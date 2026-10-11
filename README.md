@@ -44,6 +44,19 @@ npm run dev
 
 Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de conexión en `AsiloCabezaAlgodon/AsiloCabezaAlgodon.API/appsettings.json`.
 
+## Base de datos
+
+Se incluye el script [`base-de-datos/crear-base.sql`](./base-de-datos/crear-base.sql) para crear las tablas sin necesitar las herramientas de .NET. Las instrucciones están en [`base-de-datos/LEEME.md`](./base-de-datos/LEEME.md).
+
+## Despliegue
+
+El sistema se desarrolló y se probó **en un equipo local** (backend en `https://localhost:7022`, frontend en `http://localhost:5173`, SQL Server Express). No se desplegó en un servidor en la nube. Para llevarlo a un servidor habría que:
+
+1. Publicar el backend con `dotnet publish` y el frontend con `npm run build`.
+2. Cambiar la cadena de conexión y la llave del JWT (`Jwt:Key`) por valores propios del servidor, preferiblemente con variables de entorno.
+3. Ajustar dos valores que hoy están fijos para entorno local: el origen permitido por CORS en `Program.cs` (`http://localhost:5173`) y la dirección de la API en `AsiloCabezaAlgodon.Web/src/Servicios/api.js` (`https://localhost:7022/api`).
+4. Eliminar o proteger `SeedController`.
+
 ## Roles del sistema
 
 Administrador (fundación y administración del asilo), Médico General, Especialista, Enfermero, Laboratorio y Farmacia. Cada rol ve solo las opciones que necesita, y el servidor valida los permisos con `[Authorize(Roles = ...)]`.

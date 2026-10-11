@@ -122,11 +122,15 @@ El diagrama entidad-relación completo (13 tablas, llaves primarias/foráneas y 
 
 ### 5.2 Clonar y restaurar
 
+El repositorio contiene las dos partes del sistema (backend y frontend) en carpetas separadas.
+
 ```bash
-git clone <URL-del-repositorio>
-cd AsiloCabezaAlgodon
+git clone https://github.com/persival1/AsiloCabezaAlgodon-Sistema.git
+cd AsiloCabezaAlgodon-Sistema/AsiloCabezaAlgodon
 dotnet restore
 ```
+
+Los comandos de 5.3 a 5.5 se ejecutan desde esta carpeta (`AsiloCabezaAlgodon`, la del backend).
 
 ### 5.3 Configurar la base de datos
 
@@ -141,8 +145,7 @@ Editá `AsiloCabezaAlgodon.API/appsettings.json` si tu SQL Server no usa la conf
 Aplicá las migraciones (crea la base y todas las tablas):
 
 ```bash
-cd AsiloCabezaAlgodon.API
-dotnet ef database update --project ../AsiloCabezaAlgodon.Infrastructure --startup-project .
+dotnet ef database update --project AsiloCabezaAlgodon.Infrastructure --startup-project AsiloCabezaAlgodon.API
 ```
 
 ### 5.4 Sembrar usuarios de prueba
@@ -161,9 +164,13 @@ cd AsiloCabezaAlgodon.API
 dotnet run --launch-profile https
 ```
 
+(Desde la carpeta del backend, `AsiloCabezaAlgodon`.)
+
 Queda escuchando en `https://localhost:7022` (y `http://localhost:5253`). Swagger disponible en `/swagger`.
 
 ### 5.6 Correr el frontend
+
+En otra terminal, desde la **raíz del repositorio** (`AsiloCabezaAlgodon-Sistema`):
 
 ```bash
 cd AsiloCabezaAlgodon.Web

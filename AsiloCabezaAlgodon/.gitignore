@@ -1,0 +1,23 @@
+# Archivos generados al compilar
+bin/
+obj/
+publish/
+
+# Visual Studio / editores
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# Resultados de pruebas y logs
+TestResults/
+*.log
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+
+# Archivos personales de configuración local (si se llegan a crear)
+appsettings.Local.json
+*.secrets.json

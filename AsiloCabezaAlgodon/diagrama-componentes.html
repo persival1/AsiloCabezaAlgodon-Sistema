@@ -1,0 +1,246 @@
+<title>Diagrama de Componentes</title>
+<style>
+  :root{
+    --bg:#f6f4ee; --surface:#ffffff; --ink:#211d16; --ink-soft:#6b6255; --line:#ddd6c6;
+    --cliente:#3651c9; --cliente-bg:#e8ecfc;
+    --api:#c1560c; --api-bg:#fbebdd;
+    --application:#0b7d8f; --application-bg:#e1f4f6;
+    --infrastructure:#1c8a4b; --infrastructure-bg:#e5f6ec;
+    --domain:#a3260f; --domain-bg:#fbe6df;
+    --db:#4a4438; --db-bg:#ece7d9;
+    --shadow: 0 1px 2px rgba(33,29,22,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#171512; --surface:#211e19; --ink:#f1ede3; --ink-soft:#b3aa98; --line:#3a352b;
+      --cliente:#8fa1ff; --cliente-bg:#232a4a;
+      --api:#f0a066; --api-bg:#3a2716;
+      --application:#7fd7e3; --application-bg:#153539;
+      --infrastructure:#6fd39a; --infrastructure-bg:#1c3728;
+      --domain:#ff8a70; --domain-bg:#3a2018;
+      --db:#cfc8b8; --db-bg:#302c22;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#171512; --surface:#211e19; --ink:#f1ede3; --ink-soft:#b3aa98; --line:#3a352b;
+    --cliente:#8fa1ff; --cliente-bg:#232a4a;
+    --api:#f0a066; --api-bg:#3a2716;
+    --application:#7fd7e3; --application-bg:#153539;
+    --infrastructure:#6fd39a; --infrastructure-bg:#1c3728;
+    --domain:#ff8a70; --domain-bg:#3a2018;
+    --db:#cfc8b8; --db-bg:#302c22;
+  }
+
+  * { box-sizing: border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    padding: 28px 16px 48px;
+  }
+  .wrap{ max-width: 980px; margin: 0 auto; }
+  header{ margin-bottom: 22px; }
+  .kicker{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0 0 6px;
+  }
+  h1{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size: clamp(22px, 4vw, 30px); margin: 0 0 8px; text-wrap: balance; font-weight: 600;
+  }
+  header p{ margin: 0; color: var(--ink-soft); font-size: 14px; max-width: 62ch; line-height: 1.5; }
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap: 14px 22px; margin: 18px 0 22px; padding: 12px 16px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    font-size: 12.5px; box-shadow: var(--shadow);
+  }
+  .legend .grp{ display:flex; align-items:center; gap:8px; }
+  .legend .dot{ width:10px; height:10px; border-radius: 3px; flex: none; }
+
+  .scroller{
+    overflow-x: auto; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; box-shadow: var(--shadow); padding: 8px;
+  }
+  svg{ display:block; max-width: none; height: auto; }
+  figcaption{ margin-top: 12px; font-size: 13px; color: var(--ink-soft); line-height: 1.5; max-width: 72ch; }
+  figure{ margin: 0; }
+
+  .notas{
+    margin-top: 26px; padding: 16px 18px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow);
+  }
+  .notas h2{
+    font-family:"IBM Plex Mono", ui-monospace, monospace; font-size: 14px; margin: 0 0 10px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft);
+  }
+  .notas ul{ margin:0; padding-left: 20px; font-size: 13.5px; line-height: 1.7; }
+  .notas li{ margin-bottom: 6px; }
+  .notas code{ font-family:"IBM Plex Mono", monospace; font-size: 12px; background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Manual de usuario — Anexo técnico</p>
+    <h1>Diagrama de Componentes</h1>
+    <p>Arquitectura del sistema: Clean Architecture en el backend (4 proyectos .NET) + SPA de React independiente, comunicados por HTTPS/JWT. Las flechas muestran la dirección real de las dependencias entre proyectos.</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <figure>
+    <div class="scroller">
+      <svg id="diagrama" role="img" aria-label="Diagrama de componentes mostrando el frontend React comunicándose por HTTPS con la API, que depende de Application e Infrastructure; Application e Infrastructure dependen del Domain en el centro; Infrastructure implementa las interfaces de Application y se conecta a SQL Server."></svg>
+    </div>
+    <figcaption>El <strong>Domain</strong> es el núcleo: no depende de nada. <strong>Application</strong> solo depende de Domain. <strong>Infrastructure</strong> implementa las interfaces que Application define (repositorios, JWT, email) y es quien realmente habla con SQL Server. <strong>API</strong> es la capa más externa: conoce a Application (le manda comandos/queries vía MediatR) y a Infrastructure (solo para registrar la inyección de dependencias en <code>Program.cs</code>).</figcaption>
+  </figure>
+
+  <div class="notas">
+    <h2>Notas de arquitectura</h2>
+    <ul>
+      <li><strong>Regla de dependencia:</strong> las flechas siempre apuntan hacia adentro. Ninguna capa interna conoce a una externa — por eso <code>Domain</code> no importa nada de <code>Infrastructure</code>.</li>
+      <li><strong>CQRS con MediatR:</strong> cada caso de uso (crear solicitud, registrar visita, despachar prescripción...) es un <code>Command</code> o <code>Query</code> con su propio <code>Handler</code> dentro de Application. El Controller solo hace <code>_mediator.Send(comando)</code>.</li>
+      <li><strong>Infrastructure implementa, no decide:</strong> interfaces como <code>ISolicitudRepository</code> o <code>IEmailService</code> viven en Application; Infrastructure las implementa con Entity Framework Core, BCrypt y SMTP.</li>
+      <li><strong>El frontend nunca toca la base de datos directo</strong> — todo pasa por la API, autenticada con JWT en el header <code>Authorization: Bearer</code>.</li>
+    </ul>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script>
+(function(){
+  var ROLES = {
+    cliente:        { label:"Cliente",        v:"--cliente",        bg:"--cliente-bg" },
+    api:            { label:"API",            v:"--api",            bg:"--api-bg" },
+    application:    { label:"Application",    v:"--application",    bg:"--application-bg" },
+    infrastructure: { label:"Infrastructure", v:"--infrastructure", bg:"--infrastructure-bg" },
+    domain:         { label:"Domain (núcleo)",v:"--domain",         bg:"--domain-bg" },
+    db:             { label:"Base de datos",  v:"--db",             bg:"--db-bg" }
+  };
+
+  var NODES = {
+    Frontend: { role:"cliente", x:60, y:40, w:340, h:78,
+      title:"AsiloCabezaAlgodon.Web", sub:"React + Vite — Interfaces/*.jsx → Servicios/*.js" },
+    Api: { role:"api", x:60, y:190, w:340, h:78,
+      title:"AsiloCabezaAlgodon.API", sub:"Controllers · Program.cs · JWT · CORS" },
+    Application: { role:"application", x:60, y:340, w:340, h:96,
+      title:"AsiloCabezaAlgodon.Application", sub:"Commands / Queries / Handlers (CQRS)\nInterfaces de repositorio · DTOs" },
+    Infrastructure: { role:"infrastructure", x:470, y:340, w:340, h:96,
+      title:"AsiloCabezaAlgodon.Infrastructure", sub:"Repositorios EF Core · JWT · BCrypt\nEmailService (SMTP)" },
+    Domain: { role:"domain", x:265, y:520, w:340, h:78,
+      title:"AsiloCabezaAlgodon.Domain", sub:"Entidades puras — sin dependencias externas" },
+    Db: { role:"db", x:470, y:650, w:340, h:78,
+      title:"SQL Server", sub:"Persistencia relacional — migraciones EF Core" }
+  };
+
+  var EDGES = [
+    { from:"Frontend", to:"Api", fromSide:"bottom", toSide:"top", label:"HTTPS · JWT (Authorization: Bearer)" },
+    { from:"Api", to:"Application", fromSide:"bottom", toSide:"top", label:"IMediator.Send(comando / query)" },
+    { from:"Api", to:"Infrastructure", fromSide:"right", toSide:"top", label:"Inyección de dependencias" },
+    { from:"Infrastructure", to:"Application", fromSide:"left", toSide:"right", label:"implementa interfaces de", dashed:true },
+    { from:"Application", to:"Domain", fromSide:"bottom", toSide:"top", label:"usa entidades de" },
+    { from:"Infrastructure", to:"Domain", fromSide:"bottom", toSide:"right", label:"mapea entidades a tablas" },
+    { from:"Infrastructure", to:"Db", fromSide:"bottom", toSide:"top", label:"EF Core / Migrations" }
+  ];
+
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var node = document.createElementNS(NS, tag);
+    for (var k in attrs) node.setAttribute(k, attrs[k]);
+    return node;
+  }
+
+  function anchor(n, side){
+    if (side === "left")  return { x:n.x, y:n.y + n.h/2 };
+    if (side === "right") return { x:n.x + n.w, y:n.y + n.h/2 };
+    if (side === "top")   return { x:n.x + n.w/2, y:n.y };
+    return { x:n.x + n.w/2, y:n.y + n.h };
+  }
+
+  var svg = document.getElementById("diagrama");
+  var maxX = 0, maxY = 0;
+  Object.keys(NODES).forEach(function(k){
+    var n = NODES[k];
+    maxX = Math.max(maxX, n.x + n.w);
+    maxY = Math.max(maxY, n.y + n.h);
+  });
+  var PAD = 40;
+  svg.setAttribute("viewBox", "0 0 " + (maxX + PAD) + " " + (maxY + PAD));
+  svg.setAttribute("width", maxX + PAD);
+  svg.setAttribute("height", maxY + PAD);
+
+  var defs = el("defs", {});
+  var marker = el("marker", { id:"arrow", markerWidth:"9", markerHeight:"9", refX:"7", refY:"4", orient:"auto", markerUnits:"userSpaceOnUse" });
+  marker.appendChild(el("path", { d:"M0,0 L8,4 L0,8 Z", fill:"currentColor" }));
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  // edges first (under boxes)
+  var edgeLayer = el("g", { color:"var(--ink-soft)" });
+  EDGES.forEach(function(e){
+    var a = anchor(NODES[e.from], e.fromSide), b = anchor(NODES[e.to], e.toSide);
+    var line = el("line", {
+      x1:a.x, y1:a.y, x2:b.x, y2:b.y,
+      stroke:"currentColor", "stroke-width":"1.5", "marker-end":"url(#arrow)"
+    });
+    if (e.dashed) line.setAttribute("stroke-dasharray", "5 4");
+    edgeLayer.appendChild(line);
+
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    var w = Math.max(30, e.label.length * 5.4);
+    var bg = el("rect", { x:mx - w/2, y:my - 9, width:w, height:17, rx:3, fill:"var(--surface)", stroke:"var(--line)" });
+    edgeLayer.appendChild(bg);
+    var lbl = el("text", {
+      x:mx, y:my + 4, "text-anchor":"middle",
+      "font-family":"IBM Plex Mono, monospace", "font-size":"9.5", fill:"var(--ink-soft)"
+    });
+    lbl.textContent = e.label;
+    edgeLayer.appendChild(lbl);
+  });
+  svg.appendChild(edgeLayer);
+
+  // nodes
+  var nodeLayer = el("g", {});
+  Object.keys(NODES).forEach(function(k){
+    var n = NODES[k], role = ROLES[n.role], accent = "var(" + role.v + ")", bg = "var(" + role.bg + ")";
+    var g = el("g", {});
+
+    g.appendChild(el("rect", { x:n.x, y:n.y, width:n.w, height:n.h, rx:12, fill:bg, stroke:accent, "stroke-width":"1.8" }));
+    g.appendChild(el("rect", { x:n.x, y:n.y, width:6, height:n.h, fill:accent, rx:3 }));
+
+    var title = el("text", {
+      x:n.x + 22, y:n.y + 26,
+      "font-family":"IBM Plex Mono, monospace", "font-size":"13.5", "font-weight":"600", fill:accent
+    });
+    title.textContent = n.title;
+    g.appendChild(title);
+
+    var lines = n.sub.split("\n");
+    lines.forEach(function(line, i){
+      var t = el("text", {
+        x:n.x + 22, y:n.y + 46 + i * 16,
+        "font-family":"IBM Plex Sans, sans-serif", "font-size":"11.5", fill:"var(--ink)"
+      });
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    nodeLayer.appendChild(g);
+  });
+  svg.appendChild(nodeLayer);
+
+  var legend = document.getElementById("legend");
+  Object.keys(ROLES).forEach(function(k){
+    var grp = document.createElement("div");
+    grp.className = "grp";
+    var dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.background = "var(" + ROLES[k].v + ")";
+    grp.appendChild(dot);
+    var span = document.createElement("span");
+    span.textContent = ROLES[k].label;
+    grp.appendChild(span);
+    legend.appendChild(grp);
+  });
+})();
+</script>

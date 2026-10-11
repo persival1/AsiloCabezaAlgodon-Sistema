@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>125d912e-6a01-433f-9c94-c3472f2adf63</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\..</DockerfileContext>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MediatR" Version="14.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+		<!-- Mantenemos la librería de OpenAPI en su versión 1.x para compatibilidad con Swashbuckle -->
+		<PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AsiloCabezaAlgodon.Application\AsiloCabezaAlgodon.Application.csproj" />
+		<ProjectReference Include="..\AsiloCabezaAlgodon.Infrastructure\AsiloCabezaAlgodon.Infrastructure.csproj" />
+	</ItemGroup>
+
+</Project>

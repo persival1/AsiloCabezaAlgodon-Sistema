@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\AsiloCabezaAlgodon.Domain\AsiloCabezaAlgodon.Dominio.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Auntenticacion\Comandos\" />
+	  <Folder Include="Comun\Interfaces\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Auntenticacion\LoginCommand.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="MediatR" Version="14.2.0" />
+	</ItemGroup>
+
+</Project>

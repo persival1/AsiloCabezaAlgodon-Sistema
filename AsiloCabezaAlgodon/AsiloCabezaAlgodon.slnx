@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AsiloCabezaAlgodon.API/AsiloCabezaAlgodon.API.csproj" />
+  <Project Path="AsiloCabezaAlgodon.Application/AsiloCabezaAlgodon.Application.csproj" />
+  <Project Path="AsiloCabezaAlgodon.Domain/AsiloCabezaAlgodon.Dominio.csproj" />
+  <Project Path="AsiloCabezaAlgodon.Infrastructure/AsiloCabezaAlgodon.Infrastructure.csproj" />
+</Solution>

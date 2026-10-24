@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { iniciarSesion } from "../servicios/autenticacionServicio";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
@@ -8,6 +8,17 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
+
+  // Si api.js cerró la sesión por un 401, deja una marca para avisar al usuario por qué
+  // volvió al login. Se lee una vez y se borra.
+  const [aviso] = useState(() =>
+    sessionStorage.getItem("sesionExpirada")
+      ? "Tu sesión expiró o ya no es válida. Iniciá sesión de nuevo."
+      : ""
+  );
+  useEffect(() => {
+    sessionStorage.removeItem("sesionExpirada");
+  }, []);
 
   const navigate = useNavigate();
   const { guardarSesion } = useAutenticacion();
@@ -55,6 +66,7 @@ function Login() {
           />
         </div>
 
+        {aviso && !error && <p className="error">{aviso}</p>}
         {error && <p className="error">{error}</p>}
 
         <button type="submit" disabled={cargando}>

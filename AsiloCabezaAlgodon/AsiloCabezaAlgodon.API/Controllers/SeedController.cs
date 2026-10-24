@@ -5,20 +5,36 @@ using AsiloCabezaAlgodon.Domain.Entidad;
 
 namespace AsiloCabezaAlgodon.API.Controllers
 {
+    // CORRECCIÓN (observación SQA #2 - SeedController):
+    // Este controlador crea los roles y los usuarios de prueba (con contraseñas conocidas
+    // como "admin123"). No tiene [Authorize] a propósito, porque se usa para crear el PRIMER
+    // usuario, cuando todavía no existe nadie que pueda iniciar sesión.
+    // El riesgo era que en un servidor real quedara abierto a cualquiera. Ahora solo
+    // responde cuando la aplicación corre en el entorno "Development" (el que usa
+    // `dotnet run --launch-profile https`). En cualquier otro entorno devuelve 404, como
+    // si el endpoint no existiera.
     [ApiController]
     [Route("api/[controller]")]
     public class SeedController : ControllerBase
     {
         private readonly BDConexion _context;
+        private readonly IWebHostEnvironment _entorno;
 
-        public SeedController(BDConexion context)
+        public SeedController(BDConexion context, IWebHostEnvironment entorno)
         {
             _context = context;
+            _entorno = entorno;
         }
+
+        // true solo si estamos en Development. Se revisa al inicio de cada acción.
+        private bool EsDesarrollo => _entorno.IsDevelopment();
 
         [HttpPost("admin")]
         public async Task<IActionResult> SembrarAdmin()
         {
+            if (!EsDesarrollo)
+                return NotFound();
+
             if (_context.Usuarios.Any())
                 return BadRequest("Ya existen usuarios.");
 
@@ -51,6 +67,9 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [HttpPost("usuarios-prueba")]
         public async Task<IActionResult> SembrarUsuariosPrueba()
         {
+            if (!EsDesarrollo)
+                return NotFound();
+
             var roles = await _context.Roles.ToListAsync();
 
             if (!roles.Any())

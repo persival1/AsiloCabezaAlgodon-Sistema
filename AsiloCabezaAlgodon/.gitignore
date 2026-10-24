@@ -18,6 +18,8 @@ TestResults/
 Thumbs.db
 .DS_Store
 
-# Archivos personales de configuración local (si se llegan a crear)
+# Configuración con datos reales de un servidor (nunca se sube; ver
+# appsettings.Production.example.json para el formato)
+appsettings.Production.json
 appsettings.Local.json
 *.secrets.json

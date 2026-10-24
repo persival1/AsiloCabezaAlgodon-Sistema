@@ -60,5 +60,13 @@ namespace AsiloCabezaAlgodon.API.Controllers
         {
             return Ok(await _mediator.Send(new ReporteMedicamentosPorPacienteQuery(idInterno)));
         }
+
+        // Observación SQA #4: recalcula el saldo de cada familiar desde sus movimientos
+        // (costos médicos - cobros) y lo compara con el saldo guardado. Solo lectura.
+        [HttpGet("conciliacion-saldos")]
+        public async Task<IActionResult> ConciliacionSaldos()
+        {
+            return Ok(await _mediator.Send(new ReporteConciliacionSaldosQuery()));
+        }
     }
 }

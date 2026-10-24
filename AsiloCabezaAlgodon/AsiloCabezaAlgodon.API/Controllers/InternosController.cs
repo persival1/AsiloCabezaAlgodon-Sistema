@@ -18,14 +18,26 @@ namespace AsiloCabezaAlgodon.API.Controllers
             _mediator = mediator;
         }
 
+        // CORRECCIÓN (observación SQA #3 - permisos por rol):
+        // Antes este endpoint solo tenía el [Authorize] general de la clase, o sea que
+        // CUALQUIER usuario con sesión (Enfermero, Laboratorio, Farmacia) podía pedirlo
+        // llamando a la API directamente, aunque su menú no mostrara "Internos".
+        // Ocultar un botón en la interfaz no es seguridad: el servidor debe rechazarlo.
+        // Ahora solo pueden leer internos los roles que necesitan la ficha para trabajar;
+        // el enunciado indica que quien tiene acceso a la ficha médica es el médico.
         [HttpGet]
+        [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> Listar()
         {
             var internos = await _mediator.Send(new ListarInternosQuery());
             return Ok(internos);
         }
 
+        // Misma corrección que arriba. Este endpoint devuelve la ficha completa
+        // (psicopatologías, medicinas de cajón, datos y saldo del familiar), que es
+        // información sensible y por eso queda restringida a los mismos tres roles.
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> ObtenerPorId(int id)
         {
             var interno = await _mediator.Send(new ObtenerInternoQuery(id));

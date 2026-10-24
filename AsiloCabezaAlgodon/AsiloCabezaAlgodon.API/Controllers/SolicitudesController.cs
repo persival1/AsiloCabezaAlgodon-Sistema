@@ -25,10 +25,17 @@ namespace AsiloCabezaAlgodon.API.Controllers
         private string RolActual =>
             User.FindFirstValue(ClaimTypes.Role)!;
 
+        // CORRECCIÓN (observación SQA #3 - permisos por rol):
+        // Antes cualquier usuario con sesión podía llamar a este endpoint, y los roles que
+        // no estaban en el "switch" de abajo (Laboratorio y Farmacia) caían en la opción por
+        // defecto y recibían TODAS las solicitudes. Laboratorio y Farmacia no trabajan con
+        // solicitudes (solo con exámenes y prescripciones), así que ahora se rechazan con 403.
         [HttpGet]
+        [Authorize(Roles = "Administrador,MedicoGeneral,Especialista,Enfermero")]
         public async Task<IActionResult> Listar()
         {
-            // Cada rol solo ve lo que le corresponde; Administrador ve todo.
+            // Cada rol solo ve lo que le corresponde. Con el [Authorize] de arriba, la opción
+            // por defecto (_) ya solo puede ser el Administrador, que ve todo.
             var query = RolActual switch
             {
                 "MedicoGeneral" => new ListarSolicitudesQuery(IdMedicoGeneral: IdUsuarioActual),

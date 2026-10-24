@@ -44,18 +44,31 @@ npm run dev
 
 Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de conexión en `AsiloCabezaAlgodon/AsiloCabezaAlgodon.API/appsettings.json`.
 
+## Pruebas y revisión de calidad
+
+- [`docs/registro-de-cambios-sqa.md`](./docs/registro-de-cambios-sqa.md): respuesta punto por punto a la revisión preliminar de SQA (qué se cambió, evidencia y qué sigue pendiente).
+- [`docs/matriz-de-trazabilidad.md`](./docs/matriz-de-trazabilidad.md): cada requerimiento unido a su pantalla, endpoint, prueba y estado.
+- [`docs/supuestos-para-aprobacion.md`](./docs/supuestos-para-aprobacion.md): los 7 supuestos del análisis, en una tabla para aprobar o rechazar.
+- [`pruebas/resultado-conciliacion-y-sesion.md`](./pruebas/resultado-conciliacion-y-sesion.md): conciliación del saldo de los familiares y cierre de sesión cuando el token ya no sirve.
+- [`pruebas/resultado-respaldo-restauracion.md`](./pruebas/resultado-respaldo-restauracion.md): prueba de respaldo y recuperación de la base de datos.
+- [`pruebas/probar-permisos.ps1`](./pruebas/probar-permisos.ps1): script que prueba los permisos de la API con los 6 roles (142 pruebas). Los resultados están en [`pruebas/resultados-permisos.md`](./pruebas/resultados-permisos.md).
+
 ## Base de datos
 
 Se incluye el script [`base-de-datos/crear-base.sql`](./base-de-datos/crear-base.sql) para crear las tablas sin necesitar las herramientas de .NET. Las instrucciones están en [`base-de-datos/LEEME.md`](./base-de-datos/LEEME.md).
 
 ## Despliegue
 
-El sistema se desarrolló y se probó **en un equipo local** (backend en `https://localhost:7022`, frontend en `http://localhost:5173`, SQL Server Express). No se desplegó en un servidor en la nube. Para llevarlo a un servidor habría que:
+**El sistema está publicado en Azure: https://asilo-cabeza-algodon-2796.azurewebsites.net**
+
+Usa planes gratuitos (App Service F1 y la oferta gratis de Azure SQL). La API y el frontend están en la misma aplicación. Las contraseñas de los usuarios en Azure **no son las de prueba** de este README: se entregan en privado. Detalle del despliegue, medidas de seguridad y limitaciones en [`despliegue/LEEME.md`](./despliegue/LEEME.md); las pruebas del sistema publicado, en [`pruebas/resultado-despliegue-azure.md`](./pruebas/resultado-despliegue-azure.md).
+
+Para publicarlo en otro servidor:
 
 1. Publicar el backend con `dotnet publish` y el frontend con `npm run build`.
-2. Cambiar la cadena de conexión y la llave del JWT (`Jwt:Key`) por valores propios del servidor, preferiblemente con variables de entorno.
-3. Ajustar dos valores que hoy están fijos para entorno local: el origen permitido por CORS en `Program.cs` (`http://localhost:5173`) y la dirección de la API en `AsiloCabezaAlgodon.Web/src/Servicios/api.js` (`https://localhost:7022/api`).
-4. Eliminar o proteger `SeedController`.
+2. Definir la configuración propia del servidor con **variables de entorno**, siguiendo [`appsettings.Production.example.json`](./AsiloCabezaAlgodon/AsiloCabezaAlgodon.API/appsettings.Production.example.json): `ASPNETCORE_ENVIRONMENT=Production`, `Jwt__Key` (mínimo 32 caracteres), `ConnectionStrings__DefaultConnection` y los datos de `Smtp__*`. La llave del JWT **ya no está** en `appsettings.json`: en desarrollo viene de `appsettings.Development.json` y en producción la aplicación **no arranca** si no se define `Jwt__Key`.
+3. Configurar las dos direcciones que cambian en un servidor: en el backend, el origen del frontend permitido por CORS (`Cors:Origenes`, por defecto `http://localhost:5173`); en el frontend, la dirección de la API con la variable `VITE_API_URL` (ver [`AsiloCabezaAlgodon.Web/.env.example`](./AsiloCabezaAlgodon.Web/.env.example)). Ya no están escritas dentro del código.
+4. `SeedController` (crea los usuarios de prueba) **ya responde 404 fuera del entorno de desarrollo**, así que en producción no queda expuesto. Los usuarios reales deben crearse por otro medio.
 
 ## Roles del sistema
 

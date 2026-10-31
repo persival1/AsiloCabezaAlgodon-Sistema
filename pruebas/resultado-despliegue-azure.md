@@ -92,3 +92,19 @@ Se publicó el código del commit `b115dce` (semana 3). Antes se descargó un re
 | Rechazos de la semana 3 en Azure (segunda visita, reasignar una Atendida) | **Pendiente**: requieren enviar peticiones de escritura a producción (que deben ser rechazadas) y quedan para hacerlas con autorización. En local pasaron 11 de 11 |
 
 **Observación:** el 500 de la primera consulta después de cada reinicio se repite porque la base gratuita se pausa sola (AutoPause) y tarda en despertar. El propio registro sugiere activar `EnableRetryOnFailure` en `UseSqlServer`: así Entity Framework reintenta en lugar de responder 500. Queda propuesto para la semana 4 (robustez).
+
+---
+
+# Actualización del 30/10/2026 (23:25): revisión de errores
+
+Se publicó el código del commit `8a7bbb2` (revisión descrita en [`resultado-revision-30-10.md`](./resultado-revision-30-10.md)): `EnableRetryOnFailure` para la base que despierta, validaciones en crear solicitud, agregar psicopatología y agregar medicina de cajón, y mensajes de error reales en la ficha del interno, Solicitudes y el login. Antes se descargó un respaldo de la versión anterior (semana 3). Esta vez no se cambió ninguna configuración, así que no hubo reinicio cruzado con la copia: el despliegue terminó bien al primer intento («Site started successfully»).
+
+| Comprobación | Resultado |
+|---|---|
+| Azure sirve la versión nueva | El archivo del frontend cambió a `index-Cm4vTRf1.js` |
+| Registros de arranque | Sin errores |
+| Comprobaciones básicas | 11 de 11 al primer intento, sin 500 |
+| Permisos por rol | 142 de 142 (archivo de resultados sin contraseñas) |
+| Validaciones nuevas en Azure | **No se ejecutaron**: son peticiones de escritura a producción. En local pasaron (antes 500, ahora 400) |
+
+**Reintento de la base:** esta vez la primera llamada no dio 500, pero no se puede asegurar que la base estuviera pausada en ese momento. La prueba real será la próxima vez que la base despierte después de estar una hora sin uso.

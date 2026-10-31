@@ -153,6 +153,8 @@ Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 - **Tres operaciones daban 500 con un interno inexistente** y aceptaban textos vacíos: crear solicitud, agregar psicopatología y agregar medicina de cajón. Ahora 400 con mensaje. 10 pruebas xUnit nuevas (con el código anterior fallaban 7).
 - **Pantallas:** la ficha del interno no mostraba los errores al guardar; crear solicitud mostraba un mensaje genérico; el login decía «contraseña incorrecta» ante cualquier error, incluso con la base despertando. Corregido.
 
+- **Publicada en Azure el 30/10/2026 (23:25)**, con respaldo previo: 11 comprobaciones básicas y 142 permisos correctos, sin errores en el arranque. Las validaciones nuevas no se probaron en Azure (son escrituras a producción); en local, sí.
+
 Detalle: `pruebas/resultado-revision-30-10.md`.
 
 ## Semanas 1 y 2 publicadas en Azure (30/10/2026)

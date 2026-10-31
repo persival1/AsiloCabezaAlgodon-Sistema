@@ -34,10 +34,15 @@ Después del script falta un paso manual: cambiar las contraseñas de los usuari
 
 ## Cómo actualizar la aplicación después de un cambio
 
-1. Compilar el frontend con `VITE_API_URL=/api` (`npm run build`).
-2. `dotnet publish` de la API en modo Release.
-3. Copiar `AsiloCabezaAlgodon.Web/dist` dentro de la carpeta `wwwroot` de lo publicado.
-4. Comprimir y publicar con `az webapp deploy --type zip` (pasos 7 del script).
+El script [`actualizar-azure.ps1`](./actualizar-azure.ps1) hace todo en orden y pide confirmación antes de publicar:
+
+1. Descarga un respaldo de lo que hay en Azure (fuera del repositorio).
+2. Compila el frontend con `VITE_API_URL=/api` (`npm run build`).
+3. `dotnet publish` de la API en modo Release.
+4. Copia `AsiloCabezaAlgodon.Web/dist` dentro de la carpeta `wwwroot` de lo publicado y quita `appsettings.Development.json`.
+5. Comprime y publica con `az webapp deploy --type zip`.
+
+Antes: pasar las pruebas, hacer commit y push. Después: verificar el sitio y correr `pruebas/probar-permisos.ps1` contra Azure.
 
 ## Correo electrónico
 

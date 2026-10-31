@@ -135,6 +135,12 @@ Detalle y evidencia: `pruebas/resultado-semana-1-plan-sqa.md`. Pendiente: repeti
 
 Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 
+## Semanas 1 y 2 publicadas en Azure (30/10/2026)
+
+Se publicó en Azure el código de las semanas 1 y 2 (commit `3a45486`), con respaldo previo de la versión anterior. En el sistema publicado: 11 comprobaciones básicas y 142 pruebas de permisos correctas, y **despachar de nuevo una prescripción ya despachada responde 409 sin cambiar los saldos**. Detalle: `pruebas/resultado-despliegue-azure.md` (sección «Actualización del 30/10/2026»).
+
+**Nuevo aviso de dependencias:** `npm audit` reporta 6 avisos moderados (paquete `minimatch`, usado por ESLint) publicados después del 26/10. No afectan lo que se publica (`npm audit --omit=dev`: 0). La corrección automática rompe ESLint, así que se deja anotado para revisar cuando ESLint publique una versión corregida.
+
 ## Hallazgo adicional: cierre de sesión con token inválido
 
 Al cambiar la llave del JWT, las sesiones abiertas en el navegador quedaron con tokens que el servidor ya no acepta (401). La pantalla no avisaba: se quedaba con errores en segundo plano. Lo mismo pasaría cuando un token vence a las 8 horas. **Corregido:** `api.js` detecta el 401, cierra la sesión y vuelve al login con el aviso «Tu sesión expiró o ya no es válida»; el login se excluye para que una contraseña incorrecta siga mostrando su mensaje. Se probó con 4 casos en el navegador (`pruebas/resultado-conciliacion-y-sesion.md`).

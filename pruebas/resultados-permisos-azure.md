@@ -1,6 +1,6 @@
 # Resultados de las pruebas de autorización por rol
 
-Ejecutado el 21/10/2026 00:11 contra https://asilo-cabeza-algodon-2796.azurewebsites.net/api
+Ejecutado el 30/10/2026 20:30 contra https://asilo-cabeza-algodon-2796.azurewebsites.net/api
 
 **Total: 142 pruebas. Correctas: 142. Fallidas: 0.**
 

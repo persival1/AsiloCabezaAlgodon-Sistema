@@ -32,8 +32,12 @@ function Login() {
       const resultado = await iniciarSesion(nombreUsuario, password);
       guardarSesion(resultado.token, resultado.rol);
       navigate("/dashboard");
-    } catch {
-      setError("Usuario o contraseña incorrectos.");
+    } catch (err) {
+      // Solo un 401 significa usuario o contraseña incorrectos. Cualquier otro error (por
+      // ejemplo, la base de datos despertando) no debe hacerle creer al usuario que se equivocó.
+      setError(err.response?.status === 401
+        ? "Usuario o contraseña incorrectos."
+        : "No se pudo conectar con el servidor. Esperá unos segundos e intentá de nuevo.");
     } finally {
       setCargando(false);
     }

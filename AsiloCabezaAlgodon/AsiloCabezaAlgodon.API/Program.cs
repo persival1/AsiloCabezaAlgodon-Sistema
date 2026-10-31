@@ -45,8 +45,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+// La base de Azure (oferta gratis) se pausa sola cuando nadie la usa y tarda en despertar.
+// Mientras despierta responde «no disponible» (error 40613) y la API devolvía 500 en la
+// primera petición. Con EnableRetryOnFailure, Entity Framework reintenta unas veces antes de
+// rendirse. Nota: si algún día se usa una transacción manual (BeginTransaction), hay que
+// envolverla en Database.CreateExecutionStrategy(), porque así lo exige este modo.
 builder.Services.AddDbContext<BDConexion>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sql => sql.EnableRetryOnFailure(maxRetryCount: 6, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null)));
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AsiloCabezaAlgodon.Application.Autenticacion.Comandos.LoginCommand).Assembly));

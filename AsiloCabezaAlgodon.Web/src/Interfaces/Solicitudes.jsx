@@ -55,8 +55,8 @@ function Solicitudes() {
       setMotivo("");
       setEspecialidadRequerida("");
       await cargarSolicitudes();
-    } catch {
-      setError("No se pudo crear la solicitud.");
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo crear la solicitud."));
     } finally {
       setCreando(false);
     }

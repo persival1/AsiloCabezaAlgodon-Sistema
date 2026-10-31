@@ -1,6 +1,6 @@
 # Resultados de las pruebas de la semana 3 (plan de SQA)
 
-Fecha: 30/10/2026 20:46 · API: https://localhost:7022/api · Solicitud de prueba: 4
+Fecha: 30/10/2026 22:12 · API: https://localhost:7022/api · Solicitud de prueba: 8
 
 **11 de 11 correctas.** Conciliación de saldos al final: **cuadra**.
 
@@ -14,6 +14,6 @@ Fecha: 30/10/2026 20:46 · API: https://localhost:7022/api · Solicitud de prueb
 | EXP-05 / COR | Asignación correcta (mensaje del correo según lo que pasó) | 200 | 200 | Solicitud asignada, pero el correo al familiar no se pudo enviar. | correoEnviado = False | Correcto |
 | AUT-08 | El Especialista 2 registra la visita de una solicitud del Especialista 1 | 403 | 403 | Solo el especialista asignado puede registrar la visita de esta solicitud. | Visitas y estado sin cambio | Correcto |
 | AUT-08 | Igual, pero mandando en el cuerpo el ID del especialista asignado | 403 | 403 | Solo el especialista asignado puede registrar la visita de esta solicitud. | El ID sale del token, no del cuerpo | Correcto |
-| EXP-08 | El especialista asignado registra la visita | 200 | 200 |  | Saldo: -349.5 -> -199.5 | Correcto |
-| EXP-07 | Segunda visita sobre la solicitud Atendida | 409 | 409 | Esta solicitud ya fue atendida. | Saldo sin cambio: -199.5 | Correcto |
+| EXP-08 | El especialista asignado registra la visita | 200 | 200 |  | Saldo: -49.5 -> 100.5 | Correcto |
+| EXP-07 | Segunda visita sobre la solicitud Atendida | 409 | 409 | Esta solicitud ya fue atendida. | Saldo sin cambio: 100.5 | Correcto |
 | EXP-07 | Reasignar la solicitud ya Atendida | 409 | 409 | No se puede asignar una solicitud en estado «Atendida». | Sigue: Atendida | Correcto |

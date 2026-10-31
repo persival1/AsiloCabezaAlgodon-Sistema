@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
 import { obtenerInterno, agregarPsicopatologia, agregarMedicamentoCajon } from "../Servicios/internosServicio";
 import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
+import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 
 const HOY = new Date().toISOString().slice(0, 10);
@@ -29,6 +30,9 @@ function FichaInterno() {
   const [medicamento, setMedicamento] = useState({ nombre: "", dosis: "", frecuencia: "" });
 
   const [guardando, setGuardando] = useState(false);
+  // Antes, si guardar fallaba, la pantalla no mostraba nada. Ahora muestra el motivo.
+  const [errorPsico, setErrorPsico] = useState("");
+  const [errorMedicamento, setErrorMedicamento] = useState("");
 
   function mostrarFicha([datosInterno, datosVisitas]) {
     setInterno(datosInterno);
@@ -46,12 +50,15 @@ function FichaInterno() {
 
   async function guardarPsicopatologia(evento) {
     evento.preventDefault();
+    setErrorPsico("");
     setGuardando(true);
     try {
       await agregarPsicopatologia(id, nombrePsico, fechaPsico);
       setNombrePsico("");
       setMostrarPsico(false);
       await cargar();
+    } catch (err) {
+      setErrorPsico(mensajeDeError(err, "No se pudo guardar la psicopatología."));
     } finally {
       setGuardando(false);
     }
@@ -59,12 +66,15 @@ function FichaInterno() {
 
   async function guardarMedicamento(evento) {
     evento.preventDefault();
+    setErrorMedicamento("");
     setGuardando(true);
     try {
       await agregarMedicamentoCajon(id, medicamento.nombre, medicamento.dosis, medicamento.frecuencia);
       setMedicamento({ nombre: "", dosis: "", frecuencia: "" });
       setMostrarMedicamento(false);
       await cargar();
+    } catch (err) {
+      setErrorMedicamento(mensajeDeError(err, "No se pudo guardar el medicamento."));
     } finally {
       setGuardando(false);
     }
@@ -120,11 +130,12 @@ function FichaInterno() {
             </div>
             <div className="campo">
               <label>Fecha de diagnóstico</label>
-              <input type="date" value={fechaPsico} onChange={(e) => setFechaPsico(e.target.value)} required />
+              <input type="date" value={fechaPsico} max={HOY} onChange={(e) => setFechaPsico(e.target.value)} required />
             </div>
             <button type="submit" className="boton-primario" disabled={guardando}>Guardar</button>
           </form>
         )}
+        {mostrarPsico && errorPsico && <p className="error">{errorPsico}</p>}
 
         <ul>
           {interno.psicopatologias.length === 0 && <li>Ninguna registrada</li>}
@@ -161,6 +172,7 @@ function FichaInterno() {
             <button type="submit" className="boton-primario" disabled={guardando}>Guardar</button>
           </form>
         )}
+        {mostrarMedicamento && errorMedicamento && <p className="error">{errorMedicamento}</p>}
 
         <ul>
           {interno.medicamentosCajon.length === 0 && <li>Ninguno registrado</li>}

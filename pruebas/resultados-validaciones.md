@@ -1,6 +1,6 @@
 # Resultados de las pruebas de validación en el servidor
 
-Fecha: 30/10/2026 20:46 · API: https://localhost:7022/api
+Fecha: 30/10/2026 22:12 · API: https://localhost:7022/api
 
 **20 de 20 correctas.** Datos sin cambios después de las pruebas: **sí**.
 
@@ -35,5 +35,5 @@ Fecha: 30/10/2026 20:46 · API: https://localhost:7022/api
 | Cobros | 2 | 2 |
 | Donaciones | 1 | 1 |
 | Gastos | 1 | 1 |
-| Saldos | 1=-349.5 | 1=-349.5 |
+| Saldos | 1=-49.5 | 1=-49.5 |
 | Cuadra | True | True |

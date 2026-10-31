@@ -147,6 +147,14 @@ Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 
 Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 
+## Revisión de errores en Azure y del proyecto (30/10/2026)
+
+- **Único error de la aplicación en Azure:** la base gratuita se pausa y la primera petición mientras despierta daba 500. Arreglo: `EnableRetryOnFailure` (Entity Framework reintenta).
+- **Tres operaciones daban 500 con un interno inexistente** y aceptaban textos vacíos: crear solicitud, agregar psicopatología y agregar medicina de cajón. Ahora 400 con mensaje. 10 pruebas xUnit nuevas (con el código anterior fallaban 7).
+- **Pantallas:** la ficha del interno no mostraba los errores al guardar; crear solicitud mostraba un mensaje genérico; el login decía «contraseña incorrecta» ante cualquier error, incluso con la base despertando. Corregido.
+
+Detalle: `pruebas/resultado-revision-30-10.md`.
+
 ## Semanas 1 y 2 publicadas en Azure (30/10/2026)
 
 Se publicó en Azure el código de las semanas 1 y 2 (commit `3a45486`), con respaldo previo de la versión anterior. En el sistema publicado: 11 comprobaciones básicas y 142 pruebas de permisos correctas, y **despachar de nuevo una prescripción ya despachada responde 409 sin cambiar los saldos**. Detalle: `pruebas/resultado-despliegue-azure.md` (sección «Actualización del 30/10/2026»).

@@ -215,6 +215,17 @@ h1, h2, h3 {
   border-radius: var(--radio-sm);
 }
 
+/* Avisos después de una acción (por ejemplo, si el correo al familiar se envió o no) */
+.aviso-exito,
+.aviso-alerta {
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radio-sm);
+}
+.aviso-exito { color: var(--color-exito); background: var(--color-exito-suave); }
+.aviso-alerta { color: var(--color-alerta); background: var(--color-alerta-suave); }
+
 /* ---------------- Layout ---------------- */
 
 .layout-contenedor {

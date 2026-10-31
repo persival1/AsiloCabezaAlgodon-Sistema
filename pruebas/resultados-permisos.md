@@ -1,6 +1,6 @@
 # Resultados de las pruebas de autorización por rol
 
-Ejecutado el 19/10/2026 12:22 contra https://localhost:7030/api
+Ejecutado el 30/10/2026 20:46 contra https://localhost:7022/api
 
 **Total: 142 pruebas. Correctas: 142. Fallidas: 0.**
 

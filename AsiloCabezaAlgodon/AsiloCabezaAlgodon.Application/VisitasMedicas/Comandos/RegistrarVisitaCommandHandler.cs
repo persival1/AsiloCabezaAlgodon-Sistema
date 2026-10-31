@@ -27,6 +27,22 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos
             foreach (var prescripcion in request.Prescripciones)
                 Validar.Texto(prescripcion.NombreMedicamento, "nombre del medicamento");
 
+            // CORRECCIÓN (plan de pruebas SQA, semana 3): antes se podía registrar una visita sobre
+            // cualquier solicitud, aunque fuera de otro especialista (AUT-08), estuviera Pendiente o
+            // ya Atendida (EXP-07). Una segunda visita cobraba la consulta otra vez al familiar.
+            // Ahora se revisa todo ANTES de guardar o cobrar algo.
+            var solicitud = await _solicitudRepository.ObtenerPorIdAsync(request.IdSolicitud);
+            if (solicitud == null)
+                throw new DatosInvalidosException("La solicitud indicada no existe.");
+
+            if (solicitud.Estado == "Atendida")
+                throw new ConflictoException("Esta solicitud ya fue atendida.");
+            if (solicitud.Estado != "Asignada")
+                throw new ConflictoException("La solicitud todavía no tiene especialista asignado.");
+
+            if (solicitud.IdEspecialista != request.IdEspecialista)
+                throw new AccesoDenegadoException("Solo el especialista asignado puede registrar la visita de esta solicitud.");
+
             var visita = new VisitaMedica
             {
                 IdSolicitud = request.IdSolicitud,
@@ -46,12 +62,8 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos
 
             await _visitaMedicaRepository.CargarCostoAFamiliarAsync(creada.IdVisitaMedica, request.CostoConsulta);
 
-            var solicitud = await _solicitudRepository.ObtenerPorIdAsync(request.IdSolicitud);
-            if (solicitud != null)
-            {
-                solicitud.Estado = "Atendida";
-                await _solicitudRepository.ActualizarAsync(solicitud);
-            }
+            solicitud.Estado = "Atendida";
+            await _solicitudRepository.ActualizarAsync(solicitud);
 
             return creada.IdVisitaMedica;
         }

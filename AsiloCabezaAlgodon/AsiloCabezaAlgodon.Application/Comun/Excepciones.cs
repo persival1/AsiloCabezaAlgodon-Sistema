@@ -18,4 +18,12 @@ namespace AsiloCabezaAlgodon.Application.Comun
     {
         public ConflictoException(string mensaje) : base(mensaje) { }
     }
+
+    // Semana 3: el usuario tiene el rol correcto, pero el registro no le pertenece:
+    // por ejemplo, un especialista que intenta registrar la visita de una solicitud
+    // asignada a otro especialista. La API responde 403 (Forbidden).
+    public class AccesoDenegadoException : Exception
+    {
+        public AccesoDenegadoException(string mensaje) : base(mensaje) { }
+    }
 }

@@ -135,6 +135,17 @@ Detalle y evidencia: `pruebas/resultado-semana-1-plan-sqa.md`. Pendiente: repeti
 
 Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 
+## Plan de pruebas de SQA: semana 3 (30/10/2026, solo local)
+
+- **Visita solo del especialista asignado (AUT-08):** otro especialista recibe 403, aunque mande en el cuerpo el ID del asignado (el ID sale del token).
+- **Estados de la solicitud (EXP-07):** no se registra una visita sobre una solicitud Pendiente ni una segunda visita sobre una Atendida (la consulta ya no se cobra dos veces), y no se reasigna una Atendida: 409.
+- **Validación de la asignación (EXP-06):** fecha pasada, especialista o enfermero sin ese rol: 400.
+- **Mensaje honesto del correo (COR-02, COR-04):** la API ya no dice «correo enviado» si no se envió, y la pantalla de Solicitudes lo muestra. El registro no contiene la contraseña SMTP (COR-05).
+- **Pruebas:** xUnit 57 (con el código anterior fallaban 10, justo los casos nuevos); `pruebas/probar-semana-3.ps1` 11 de 11, sin SMTP y con un SMTP que falla; regresión 142/142 permisos y 20/20 validaciones.
+- **Pendiente:** correo real (COR-01) con la cuenta de Gmail, y poner la hora de Guatemala en Azure antes de publicar esta semana.
+
+Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
+
 ## Semanas 1 y 2 publicadas en Azure (30/10/2026)
 
 Se publicó en Azure el código de las semanas 1 y 2 (commit `3a45486`), con respaldo previo de la versión anterior. En el sistema publicado: 11 comprobaciones básicas y 142 pruebas de permisos correctas, y **despachar de nuevo una prescripción ya despachada responde 409 sin cambiar los saldos**. Detalle: `pruebas/resultado-despliegue-azure.md` (sección «Actualización del 30/10/2026»).

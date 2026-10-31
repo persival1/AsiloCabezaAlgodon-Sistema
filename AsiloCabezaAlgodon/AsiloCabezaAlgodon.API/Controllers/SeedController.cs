@@ -79,6 +79,9 @@ namespace AsiloCabezaAlgodon.API.Controllers
             {
                 new { Usuario = "medicogeneral", Nombre = "Dr. Médico General", Rol = "MedicoGeneral", Especialidad = (string?)null },
                 new { Usuario = "especialista", Nombre = "Dr. Especialista", Rol = "Especialista", Especialidad = (string?)"Geriatría" },
+                // Segundo especialista: hace falta para la prueba AUT-08 del plan de SQA
+                // (un especialista intenta registrar la visita de una solicitud de otro).
+                new { Usuario = "especialista2", Nombre = "Dra. Segunda Especialista", Rol = "Especialista", Especialidad = (string?)"Cardiología" },
                 new { Usuario = "enfermero", Nombre = "Enfermero de Turno", Rol = "Enfermero", Especialidad = (string?)null },
                 new { Usuario = "laboratorio", Nombre = "Técnico de Laboratorio", Rol = "Laboratorio", Especialidad = (string?)null },
                 new { Usuario = "farmacia", Nombre = "Encargado de Farmacia", Rol = "Farmacia", Especialidad = (string?)null }

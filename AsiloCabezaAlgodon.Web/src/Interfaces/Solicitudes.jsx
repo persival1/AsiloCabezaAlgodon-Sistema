@@ -3,6 +3,7 @@ import { useAutenticacion } from "../contexto/AutenticacionContexto";
 import { listarSolicitudes, crearSolicitud, asignarMedico } from "../Servicios/solicitudesServicio";
 import { listarInternos } from "../Servicios/internosServicio";
 import { listarUsuarios } from "../Servicios/usuariosServicio";
+import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 
 function Solicitudes() {
@@ -11,6 +12,8 @@ function Solicitudes() {
   const [internos, setInternos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [error, setError] = useState("");
+  // Mensaje del servidor después de asignar: dice si el correo al familiar salió o no (COR-04).
+  const [aviso, setAviso] = useState(null);
 
   const [idInterno, setIdInterno] = useState("");
   const [motivo, setMotivo] = useState("");
@@ -70,18 +73,20 @@ function Solicitudes() {
   async function manejarAsignar(evento) {
     evento.preventDefault();
     setError("");
+    setAviso(null);
     setAsignando(true);
     try {
-      await asignarMedico(
+      const respuesta = await asignarMedico(
         solicitudEnAsignacion,
         Number(idEspecialista),
         idEnfermero ? Number(idEnfermero) : null,
         fechaHoraCita
       );
+      setAviso(respuesta);
       setSolicitudEnAsignacion(null);
       await cargarSolicitudes();
-    } catch {
-      setError("No se pudo asignar la solicitud.");
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo asignar la solicitud."));
     } finally {
       setAsignando(false);
     }
@@ -136,6 +141,10 @@ function Solicitudes() {
             {creando ? "Creando..." : "Crear solicitud"}
           </button>
         </form>
+      )}
+
+      {aviso && (
+        <p className={aviso.correoEnviado ? "aviso-exito" : "aviso-alerta"}>{aviso.mensaje}</p>
       )}
 
       <table className="tabla">

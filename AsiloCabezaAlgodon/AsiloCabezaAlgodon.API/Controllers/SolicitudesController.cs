@@ -60,12 +60,17 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Asignar(int id, [FromBody] AsignarMedicoRequest request)
         {
-            var exito = await _mediator.Send(new AsignarMedicoCommand(id, request.IdEspecialista, request.IdEnfermero, request.FechaHoraCita));
+            var resultado = await _mediator.Send(new AsignarMedicoCommand(id, request.IdEspecialista, request.IdEnfermero, request.FechaHoraCita));
 
-            if (!exito)
+            if (resultado == null)
                 return NotFound();
 
-            return Ok(new { mensaje = "Solicitud asignada y correo enviado al familiar." });
+            // COR-04: antes decía «correo enviado» siempre, aunque no se hubiera enviado.
+            var mensaje = resultado.CorreoEnviado
+                ? "Solicitud asignada y correo enviado al familiar."
+                : "Solicitud asignada, pero el correo al familiar no se pudo enviar.";
+
+            return Ok(new { mensaje, correoEnviado = resultado.CorreoEnviado });
         }
     }
 

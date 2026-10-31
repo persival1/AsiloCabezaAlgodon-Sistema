@@ -39,7 +39,9 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Especialista")]
         public async Task<IActionResult> Registrar([FromBody] RegistrarVisitaCommand command)
         {
-            var idVisita = await _mediator.Send(command);
+            // AUT-08: el especialista sale del token, no del cuerpo de la petición.
+            var idEspecialista = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var idVisita = await _mediator.Send(command with { IdEspecialista = idEspecialista });
             return Ok(new { idVisita });
         }
     }

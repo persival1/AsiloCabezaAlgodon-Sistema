@@ -94,6 +94,7 @@ if (app.Environment.IsDevelopment())
 // correcta, con un mensaje que el frontend puede mostrar: { "mensaje": "..." }.
 //  - DatosInvalidosException -> 400 (por ejemplo, un monto negativo)
 //  - ConflictoException      -> 409 (por ejemplo, despachar dos veces la misma prescripción)
+//  - AccesoDenegadoException -> 403 (por ejemplo, la visita de una solicitud de otro especialista)
 // Cualquier otro error sigue siendo un 500 sin detalles internos.
 app.Use(async (context, next) =>
 {
@@ -109,6 +110,12 @@ app.Use(async (context, next) =>
     catch (ConflictoException ex)
     {
         context.Response.StatusCode = StatusCodes.Status409Conflict;
+        await context.Response.WriteAsJsonAsync(new { mensaje = ex.Message });
+    }
+    catch (AccesoDenegadoException ex)
+    {
+        // Semana 3 (AUT-08): por ejemplo, registrar la visita de una solicitud de otro especialista.
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
         await context.Response.WriteAsJsonAsync(new { mensaje = ex.Message });
     }
 });

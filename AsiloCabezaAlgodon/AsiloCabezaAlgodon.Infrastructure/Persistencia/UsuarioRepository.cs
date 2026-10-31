@@ -27,5 +27,11 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
                 .OrderBy(u => u.IdUsuario)
                 .ToListAsync();
         }
+
+        public async Task<bool> TieneRolAsync(int idUsuario, string rol)
+        {
+            return await _context.Usuarios
+                .AnyAsync(u => u.IdUsuario == idUsuario && u.Rol.Nombre == rol && u.Estado == "activo");
+        }
     }
 }

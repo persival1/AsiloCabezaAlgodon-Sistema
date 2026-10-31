@@ -1,6 +1,6 @@
 # Resultados de las pruebas de validación en el servidor
 
-Fecha: 26/10/2026 16:03 · API: https://localhost:7022/api
+Fecha: 30/10/2026 20:46 · API: https://localhost:7022/api
 
 **20 de 20 correctas.** Datos sin cambios después de las pruebas: **sí**.
 

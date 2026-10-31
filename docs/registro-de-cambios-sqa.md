@@ -142,7 +142,8 @@ Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 - **Validación de la asignación (EXP-06):** fecha pasada, especialista o enfermero sin ese rol: 400.
 - **Mensaje honesto del correo (COR-02, COR-04):** la API ya no dice «correo enviado» si no se envió, y la pantalla de Solicitudes lo muestra. El registro no contiene la contraseña SMTP (COR-05).
 - **Pruebas:** xUnit 57 (con el código anterior fallaban 10, justo los casos nuevos); `pruebas/probar-semana-3.ps1` 11 de 11, sin SMTP y con un SMTP que falla; regresión 142/142 permisos y 20/20 validaciones.
-- **Pendiente:** correo real (COR-01) con la cuenta de Gmail, y poner la hora de Guatemala en Azure antes de publicar esta semana.
+- **Pendiente:** correo real (COR-01) con la cuenta de Gmail.
+- **Publicada en Azure el 30/10/2026** con `TZ=America/Guatemala`. El primer arranque falló porque el reinicio por el cambio de hora coincidió con la copia de archivos; el segundo funcionó y los 79 archivos publicados son idénticos al paquete. 11 comprobaciones básicas y 142 permisos correctos. Detalle en `pruebas/resultado-despliegue-azure.md`.
 
 Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 

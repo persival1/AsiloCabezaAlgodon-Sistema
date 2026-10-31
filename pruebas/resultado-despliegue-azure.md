@@ -61,3 +61,34 @@ Se publicó en el mismo App Service el código del commit `3a45486` (semanas 1 y
 El script de validaciones (`probar-validaciones.ps1`) **no** se ejecutó en Azure a propósito: si una validación fallara, el dato inválido quedaría guardado en producción. Se ejecutó en local (20 de 20).
 
 **Cómo regresar a la versión anterior si hiciera falta:** publicar el respaldo con `az webapp deploy --type zip` (el archivo está fuera del repositorio, en el equipo del desarrollador).
+
+---
+
+# Actualización del 30/10/2026 (noche): semana 3 del plan de SQA
+
+Se publicó el código del commit `b115dce` (semana 3). Antes se descargó un respaldo de la versión anterior (semanas 1 y 2).
+
+**Configuración nueva:** `TZ=America/Guatemala` en las variables de entorno del App Service. El servidor Linux usa UTC (seis horas adelante) y la regla nueva «la cita no puede estar en el pasado» compara con la hora del servidor; sin este ajuste, una cita para dentro de menos de seis horas se habría rechazado. Desde ahora las fechas que guarda el sistema (despachos, visitas, cobros) quedan en hora de Guatemala; las guardadas entre el 21 y el 30/10 en Azure quedaron en UTC, seis horas adelante.
+
+## Incidente al publicar
+
+`az webapp deploy` informó un error: «el sitio no arrancó en 10 minutos». Se investigó en los registros de arranque del App Service:
+
+- El primer arranque falló con `System.BadImageFormatException: Bad IL range` (código de salida 134). Ese error aparece cuando .NET lee un archivo `.dll` incompleto.
+- **Causa:** el cambio de la variable `TZ` reinicia la aplicación, y ese reinicio ocurrió mientras el despliegue todavía estaba copiando los archivos nuevos.
+- Azure volvió a intentar y el segundo arranque, con todos los archivos ya copiados, funcionó («Site started»).
+- **Comprobación:** se descargaron los 79 archivos publicados y se compararon con el paquete: **79 de 79 idénticos** (mismo SHA-256).
+
+**Lección para la próxima vez:** cambiar la configuración, esperar a que la aplicación termine de reiniciar y recién entonces publicar.
+
+## Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| Azure sirve la versión nueva | El archivo del frontend cambió a `index-D6B6BntR.js` |
+| Archivos publicados iguales al paquete | 79 de 79 |
+| Comprobaciones básicas | 11 de 11 (la primera llamada a la base después del reinicio dio 500 mientras la base despertaba; repetida tres veces dio 401) |
+| Permisos por rol | 142 de 142 |
+| Rechazos de la semana 3 en Azure (segunda visita, reasignar una Atendida) | **Pendiente**: requieren enviar peticiones de escritura a producción (que deben ser rechazadas) y quedan para hacerlas con autorización. En local pasaron 11 de 11 |
+
+**Observación:** el 500 de la primera consulta después de cada reinicio se repite porque la base gratuita se pausa sola (AutoPause) y tarda en despertar. El propio registro sugiere activar `EnableRetryOnFailure` en `UseSqlServer`: así Entity Framework reintenta en lugar de responder 500. Queda propuesto para la semana 4 (robustez).

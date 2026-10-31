@@ -3,4 +3,5 @@
   <Project Path="AsiloCabezaAlgodon.Application/AsiloCabezaAlgodon.Application.csproj" />
   <Project Path="AsiloCabezaAlgodon.Domain/AsiloCabezaAlgodon.Dominio.csproj" />
   <Project Path="AsiloCabezaAlgodon.Infrastructure/AsiloCabezaAlgodon.Infrastructure.csproj" />
+  <Project Path="AsiloCabezaAlgodon.Tests/AsiloCabezaAlgodon.Tests.csproj" />
 </Solution>

@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using AsiloCabezaAlgodon.Application.Comun;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Infrastructure.Persistencia;
 using AsiloCabezaAlgodon.Infrastructure.Seguridad;
@@ -87,6 +88,30 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Plan de pruebas SQA, semana 2: cuando un handler rechaza una operación lanza una de las
+// excepciones de Application/Comun/Excepciones.cs. Aquí se convierten en la respuesta HTTP
+// correcta, con un mensaje que el frontend puede mostrar: { "mensaje": "..." }.
+//  - DatosInvalidosException -> 400 (por ejemplo, un monto negativo)
+//  - ConflictoException      -> 409 (por ejemplo, despachar dos veces la misma prescripción)
+// Cualquier otro error sigue siendo un 500 sin detalles internos.
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (DatosInvalidosException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await context.Response.WriteAsJsonAsync(new { mensaje = ex.Message });
+    }
+    catch (ConflictoException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status409Conflict;
+        await context.Response.WriteAsJsonAsync(new { mensaje = ex.Message });
+    }
+});
 
 // Archivos del frontend (React ya compilado). En el servidor de Azure, la carpeta wwwroot
 // contiene el resultado de "npm run build", así la misma aplicación entrega la página y la

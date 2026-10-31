@@ -29,6 +29,9 @@ export function AutenticacionProveedor({ children }) {
   );
 }
 
+// Es normal que el proveedor y su hook vivan juntos. Esta regla solo afecta la recarga
+// en caliente mientras se programa (no al sistema publicado), por eso se desactiva aquí.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAutenticacion() {
   return useContext(AutenticacionContexto);
 }

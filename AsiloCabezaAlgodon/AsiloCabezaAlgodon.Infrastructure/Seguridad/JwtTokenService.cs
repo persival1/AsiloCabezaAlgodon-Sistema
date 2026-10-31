@@ -4,7 +4,6 @@ using System.Text;
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;

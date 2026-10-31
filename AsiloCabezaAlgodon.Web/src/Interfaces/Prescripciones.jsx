@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listarPrescripciones, despacharPrescripcion } from "../Servicios/prescripcionesServicio";
+import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 
 function Prescripciones() {
@@ -7,28 +8,33 @@ function Prescripciones() {
   const [idEnEdicion, setIdEnEdicion] = useState(null);
   const [costo, setCosto] = useState("");
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    cargar();
-  }, []);
+  const [error, setError] = useState("");
 
   async function cargar() {
     const datos = await listarPrescripciones();
     setPrescripciones(datos);
   }
 
+  useEffect(() => {
+    listarPrescripciones().then(setPrescripciones);
+  }, []);
+
   function abrirDespacho(prescripcion) {
     setIdEnEdicion(prescripcion.idPrescripcion);
     setCosto("");
+    setError("");
   }
 
   async function guardarDespacho(evento) {
     evento.preventDefault();
+    setError("");
     setGuardando(true);
     try {
       await despacharPrescripcion(idEnEdicion, Number(costo));
       setIdEnEdicion(null);
       await cargar();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo despachar el medicamento."));
     } finally {
       setGuardando(false);
     }
@@ -85,8 +91,9 @@ function Prescripciones() {
           <h2>Despachar medicamento</h2>
           <div className="campo">
             <label>Costo (Q)</label>
-            <input type="number" step="0.01" value={costo} onChange={(e) => setCosto(e.target.value)} required />
+            <input type="number" step="0.01" min="0" value={costo} onChange={(e) => setCosto(e.target.value)} required />
           </div>
+          {error && <p className="error">{error}</p>}
           <div className="fila-campos">
             <button type="submit" className="boton-primario" disabled={guardando}>
               {guardando ? "Guardando..." : "Confirmar despacho"}

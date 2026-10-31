@@ -25,65 +25,67 @@ function Tarjeta({ valor, etiqueta }) {
   );
 }
 
+// Consulta la API y devuelve las tarjetas que le corresponden a cada rol
+async function obtenerTarjetas(rol) {
+  if (rol === "Administrador") {
+    const [internos, solicitudes, donaciones] = await Promise.all([
+      listarInternos(), listarSolicitudes(), listarDonaciones(),
+    ]);
+    const totalEntradas = donaciones.reduce((s, d) => s + d.monto, 0);
+    return [
+      { valor: internos.length, etiqueta: "Internos registrados" },
+      { valor: solicitudes.filter((s) => s.estado === "Pendiente").length, etiqueta: "Solicitudes pendientes" },
+      { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Citas asignadas" },
+      { valor: `Q${totalEntradas.toFixed(2)}`, etiqueta: "Donaciones recibidas" },
+    ];
+  }
+  if (rol === "MedicoGeneral") {
+    const [internos, solicitudes] = await Promise.all([listarInternos(), listarSolicitudes()]);
+    return [
+      { valor: internos.length, etiqueta: "Internos registrados" },
+      { valor: solicitudes.filter((s) => s.estado === "Pendiente").length, etiqueta: "Mis solicitudes pendientes" },
+      { valor: solicitudes.length, etiqueta: "Solicitudes creadas en total" },
+    ];
+  }
+  if (rol === "Especialista") {
+    const [solicitudes, visitas] = await Promise.all([listarSolicitudes(), listarVisitas()]);
+    return [
+      { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Citas por atender" },
+      { valor: visitas.length, etiqueta: "Visitas registradas" },
+    ];
+  }
+  if (rol === "Enfermero") {
+    const solicitudes = await listarSolicitudes();
+    return [
+      { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Acompañamientos próximos" },
+      { valor: solicitudes.length, etiqueta: "Acompañamientos en total" },
+    ];
+  }
+  if (rol === "Laboratorio") {
+    const examenes = await listarExamenes();
+    return [
+      { valor: examenes.filter((e) => e.estado === "Pendiente").length, etiqueta: "Exámenes pendientes" },
+      { valor: examenes.length, etiqueta: "Exámenes en total" },
+    ];
+  }
+  if (rol === "Farmacia") {
+    const prescripciones = await listarPrescripciones();
+    return [
+      { valor: prescripciones.filter((p) => p.estado === "Pendiente").length, etiqueta: "Prescripciones pendientes" },
+      { valor: prescripciones.length, etiqueta: "Prescripciones en total" },
+    ];
+  }
+  return [];
+}
+
 function Inicio() {
   const { rol } = useAutenticacion();
   const [tarjetas, setTarjetas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    cargarEstadisticas();
+    obtenerTarjetas(rol).then(setTarjetas).finally(() => setCargando(false));
   }, [rol]);
-
-  async function cargarEstadisticas() {
-    setCargando(true);
-    try {
-      if (rol === "Administrador") {
-        const [internos, solicitudes, donaciones] = await Promise.all([
-          listarInternos(), listarSolicitudes(), listarDonaciones(),
-        ]);
-        const totalEntradas = donaciones.reduce((s, d) => s + d.monto, 0);
-        setTarjetas([
-          { valor: internos.length, etiqueta: "Internos registrados" },
-          { valor: solicitudes.filter((s) => s.estado === "Pendiente").length, etiqueta: "Solicitudes pendientes" },
-          { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Citas asignadas" },
-          { valor: `Q${totalEntradas.toFixed(2)}`, etiqueta: "Donaciones recibidas" },
-        ]);
-      } else if (rol === "MedicoGeneral") {
-        const [internos, solicitudes] = await Promise.all([listarInternos(), listarSolicitudes()]);
-        setTarjetas([
-          { valor: internos.length, etiqueta: "Internos registrados" },
-          { valor: solicitudes.filter((s) => s.estado === "Pendiente").length, etiqueta: "Mis solicitudes pendientes" },
-          { valor: solicitudes.length, etiqueta: "Solicitudes creadas en total" },
-        ]);
-      } else if (rol === "Especialista") {
-        const [solicitudes, visitas] = await Promise.all([listarSolicitudes(), listarVisitas()]);
-        setTarjetas([
-          { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Citas por atender" },
-          { valor: visitas.length, etiqueta: "Visitas registradas" },
-        ]);
-      } else if (rol === "Enfermero") {
-        const solicitudes = await listarSolicitudes();
-        setTarjetas([
-          { valor: solicitudes.filter((s) => s.estado === "Asignada").length, etiqueta: "Acompañamientos próximos" },
-          { valor: solicitudes.length, etiqueta: "Acompañamientos en total" },
-        ]);
-      } else if (rol === "Laboratorio") {
-        const examenes = await listarExamenes();
-        setTarjetas([
-          { valor: examenes.filter((e) => e.estado === "Pendiente").length, etiqueta: "Exámenes pendientes" },
-          { valor: examenes.length, etiqueta: "Exámenes en total" },
-        ]);
-      } else if (rol === "Farmacia") {
-        const prescripciones = await listarPrescripciones();
-        setTarjetas([
-          { valor: prescripciones.filter((p) => p.estado === "Pendiente").length, etiqueta: "Prescripciones pendientes" },
-          { valor: prescripciones.length, etiqueta: "Prescripciones en total" },
-        ]);
-      }
-    } finally {
-      setCargando(false);
-    }
-  }
 
   return (
     <div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { iniciarSesion } from "../servicios/autenticacionServicio";
+import { iniciarSesion } from "../Servicios/autenticacionServicio";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
 
 function Login() {
@@ -32,7 +32,7 @@ function Login() {
       const resultado = await iniciarSesion(nombreUsuario, password);
       guardarSesion(resultado.token, resultado.rol);
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Usuario o contraseña incorrectos.");
     } finally {
       setCargando(false);

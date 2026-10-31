@@ -1,4 +1,5 @@
 using MediatR;
+using AsiloCabezaAlgodon.Application.Comun;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Domain.Entidad;
 
@@ -17,6 +18,15 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos
 
         public async Task<int> Handle(RegistrarVisitaCommand request, CancellationToken cancellationToken)
         {
+            // Validaciones en el servidor (plan de pruebas SQA, caso FAR-03 y costo de consulta).
+            // La consulta acepta Q0.00 (sin costo), que no se carga al familiar.
+            Validar.Texto(request.Diagnostico, "diagnóstico");
+            Validar.Monto(request.CostoConsulta, "El costo de la consulta", permiteCero: true);
+            foreach (var examen in request.Examenes)
+                Validar.Texto(examen.NombreExamen, "nombre del examen");
+            foreach (var prescripcion in request.Prescripciones)
+                Validar.Texto(prescripcion.NombreMedicamento, "nombre del medicamento");
+
             var visita = new VisitaMedica
             {
                 IdSolicitud = request.IdSolicitud,

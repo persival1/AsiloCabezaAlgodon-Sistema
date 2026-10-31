@@ -113,6 +113,28 @@ Pruebas de integración, seguridad, regresión, respaldo y recuperación.
 
 **Pendiente:** configurar el correo de Gmail en Azure y probar el envío real (observación 6).
 
+## Plan de pruebas de SQA (25/10/2026): semana 1
+
+SQA entregó un plan con 74 casos de prueba. Al ejecutar los primeros encontró tres fallas en el frontend, que se corrigieron el 26/10/2026:
+
+- **Compilación en Linux (CMP-01, PU-FE-08):** dos importaciones no coincidían en mayúsculas con el archivo real (`RutaProtegida` y `servicios`). Corregido.
+- **ESLint (CMP-02):** de 16 errores y 3 advertencias a 0.
+- **Dependencias (CMP-03):** de 5 avisos altos a 0 con `npm audit fix`.
+- Se incorporaron al repositorio las 8 pruebas automatizadas de SQA (Anexo A): `npm test` → 8 de 8 aprobadas.
+
+Detalle y evidencia: `pruebas/resultado-semana-1-plan-sqa.md`. Pendiente: repetir la compilación en un equipo Linux.
+
+## Plan de pruebas de SQA: semana 2 (26/10/2026)
+
+- **Cargos duplicados corregidos:** despachar de nuevo una prescripción (FAR-05) o registrar de nuevo un resultado (LAB-06) ahora responde 409 y no vuelve a cargar el costo.
+- **Validación en el servidor:** montos negativos, en cero, con más de dos decimales o demasiado grandes; campos obligatorios; correos y fechas imposibles. Responde 400 con un mensaje que la pantalla muestra (FIN-05, FAR-03, LAB-03, RES-02, RES-03).
+- **Cobro ligado a la visita de otro interno** rechazado (FIN-06).
+- **Pruebas unitarias del backend:** proyecto `AsiloCabezaAlgodon.Tests` con 43 pruebas. Con el código anterior fallaban 21; después de corregir pasan las 43.
+- **Pruebas contra la API:** `pruebas/probar-validaciones.ps1`, 20 de 20 correctas y sin cambios en los datos. Permisos: 142 de 142.
+- Las reglas de montos quedaron como **supuesto 8**, pendiente de aprobar.
+
+Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
+
 ## Hallazgo adicional: cierre de sesión con token inválido
 
 Al cambiar la llave del JWT, las sesiones abiertas en el navegador quedaron con tokens que el servidor ya no acepta (401). La pantalla no avisaba: se quedaba con errores en segundo plano. Lo mismo pasaría cuando un token vence a las 8 horas. **Corregido:** `api.js` detecta el 401, cierra la sesión y vuelve al login con el aviso «Tu sesión expiró o ya no es válida»; el login se excluye para que una contraseña incorrecta siga mostrando su mensaje. Se probó con 4 casos en el navegador (`pruebas/resultado-conciliacion-y-sesion.md`).

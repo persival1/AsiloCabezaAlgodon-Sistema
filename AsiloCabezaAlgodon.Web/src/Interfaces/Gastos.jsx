@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listarGastos, crearGasto } from "../Servicios/gastosServicio";
+import { mensajeDeError } from "../Servicios/api";
 
 function Gastos() {
   const [gastos, setGastos] = useState([]);
@@ -7,18 +8,20 @@ function Gastos() {
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState("");
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    cargar();
-  }, []);
+  const [error, setError] = useState("");
 
   async function cargar() {
     const datos = await listarGastos();
     setGastos(datos);
   }
 
+  useEffect(() => {
+    listarGastos().then(setGastos);
+  }, []);
+
   async function manejarEnvio(evento) {
     evento.preventDefault();
+    setError("");
     setGuardando(true);
     try {
       await crearGasto(concepto, Number(monto));
@@ -26,6 +29,8 @@ function Gastos() {
       setMonto("");
       setMostrarFormulario(false);
       await cargar();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo registrar el gasto."));
     } finally {
       setGuardando(false);
     }
@@ -62,9 +67,10 @@ function Gastos() {
             </div>
             <div className="campo">
               <label>Monto (Q)</label>
-              <input type="number" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
+              <input type="number" step="0.01" min="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
             </div>
           </div>
+          {error && <p className="error">{error}</p>}
           <button type="submit" className="boton-primario" disabled={guardando}>
             {guardando ? "Guardando..." : "Registrar gasto"}
           </button>

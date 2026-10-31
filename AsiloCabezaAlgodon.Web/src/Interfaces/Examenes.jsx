@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listarExamenes, registrarResultado } from "../Servicios/examenesServicio";
+import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 
 function Examenes() {
@@ -8,29 +9,34 @@ function Examenes() {
   const [resultado, setResultado] = useState("");
   const [costo, setCosto] = useState("");
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    cargar();
-  }, []);
+  const [error, setError] = useState("");
 
   async function cargar() {
     const datos = await listarExamenes();
     setExamenes(datos);
   }
 
+  useEffect(() => {
+    listarExamenes().then(setExamenes);
+  }, []);
+
   function abrirResultado(examen) {
     setIdEnEdicion(examen.idExamenSolicitado);
     setResultado("");
     setCosto("");
+    setError("");
   }
 
   async function guardarResultado(evento) {
     evento.preventDefault();
+    setError("");
     setGuardando(true);
     try {
       await registrarResultado(idEnEdicion, resultado, Number(costo) || 0);
       setIdEnEdicion(null);
       await cargar();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo registrar el resultado."));
     } finally {
       setGuardando(false);
     }
@@ -89,8 +95,9 @@ function Examenes() {
           </div>
           <div className="campo">
             <label>Costo (Q, ya con el descuento de la fundación)</label>
-            <input type="number" step="0.01" value={costo} onChange={(e) => setCosto(e.target.value)} required />
+            <input type="number" step="0.01" min="0" value={costo} onChange={(e) => setCosto(e.target.value)} required />
           </div>
+          {error && <p className="error">{error}</p>}
           <div className="fila-campos">
             <button type="submit" className="boton-primario" disabled={guardando}>
               {guardando ? "Guardando..." : "Guardar resultado"}

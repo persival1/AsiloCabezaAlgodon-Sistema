@@ -1,4 +1,5 @@
 using MediatR;
+using AsiloCabezaAlgodon.Application.Comun;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Domain.Entidad;
 
@@ -15,6 +16,23 @@ namespace AsiloCabezaAlgodon.Application.Internos.Comandos
 
         public async Task<int> Handle(CrearInternoCommand request, CancellationToken cancellationToken)
         {
+            // Validaciones en el servidor (plan de pruebas SQA, casos RES-02 y RES-03).
+            // El formulario de React ya exige estos campos, pero alguien podría llamar a la
+            // API directamente (por ejemplo con Postman) y saltarse el formulario.
+            Validar.Texto(request.Nombres, "nombres");
+            Validar.Texto(request.Apellidos, "apellidos");
+            Validar.Texto(request.MotivoIngreso, "motivo de ingreso");
+            Validar.Texto(request.NombreFamiliar, "nombre del familiar");
+            Validar.Texto(request.ApellidoFamiliar, "apellido del familiar");
+            Validar.Texto(request.Parentesco, "parentesco");
+            Validar.Texto(request.TelefonoFamiliar, "teléfono del familiar");
+            Validar.Correo(request.CorreoFamiliar, "correo del familiar");
+            Validar.Monto(request.CuotaMensual, "La cuota mensual", permiteCero: true);
+            Validar.FechaNoFutura(request.FechaNacimiento, "La fecha de nacimiento");
+
+            if (request.FechaIngreso.Date < request.FechaNacimiento.Date)
+                throw new DatosInvalidosException("La fecha de ingreso no puede ser anterior a la fecha de nacimiento.");
+
             var interno = new Interno
             {
                 Nombres = request.Nombres,

@@ -34,4 +34,10 @@ api.interceptors.response.use(
   }
 );
 
+// Cuando el servidor rechaza una operación (400 datos inválidos, 409 conflicto) explica el
+// motivo en { mensaje }. Esta función lo saca para mostrarlo; si no viene, usa el genérico.
+export function mensajeDeError(error, porDefecto) {
+  return error.response?.data?.mensaje || porDefecto;
+}
+
 export default api;

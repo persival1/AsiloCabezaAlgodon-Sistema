@@ -77,7 +77,7 @@ function Reportes() {
           break;
       }
       setResultado(datos);
-    } catch (err) {
+    } catch {
       setError("No se pudo generar el reporte.");
     } finally {
       setCargando(false);

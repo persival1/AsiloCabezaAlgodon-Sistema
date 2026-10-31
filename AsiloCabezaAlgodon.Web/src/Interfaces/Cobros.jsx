@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { listarCobros, crearCobro } from "../Servicios/cobrosServicio";
 import { listarInternos } from "../Servicios/internosServicio";
 import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
+import { mensajeDeError } from "../Servicios/api";
 
 function Cobros() {
   const [cobros, setCobros] = useState([]);
@@ -15,23 +16,26 @@ function Cobros() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    cargar();
-    listarInternos().then(setInternos);
-  }, []);
-
-  useEffect(() => {
-    if (concepto === "Cargo médico" && idInterno) {
-      listarVisitasPorInterno(idInterno).then(setVisitasDelInterno);
-    } else {
-      setVisitasDelInterno([]);
-      setIdVisitaMedica("");
-    }
-  }, [concepto, idInterno]);
-
   async function cargar() {
     const datos = await listarCobros();
     setCobros(datos);
+  }
+
+  useEffect(() => {
+    listarCobros().then(setCobros);
+    listarInternos().then(setInternos);
+  }, []);
+
+  // Al cambiar el interno o el concepto se limpia la visita elegida y, si es un cargo
+  // médico, se traen las visitas de ese interno.
+  function cambiarSeleccion(nuevoIdInterno, nuevoConcepto) {
+    setIdInterno(nuevoIdInterno);
+    setConcepto(nuevoConcepto);
+    setIdVisitaMedica("");
+    setVisitasDelInterno([]);
+    if (nuevoConcepto === "Cargo médico" && nuevoIdInterno) {
+      listarVisitasPorInterno(nuevoIdInterno).then(setVisitasDelInterno);
+    }
   }
 
   async function manejarEnvio(evento) {
@@ -47,11 +51,12 @@ function Cobros() {
     setGuardando(true);
     try {
       await crearCobro(interno.idFamiliar, concepto, Number(monto), idVisitaMedica ? Number(idVisitaMedica) : null);
-      setIdInterno("");
+      cambiarSeleccion("", concepto);
       setMonto("");
-      setIdVisitaMedica("");
       setMostrarFormulario(false);
       await cargar();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo registrar el cobro."));
     } finally {
       setGuardando(false);
     }
@@ -75,7 +80,7 @@ function Cobros() {
           <div className="fila-campos">
             <div className="campo">
               <label>Interno</label>
-              <select value={idInterno} onChange={(e) => setIdInterno(e.target.value)} required>
+              <select value={idInterno} onChange={(e) => cambiarSeleccion(e.target.value, concepto)} required>
                 <option value="">Seleccioná un interno</option>
                 {internos.map((i) => (
                   <option key={i.idInterno} value={i.idInterno}>
@@ -86,7 +91,7 @@ function Cobros() {
             </div>
             <div className="campo">
               <label>Concepto</label>
-              <select value={concepto} onChange={(e) => setConcepto(e.target.value)}>
+              <select value={concepto} onChange={(e) => cambiarSeleccion(idInterno, e.target.value)}>
                 <option value="Cuota mensual">Cuota mensual</option>
                 <option value="Cargo médico">Cargo médico</option>
               </select>
@@ -107,7 +112,7 @@ function Cobros() {
           )}
           <div className="campo">
             <label>Monto (Q)</label>
-            <input type="number" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
+            <input type="number" step="0.01" min="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
           </div>
           {error && <p className="error">{error}</p>}
           <button type="submit" className="boton-primario" disabled={guardando}>

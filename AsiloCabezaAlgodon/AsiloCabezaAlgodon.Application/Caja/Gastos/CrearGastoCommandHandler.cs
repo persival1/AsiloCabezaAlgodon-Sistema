@@ -1,4 +1,5 @@
 using MediatR;
+using AsiloCabezaAlgodon.Application.Comun;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Domain.Entidad;
 
@@ -15,6 +16,10 @@ namespace AsiloCabezaAlgodon.Application.Caja.Gastos
 
         public async Task<int> Handle(CrearGastoCommand request, CancellationToken cancellationToken)
         {
+            // Validaciones en el servidor (plan de pruebas SQA, caso FIN-05)
+            Validar.Texto(request.Concepto, "concepto");
+            Validar.Monto(request.Monto, "El monto");
+
             var gasto = new Gasto
             {
                 Concepto = request.Concepto,

@@ -14,7 +14,7 @@ import Gastos from "./Interfaces/Gastos";
 import Cobros from "./Interfaces/Cobros";
 import Reportes from "./Interfaces/Reportes";
 import Layout from "./componentes/Layout";
-import RutaProtegida from "./componentes/RutaProtegida";
+import RutaProtegida from "./componentes/Rutaprotegida";
 
 function App() {
   return (

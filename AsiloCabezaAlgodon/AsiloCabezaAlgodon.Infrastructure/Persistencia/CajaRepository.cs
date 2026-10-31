@@ -56,5 +56,18 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
             await _context.SaveChangesAsync();
             return cobro;
         }
+
+        public async Task<bool> ExisteFamiliarAsync(int idFamiliar)
+        {
+            return await _context.Familiares.AnyAsync(f => f.IdFamiliar == idFamiliar);
+        }
+
+        public async Task<bool> VisitaEsDelFamiliarAsync(int idVisitaMedica, int idFamiliar)
+        {
+            return await _context.VisitasMedicas.AnyAsync(v =>
+                v.IdVisitaMedica == idVisitaMedica &&
+                v.Solicitud.Interno.Familiar != null &&
+                v.Solicitud.Interno.Familiar.IdFamiliar == idFamiliar);
+        }
     }
 }

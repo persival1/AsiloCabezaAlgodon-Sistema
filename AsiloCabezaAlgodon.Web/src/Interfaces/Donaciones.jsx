@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listarDonaciones, crearDonacion } from "../Servicios/donacionesServicio";
+import { mensajeDeError } from "../Servicios/api";
 
 const TIPOS_DONANTE = ["EmpresaNacional", "EmpresaInternacional", "Gobierno", "Particular"];
 const ETIQUETA_TIPO_DONANTE = {
@@ -17,18 +18,20 @@ function Donaciones() {
   const [monto, setMonto] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    cargar();
-  }, []);
+  const [error, setError] = useState("");
 
   async function cargar() {
     const datos = await listarDonaciones();
     setDonaciones(datos);
   }
 
+  useEffect(() => {
+    listarDonaciones().then(setDonaciones);
+  }, []);
+
   async function manejarEnvio(evento) {
     evento.preventDefault();
+    setError("");
     setGuardando(true);
     try {
       await crearDonacion(tipoDonante, nombreDonante, Number(monto), descripcion);
@@ -37,6 +40,8 @@ function Donaciones() {
       setDescripcion("");
       setMostrarFormulario(false);
       await cargar();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo registrar la donación."));
     } finally {
       setGuardando(false);
     }
@@ -84,13 +89,14 @@ function Donaciones() {
           <div className="fila-campos">
             <div className="campo">
               <label>Monto (Q)</label>
-              <input type="number" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
+              <input type="number" step="0.01" min="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} required />
             </div>
             <div className="campo">
               <label>Descripción</label>
               <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
             </div>
           </div>
+          {error && <p className="error">{error}</p>}
           <button type="submit" className="boton-primario" disabled={guardando}>
             {guardando ? "Guardando..." : "Registrar donación"}
           </button>

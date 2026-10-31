@@ -7,6 +7,11 @@ import Badge from "../componentes/Badge";
 
 const HOY = new Date().toISOString().slice(0, 10);
 
+// Trae el interno y sus visitas al mismo tiempo
+function obtenerFicha(id) {
+  return Promise.all([obtenerInterno(id), listarVisitasPorInterno(id)]);
+}
+
 function FichaInterno() {
   const { id } = useParams();
   const { rol } = useAutenticacion();
@@ -25,22 +30,18 @@ function FichaInterno() {
 
   const [guardando, setGuardando] = useState(false);
 
+  function mostrarFicha([datosInterno, datosVisitas]) {
+    setInterno(datosInterno);
+    setVisitas(datosVisitas);
+  }
+
   useEffect(() => {
-    cargar();
+    obtenerFicha(id).then(mostrarFicha).finally(() => setCargando(false));
   }, [id]);
 
+  // Para recargar la ficha después de agregar una psicopatología o un medicamento
   async function cargar() {
-    setCargando(true);
-    try {
-      const [datosInterno, datosVisitas] = await Promise.all([
-        obtenerInterno(id),
-        listarVisitasPorInterno(id),
-      ]);
-      setInterno(datosInterno);
-      setVisitas(datosVisitas);
-    } finally {
-      setCargando(false);
-    }
+    mostrarFicha(await obtenerFicha(id));
   }
 
   async function guardarPsicopatologia(evento) {

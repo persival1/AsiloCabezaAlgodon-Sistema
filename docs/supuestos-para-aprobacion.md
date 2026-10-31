@@ -1,6 +1,6 @@
 # Supuestos del análisis para aprobación
 
-Respuesta a la observación 5 de SQA (requerimientos ambiguos). El enunciado del proyecto no definía con claridad siete puntos. En cada uno se tomó la opción más simple y se implementó así. Este documento los lista para que **SQA o el cliente los aprueben, los rechacen o pidan un cambio**, y para dejar constancia de la decisión.
+Respuesta a la observación 5 de SQA (requerimientos ambiguos). El enunciado del proyecto no definía con claridad siete puntos (y un octavo, las reglas de montos, se agregó con el plan de pruebas). En cada uno se tomó la opción más simple y se implementó así. Este documento los lista para que **SQA o el cliente los aprueben, los rechacen o pidan un cambio**, y para dejar constancia de la decisión.
 
 **Cómo usarlo:** en la última columna marcar una opción y, si se pide un cambio, escribir cuál. Mientras no haya respuesta, el sistema funciona con el supuesto descrito.
 
@@ -13,6 +13,7 @@ Respuesta a la observación 5 de SQA (requerimientos ambiguos). El enunciado del
 | 5 | Registrar «medicamento aplicado, cantidad y tiempo de aplicación» | Se registran **dosis e indicaciones como texto libre** (por ejemplo «20mg» y «Una vez al día por 30 días») | Para campos numéricos (cantidad, días) habría que definir unidades y validaciones | ☐ Aprobado ☐ Rechazado ☐ Cambiar a: ______ |
 | 6 | Habla de «un módulo que se le proporcionará a la fundación» | La fundación **usa el rol Administrador**; no es un usuario separado | Si la fundación debe ser un rol aparte, el Administrador del asilo y la fundación tendrían permisos distintos | ☐ Aprobado ☐ Rechazado ☐ Cambiar a: ______ |
 | 7 | Registrar «el costo total que se le debe a la fundación» y un reporte de «pagos a la fundación» | El reporte 4 muestra **lo que se le debe** (consultas + laboratorio + farmacia). El sistema **no registra los pagos que el asilo hace** a la fundación | Para registrar pagos efectuados haría falta una tabla nueva, una pantalla y un saldo adeudado que baje con cada pago | ☐ Aprobado ☐ Rechazado ☐ Cambiar a: ______ |
+| 8 | El enunciado no define reglas para los montos (agregado el 26/10/2026, a partir del plan de pruebas de SQA, apartados 8.1 y 8.2) | **Nunca negativos**; máximo **Q99,999,999.99** (lo que cabe en la base); **máximo dos decimales**. Cobros, donaciones y gastos deben ser **mayores que cero**. Los costos médicos (consulta, examen, medicamento) aceptan **Q0.00** para algo sin costo, como una medicina donada, y ese cero no se carga al familiar | Cambiar un límite es modificar una línea en `Application/Comun/Validar.cs` y su prueba | ☐ Aprobado ☐ Rechazado ☐ Cambiar a: ______ |
 
 ## Prioridad sugerida para la revisión
 

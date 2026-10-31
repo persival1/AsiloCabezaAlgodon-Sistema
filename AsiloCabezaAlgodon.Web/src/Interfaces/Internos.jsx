@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listarInternos, crearInterno } from "../Servicios/internosServicio";
+import { mensajeDeError } from "../Servicios/api";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
 import Badge from "../componentes/Badge";
 
@@ -54,7 +55,7 @@ function Internos() {
       setMostrarFormulario(false);
       await cargarInternos();
     } catch (err) {
-      setError("No se pudo registrar el interno. Revisá los datos.");
+      setError(mensajeDeError(err, "No se pudo registrar el interno. Revisá los datos."));
     } finally {
       setGuardando(false);
     }
@@ -130,7 +131,7 @@ function Internos() {
             </div>
             <div className="campo">
               <label>Cuota mensual (Q)</label>
-              <input type="number" step="0.01" value={form.cuotaMensual} onChange={(e) => manejarCambio("cuotaMensual", e.target.value)} required />
+              <input type="number" step="0.01" min="0" value={form.cuotaMensual} onChange={(e) => manejarCambio("cuotaMensual", e.target.value)} required />
             </div>
           </div>
 

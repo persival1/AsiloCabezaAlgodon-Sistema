@@ -27,20 +27,20 @@ function Solicitudes() {
   const esMedicoGeneral = rol === "MedicoGeneral";
   const esAdministrador = rol === "Administrador";
 
+  async function cargarSolicitudes() {
+    const datos = await listarSolicitudes();
+    setSolicitudes(datos);
+  }
+
   useEffect(() => {
-    cargarSolicitudes();
+    listarSolicitudes().then(setSolicitudes);
     if (esMedicoGeneral) {
       listarInternos().then(setInternos);
     }
     if (esAdministrador) {
       listarUsuarios().then(setUsuarios);
     }
-  }, []);
-
-  async function cargarSolicitudes() {
-    const datos = await listarSolicitudes();
-    setSolicitudes(datos);
-  }
+  }, [esMedicoGeneral, esAdministrador]);
 
   async function manejarCrear(evento) {
     evento.preventDefault();
@@ -52,7 +52,7 @@ function Solicitudes() {
       setMotivo("");
       setEspecialidadRequerida("");
       await cargarSolicitudes();
-    } catch (err) {
+    } catch {
       setError("No se pudo crear la solicitud.");
     } finally {
       setCreando(false);
@@ -80,7 +80,7 @@ function Solicitudes() {
       );
       setSolicitudEnAsignacion(null);
       await cargarSolicitudes();
-    } catch (err) {
+    } catch {
       setError("No se pudo asignar la solicitud.");
     } finally {
       setAsignando(false);

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listarSolicitudes } from "../Servicios/solicitudesServicio";
 import { registrarVisita } from "../Servicios/visitasServicio";
+import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 
 const FORM_VACIO = { diagnostico: "", observaciones: "", costoConsulta: "" };
@@ -63,7 +64,7 @@ function Citas() {
       setIdSolicitudEnVisita(null);
       await cargarSolicitudes();
     } catch (err) {
-      setError("No se pudo registrar la visita.");
+      setError(mensajeDeError(err, "No se pudo registrar la visita."));
     } finally {
       setGuardando(false);
     }
@@ -142,6 +143,7 @@ function Citas() {
             <input
               type="number"
               step="0.01"
+              min="0"
               value={form.costoConsulta}
               onChange={(e) => setForm((f) => ({ ...f, costoConsulta: e.target.value }))}
               required

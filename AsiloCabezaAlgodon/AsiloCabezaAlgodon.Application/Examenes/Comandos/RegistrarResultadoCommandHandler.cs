@@ -1,4 +1,5 @@
 using MediatR;
+using AsiloCabezaAlgodon.Application.Comun;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 
 namespace AsiloCabezaAlgodon.Application.Examenes.Comandos
@@ -18,6 +19,16 @@ namespace AsiloCabezaAlgodon.Application.Examenes.Comandos
 
             if (examen == null)
                 return false;
+
+            // CORRECCIÓN (plan de pruebas SQA, caso LAB-06): antes registrar dos veces el
+            // resultado cargaba dos veces el costo al familiar. Ahora solo se registra si el
+            // examen sigue Pendiente; si no, se rechaza con 409.
+            if (examen.Estado != "Pendiente")
+                throw new ConflictoException("Este examen ya tiene un resultado registrado.");
+
+            // Caso LAB-03: resultado vacío o costo inválido
+            Validar.Texto(request.Resultado, "resultado");
+            Validar.Monto(request.Costo, "El costo", permiteCero: true);
 
             examen.Resultado = request.Resultado;
             examen.FechaResultado = DateTime.Now;

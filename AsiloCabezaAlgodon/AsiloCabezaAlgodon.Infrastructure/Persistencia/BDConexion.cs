@@ -1,9 +1,6 @@
 ﻿using AsiloCabezaAlgodon.Domain.Entidad;
 using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore;
-using AsiloCabezaAlgodon.Domain.Entidad;
-
 namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
 {
     public class BDConexion : DbContext

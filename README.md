@@ -42,6 +42,10 @@ npm install
 npm run dev
 ```
 
+Para revisar el frontend: `npm test` (pruebas automáticas con Vitest), `npm run lint` (ESLint) y `npm audit` (dependencias con vulnerabilidades).
+
+Para el backend, desde la carpeta `AsiloCabezaAlgodon`: `dotnet test AsiloCabezaAlgodon.slnx` (pruebas unitarias con xUnit).
+
 Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de conexión en `AsiloCabezaAlgodon/AsiloCabezaAlgodon.API/appsettings.json`.
 
 ## Pruebas y revisión de calidad
@@ -51,6 +55,9 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 - [`docs/supuestos-para-aprobacion.md`](./docs/supuestos-para-aprobacion.md): los 7 supuestos del análisis, en una tabla para aprobar o rechazar.
 - [`pruebas/resultado-conciliacion-y-sesion.md`](./pruebas/resultado-conciliacion-y-sesion.md): conciliación del saldo de los familiares y cierre de sesión cuando el token ya no sirve.
 - [`pruebas/resultado-respaldo-restauracion.md`](./pruebas/resultado-respaldo-restauracion.md): prueba de respaldo y recuperación de la base de datos.
+- [`pruebas/resultado-semana-1-plan-sqa.md`](./pruebas/resultado-semana-1-plan-sqa.md): semana 1 del plan de pruebas de SQA (compilación en Linux, ESLint, dependencias y pruebas automáticas del frontend).
+- [`pruebas/resultado-semana-2-plan-sqa.md`](./pruebas/resultado-semana-2-plan-sqa.md): semana 2 (cargos duplicados y validación de datos en el servidor, con pruebas xUnit).
+- [`pruebas/probar-validaciones.ps1`](./pruebas/probar-validaciones.ps1): script que envía datos inválidos a la API y comprueba que se rechacen sin cambiar nada. Resultados en [`pruebas/resultados-validaciones.md`](./pruebas/resultados-validaciones.md).
 - [`pruebas/probar-permisos.ps1`](./pruebas/probar-permisos.ps1): script que prueba los permisos de la API con los 6 roles (142 pruebas). Los resultados están en [`pruebas/resultados-permisos.md`](./pruebas/resultados-permisos.md).
 
 ## Base de datos

@@ -64,7 +64,7 @@ function Layout() {
   function cambiarTema() {
     const nuevo = tema === "claro" ? "oscuro" : "claro";
     document.documentElement.dataset.tema = nuevo;
-    try { localStorage.setItem("tema", nuevo); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem("tema", nuevo); } catch { /* sin almacenamiento */ }
     setTema(nuevo);
   }
 

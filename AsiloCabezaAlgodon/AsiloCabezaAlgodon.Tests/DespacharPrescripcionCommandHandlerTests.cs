@@ -19,7 +19,7 @@ namespace AsiloCabezaAlgodon.Tests
         {
             var p = new Prescripcion { IdPrescripcion = 1, IdVisitaMedica = 10, Estado = "Despachado", Costo = 40m };
             _repo.ObtenerPrescripcionPorIdAsync(1).Returns(p);
-            var handler = new DespacharPrescripcionCommandHandler(_repo);
+            var handler = new DespacharPrescripcionCommandHandler(_repo, new SinTransaccion());
 
             await Assert.ThrowsAsync<ConflictoException>(() =>
                 handler.Handle(new DespacharPrescripcionCommand(1, 40m), CancellationToken.None));
@@ -33,7 +33,7 @@ namespace AsiloCabezaAlgodon.Tests
         {
             var p = new Prescripcion { IdPrescripcion = 2, IdVisitaMedica = 10, Estado = "Pendiente" };
             _repo.ObtenerPrescripcionPorIdAsync(2).Returns(p);
-            var handler = new DespacharPrescripcionCommandHandler(_repo);
+            var handler = new DespacharPrescripcionCommandHandler(_repo, new SinTransaccion());
 
             await Assert.ThrowsAsync<DatosInvalidosException>(() =>
                 handler.Handle(new DespacharPrescripcionCommand(2, -5m), CancellationToken.None));
@@ -47,7 +47,7 @@ namespace AsiloCabezaAlgodon.Tests
         {
             var p = new Prescripcion { IdPrescripcion = 3, IdVisitaMedica = 10, Estado = "Pendiente" };
             _repo.ObtenerPrescripcionPorIdAsync(3).Returns(p);
-            var handler = new DespacharPrescripcionCommandHandler(_repo);
+            var handler = new DespacharPrescripcionCommandHandler(_repo, new SinTransaccion());
 
             var exito = await handler.Handle(new DespacharPrescripcionCommand(3, 40m), CancellationToken.None);
 
@@ -60,11 +60,24 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Prescripcion_inexistente_devuelve_false()
         {
             _repo.ObtenerPrescripcionPorIdAsync(99999).Returns((Prescripcion?)null);
-            var handler = new DespacharPrescripcionCommandHandler(_repo);
+            var handler = new DespacharPrescripcionCommandHandler(_repo, new SinTransaccion());
 
             var exito = await handler.Handle(new DespacharPrescripcionCommand(99999, 40m), CancellationToken.None);
 
             Assert.False(exito);
+        }
+
+        [Fact] // ROB-03: el despacho y el cargo se guardan solo dentro de la transacción
+        public async Task Despacho_y_cargo_se_guardan_dentro_de_la_transaccion()
+        {
+            var p = new Prescripcion { IdPrescripcion = 4, IdVisitaMedica = 10, Estado = "Pendiente" };
+            _repo.ObtenerPrescripcionPorIdAsync(4).Returns(p);
+            var handler = new DespacharPrescripcionCommandHandler(_repo, new TransaccionQueNoEjecuta());
+
+            await handler.Handle(new DespacharPrescripcionCommand(4, 40m), CancellationToken.None);
+
+            await _repo.DidNotReceive().ActualizarPrescripcionAsync(Arg.Any<Prescripcion>());
+            await _repo.DidNotReceive().CargarCostoAFamiliarAsync(Arg.Any<int>(), Arg.Any<decimal>());
         }
     }
 }

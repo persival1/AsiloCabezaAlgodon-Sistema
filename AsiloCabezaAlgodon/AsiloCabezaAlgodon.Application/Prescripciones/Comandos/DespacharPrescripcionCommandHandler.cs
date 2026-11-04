@@ -7,10 +7,12 @@ namespace AsiloCabezaAlgodon.Application.Prescripciones.Comandos
     public class DespacharPrescripcionCommandHandler : IRequestHandler<DespacharPrescripcionCommand, bool>
     {
         private readonly IVisitaMedicaRepository _visitaMedicaRepository;
+        private readonly IUnidadDeTrabajo _unidadDeTrabajo;
 
-        public DespacharPrescripcionCommandHandler(IVisitaMedicaRepository visitaMedicaRepository)
+        public DespacharPrescripcionCommandHandler(IVisitaMedicaRepository visitaMedicaRepository, IUnidadDeTrabajo unidadDeTrabajo)
         {
             _visitaMedicaRepository = visitaMedicaRepository;
+            _unidadDeTrabajo = unidadDeTrabajo;
         }
 
         public async Task<bool> Handle(DespacharPrescripcionCommand request, CancellationToken cancellationToken)
@@ -34,8 +36,12 @@ namespace AsiloCabezaAlgodon.Application.Prescripciones.Comandos
             prescripcion.FechaDespacho = DateTime.Now;
             prescripcion.Estado = "Despachado";
 
-            await _visitaMedicaRepository.ActualizarPrescripcionAsync(prescripcion);
-            await _visitaMedicaRepository.CargarCostoAFamiliarAsync(prescripcion.IdVisitaMedica, request.Costo);
+            // Semana 4 (ROB-03): despacho y cargo al familiar, juntos o ninguno.
+            await _unidadDeTrabajo.EjecutarEnTransaccionAsync(async () =>
+            {
+                await _visitaMedicaRepository.ActualizarPrescripcionAsync(prescripcion);
+                await _visitaMedicaRepository.CargarCostoAFamiliarAsync(prescripcion.IdVisitaMedica, request.Costo);
+            });
             return true;
         }
     }

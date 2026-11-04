@@ -7,10 +7,12 @@ namespace AsiloCabezaAlgodon.Application.Examenes.Comandos
     public class RegistrarResultadoCommandHandler : IRequestHandler<RegistrarResultadoCommand, bool>
     {
         private readonly IVisitaMedicaRepository _visitaMedicaRepository;
+        private readonly IUnidadDeTrabajo _unidadDeTrabajo;
 
-        public RegistrarResultadoCommandHandler(IVisitaMedicaRepository visitaMedicaRepository)
+        public RegistrarResultadoCommandHandler(IVisitaMedicaRepository visitaMedicaRepository, IUnidadDeTrabajo unidadDeTrabajo)
         {
             _visitaMedicaRepository = visitaMedicaRepository;
+            _unidadDeTrabajo = unidadDeTrabajo;
         }
 
         public async Task<bool> Handle(RegistrarResultadoCommand request, CancellationToken cancellationToken)
@@ -35,8 +37,12 @@ namespace AsiloCabezaAlgodon.Application.Examenes.Comandos
             examen.Estado = "ResultadoRegistrado";
             examen.Costo = request.Costo;
 
-            await _visitaMedicaRepository.ActualizarExamenAsync(examen);
-            await _visitaMedicaRepository.CargarCostoAFamiliarAsync(examen.IdVisitaMedica, request.Costo);
+            // Semana 4 (ROB-03): resultado y cargo al familiar, juntos o ninguno.
+            await _unidadDeTrabajo.EjecutarEnTransaccionAsync(async () =>
+            {
+                await _visitaMedicaRepository.ActualizarExamenAsync(examen);
+                await _visitaMedicaRepository.CargarCostoAFamiliarAsync(examen.IdVisitaMedica, request.Costo);
+            });
             return true;
         }
     }

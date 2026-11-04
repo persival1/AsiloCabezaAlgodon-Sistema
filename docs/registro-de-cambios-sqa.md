@@ -147,6 +147,17 @@ Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 
 Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 
+## Plan de pruebas de SQA: semana 4 (03/11/2026, solo local)
+
+- **Transacción (ROB-03):** registrar visita, despachar y registrar resultado guardan todo o nada (`IUnidadDeTrabajo` / `UnidadDeTrabajo`). Prueba de integración con SQL Server real: antes quedaba una visita guardada tras la falla; ahora no queda nada a medias.
+- **Límite de intentos de login:** 10 por minuto por IP; el intento 11 recibe 429 con mensaje en español.
+- **Datos inesperados (ROB-05):** JSON mal escrito o texto en campos numéricos responden 400 con `{ mensaje }` en español, sin nombres de clases internas (antes los mostraba).
+- **Pipeline (Anexo C):** `.github/workflows/calidad.yml`, sin las pruebas que necesitan SQL Server. Corre en GitHub con el próximo push.
+- **Usuario de base con permisos mínimos:** script preparado (`base-de-datos/usuario-permisos-minimos.sql`); se aplica en Azure con la publicación.
+- **Pruebas:** xUnit 72 de 72; `probar-semana-4.ps1` 19 de 19; regresión 11/11, 142/142 y 20/20.
+
+Detalle, y lo que no se hizo: `pruebas/resultado-semana-4-plan-sqa.md`.
+
 ## Revisión de errores en Azure y del proyecto (30/10/2026)
 
 - **Único error de la aplicación en Azure:** la base gratuita se pausa y la primera petición mientras despierta daba 500. Arreglo: `EnableRetryOnFailure` (Entity Framework reintenta).

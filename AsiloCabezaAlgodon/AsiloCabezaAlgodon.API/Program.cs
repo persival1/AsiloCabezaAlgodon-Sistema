@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -48,8 +49,8 @@ builder.Services.AddCors(options =>
 // La base de Azure (oferta gratis) se pausa sola cuando nadie la usa y tarda en despertar.
 // Mientras despierta responde «no disponible» (error 40613) y la API devolvía 500 en la
 // primera petición. Con EnableRetryOnFailure, Entity Framework reintenta unas veces antes de
-// rendirse. Nota: si algún día se usa una transacción manual (BeginTransaction), hay que
-// envolverla en Database.CreateExecutionStrategy(), porque así lo exige este modo.
+// rendirse. Las transacciones (UnidadDeTrabajo, semana 4) se abren dentro de
+// Database.CreateExecutionStrategy(), porque así lo exige este modo.
 builder.Services.AddDbContext<BDConexion>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sql => sql.EnableRetryOnFailure(maxRetryCount: 6, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null)));
@@ -65,6 +66,7 @@ builder.Services.AddScoped<ISolicitudRepository, SolicitudRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IVisitaMedicaRepository, VisitaMedicaRepository>();
 builder.Services.AddScoped<ICajaRepository, CajaRepository>();
+builder.Services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -83,7 +85,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+
+// Plan de pruebas SQA, semana 4: límite de intentos de inicio de sesión. Sin límite, alguien
+// podría probar miles de contraseñas por minuto. Cada dirección IP puede intentar 10 veces
+// por minuto; el intento 11 recibe 429 hasta que pase el minuto. (10 y no menos, para que el
+// script de permisos, que inicia sesión con los 6 roles seguidos, siga funcionando.)
+builder.Services.AddRateLimiter(opciones =>
+{
+    opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opciones.AddPolicy("login", contexto => RateLimitPartition.GetFixedWindowLimiter(
+        contexto.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    opciones.OnRejected = async (contexto, token) =>
+        await contexto.HttpContext.Response.WriteAsJsonAsync(
+            new { mensaje = "Demasiados intentos de inicio de sesión. Esperá un minuto e intentá de nuevo." }, token);
+});
+// Plan de pruebas SQA, caso ROB-05: si llega JSON mal escrito o texto en un campo numérico,
+// .NET respondía 400 con un mensaje en inglés que mostraba nombres de clases internas
+// (por ejemplo "could not be converted to ...CrearCobroCommand"). Ahora responde 400 con el
+// mismo formato que los demás errores: { mensaje } en español y sin detalles del código.
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(opciones =>
+        opciones.InvalidModelStateResponseFactory = _ => new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(
+            new { mensaje = "Los datos enviados no tienen el formato correcto. Revisá los campos e intentá de nuevo." }));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -137,6 +161,7 @@ app.UseCors("PermitirFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 // Las rutas de React (/dashboard, /dashboard/internos, ...) no son archivos reales: si el

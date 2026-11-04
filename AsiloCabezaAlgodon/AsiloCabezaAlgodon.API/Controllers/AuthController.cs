@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using AsiloCabezaAlgodon.Application.Autenticacion.Comandos;
 
@@ -16,6 +17,7 @@ namespace AsiloCabezaAlgodon.API.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("login")] // semana 4: máximo 10 intentos por minuto (ver Program.cs)
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             var result = await _mediator.Send(command);

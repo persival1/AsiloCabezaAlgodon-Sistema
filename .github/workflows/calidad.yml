@@ -1,0 +1,38 @@
+# Plan de pruebas SQA, semana 4 (Anexo C): en cada push y pull request, GitHub compila y
+# prueba todo en Linux. Si algo falla, el commit aparece con una X roja en GitHub.
+#
+# Diferencia con la propuesta del Anexo C: las pruebas de integración (Tipo=Integracion,
+# caso ROB-03) necesitan SQL Server y aquí no hay uno, así que se excluyen con el filtro.
+# Esas se corren en el equipo del desarrollador con "dotnet test".
+name: calidad
+
+on: [push, pull_request]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore AsiloCabezaAlgodon/AsiloCabezaAlgodon.slnx
+      - run: dotnet build AsiloCabezaAlgodon/AsiloCabezaAlgodon.slnx --no-restore
+      - run: dotnet test AsiloCabezaAlgodon/AsiloCabezaAlgodon.slnx --no-build --filter "Tipo!=Integracion"
+      - run: dotnet list AsiloCabezaAlgodon/AsiloCabezaAlgodon.slnx package --vulnerable --include-transitive
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AsiloCabezaAlgodon.Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

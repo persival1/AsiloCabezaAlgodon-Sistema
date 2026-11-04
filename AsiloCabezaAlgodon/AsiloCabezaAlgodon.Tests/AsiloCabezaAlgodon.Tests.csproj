@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AsiloCabezaAlgodon.Application\AsiloCabezaAlgodon.Application.csproj" />
+    <!-- Semana 4: las pruebas de integración (ROB-03) usan los repositorios reales y SQL Server -->
+    <ProjectReference Include="..\AsiloCabezaAlgodon.Infrastructure\AsiloCabezaAlgodon.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

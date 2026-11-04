@@ -44,7 +44,9 @@ npm run dev
 
 Para revisar el frontend: `npm test` (pruebas automáticas con Vitest), `npm run lint` (ESLint) y `npm audit` (dependencias con vulnerabilidades).
 
-Para el backend, desde la carpeta `AsiloCabezaAlgodon`: `dotnet test AsiloCabezaAlgodon.slnx` (pruebas unitarias con xUnit).
+Para el backend, desde la carpeta `AsiloCabezaAlgodon`: `dotnet test AsiloCabezaAlgodon.slnx` (pruebas con xUnit). Las de integración (`Tipo=Integracion`) usan SQL Express local con una base aparte, `asilo_pruebas_integracion`; para otra instancia, definir la variable `ASILO_BD_PRUEBAS`. Sin SQL Server: `dotnet test AsiloCabezaAlgodon.slnx --filter "Tipo!=Integracion"`.
+
+En cada push, GitHub Actions (`.github/workflows/calidad.yml`) compila y prueba el backend y el frontend en Linux.
 
 Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de conexión en `AsiloCabezaAlgodon/AsiloCabezaAlgodon.API/appsettings.json`.
 
@@ -59,6 +61,8 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 - [`pruebas/resultado-semana-2-plan-sqa.md`](./pruebas/resultado-semana-2-plan-sqa.md): semana 2 (cargos duplicados y validación de datos en el servidor, con pruebas xUnit).
 - [`pruebas/resultado-semana-3-plan-sqa.md`](./pruebas/resultado-semana-3-plan-sqa.md): semana 3 (solo el especialista asignado registra la visita, estados de la solicitud, validación de la asignación y mensaje honesto del correo).
 - [`pruebas/resultado-revision-30-10.md`](./pruebas/resultado-revision-30-10.md): revisión de los errores registrados en Azure y de las operaciones que aún no validaban datos.
+- [`pruebas/resultado-semana-4-plan-sqa.md`](./pruebas/resultado-semana-4-plan-sqa.md): semana 4 (transacción en las operaciones compuestas, límite de intentos de login, datos inesperados, pipeline de GitHub Actions y usuario de base con permisos mínimos).
+- [`pruebas/probar-semana-4.ps1`](./pruebas/probar-semana-4.ps1): datos mal formados y límite de intentos de login. No crea datos; tarda unos dos minutos. Resultados en [`pruebas/resultados-semana-4.md`](./pruebas/resultados-semana-4.md).
 - [`pruebas/probar-validaciones.ps1`](./pruebas/probar-validaciones.ps1): script que envía datos inválidos a la API y comprueba que se rechacen sin cambiar nada. Resultados en [`pruebas/resultados-validaciones.md`](./pruebas/resultados-validaciones.md).
 - [`pruebas/probar-semana-3.ps1`](./pruebas/probar-semana-3.ps1): recorre el ciclo de una solicitud y prueba lo que no se debe poder hacer en cada paso. **Crea datos**: solo en local. Resultados en [`pruebas/resultados-semana-3.md`](./pruebas/resultados-semana-3.md).
 - [`pruebas/probar-permisos.ps1`](./pruebas/probar-permisos.ps1): script que prueba los permisos de la API con los 6 roles (142 pruebas). Los resultados están en [`pruebas/resultados-permisos.md`](./pruebas/resultados-permisos.md).

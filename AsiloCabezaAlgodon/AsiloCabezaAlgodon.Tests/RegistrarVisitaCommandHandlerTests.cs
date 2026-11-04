@@ -43,7 +43,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Costo_de_consulta_negativo_se_rechaza()
         {
             SolicitudEnEstado("Asignada");
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<DatosInvalidosException>(() =>
                 handler.Handle(Visita(-150m, "Diclofenaco"), CancellationToken.None));
@@ -55,7 +55,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Prescripcion_sin_nombre_se_rechaza()
         {
             SolicitudEnEstado("Asignada");
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<DatosInvalidosException>(() =>
                 handler.Handle(Visita(150m, ""), CancellationToken.None));
@@ -67,7 +67,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Visita_de_otro_especialista_se_rechaza()
         {
             var solicitud = SolicitudEnEstado("Asignada");
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<AccesoDenegadoException>(() =>
                 handler.Handle(Visita(150m, "Diclofenaco", idEspecialista: Especialista2), CancellationToken.None));
@@ -80,7 +80,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Visita_sobre_solicitud_pendiente_se_rechaza()
         {
             var solicitud = SolicitudEnEstado("Pendiente");
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<ConflictoException>(() =>
                 handler.Handle(Visita(150m, "Diclofenaco"), CancellationToken.None));
@@ -93,7 +93,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Segunda_visita_sobre_solicitud_atendida_se_rechaza_y_no_cobra()
         {
             SolicitudEnEstado("Atendida");
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<ConflictoException>(() =>
                 handler.Handle(Visita(150m, "Diclofenaco"), CancellationToken.None));
@@ -105,7 +105,7 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Solicitud_inexistente_se_rechaza()
         {
             _solicitudes.ObtenerPorIdAsync(1).Returns((Solicitud?)null);
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             await Assert.ThrowsAsync<DatosInvalidosException>(() =>
                 handler.Handle(Visita(150m, "Diclofenaco"), CancellationToken.None));
@@ -123,13 +123,24 @@ namespace AsiloCabezaAlgodon.Tests
                 v.IdVisitaMedica = 50;
                 return v;
             });
-            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes);
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new SinTransaccion());
 
             var idVisita = await handler.Handle(Visita(150m, "Diclofenaco"), CancellationToken.None);
 
             Assert.Equal(50, idVisita);
             Assert.Equal("Atendida", solicitud.Estado);
             await _visitas.Received(1).CargarCostoAFamiliarAsync(50, 150m);
+        }
+
+        [Fact] // ROB-03: los tres guardados de la visita van dentro de la transacción
+        public async Task Visita_cargo_y_estado_se_guardan_dentro_de_la_transaccion()
+        {
+            SolicitudEnEstado("Asignada");
+            var handler = new RegistrarVisitaCommandHandler(_visitas, _solicitudes, new TransaccionQueNoEjecuta());
+
+            await handler.Handle(Visita(150m, "Diclofenaco"), CancellationToken.None);
+
+            await NoSeCreoNadaNiSeCobro();
         }
     }
 }

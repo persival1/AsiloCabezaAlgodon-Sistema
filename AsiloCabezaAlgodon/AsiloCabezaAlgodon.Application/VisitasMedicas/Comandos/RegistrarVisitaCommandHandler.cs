@@ -9,11 +9,13 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos
     {
         private readonly IVisitaMedicaRepository _visitaMedicaRepository;
         private readonly ISolicitudRepository _solicitudRepository;
+        private readonly IUnidadDeTrabajo _unidadDeTrabajo;
 
-        public RegistrarVisitaCommandHandler(IVisitaMedicaRepository visitaMedicaRepository, ISolicitudRepository solicitudRepository)
+        public RegistrarVisitaCommandHandler(IVisitaMedicaRepository visitaMedicaRepository, ISolicitudRepository solicitudRepository, IUnidadDeTrabajo unidadDeTrabajo)
         {
             _visitaMedicaRepository = visitaMedicaRepository;
             _solicitudRepository = solicitudRepository;
+            _unidadDeTrabajo = unidadDeTrabajo;
         }
 
         public async Task<int> Handle(RegistrarVisitaCommand request, CancellationToken cancellationToken)
@@ -58,14 +60,18 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos
                     .ToList()
             };
 
-            var creada = await _visitaMedicaRepository.CrearAsync(visita);
+            // Semana 4 (ROB-03): los tres guardados van juntos. Si uno falla, no queda la visita
+            // sin cobrar ni la consulta cobrada con la solicitud todavía Asignada.
+            await _unidadDeTrabajo.EjecutarEnTransaccionAsync(async () =>
+            {
+                await _visitaMedicaRepository.CrearAsync(visita);
+                await _visitaMedicaRepository.CargarCostoAFamiliarAsync(visita.IdVisitaMedica, request.CostoConsulta);
 
-            await _visitaMedicaRepository.CargarCostoAFamiliarAsync(creada.IdVisitaMedica, request.CostoConsulta);
+                solicitud.Estado = "Atendida";
+                await _solicitudRepository.ActualizarAsync(solicitud);
+            });
 
-            solicitud.Estado = "Atendida";
-            await _solicitudRepository.ActualizarAsync(solicitud);
-
-            return creada.IdVisitaMedica;
+            return visita.IdVisitaMedica;
         }
     }
 }

@@ -49,7 +49,7 @@ Archivo `.github/workflows/calidad.yml`. En cada push y pull request, GitHub com
 
 Diferencia con la propuesta del Anexo C: las pruebas de integración necesitan SQL Server, que no hay en el servidor de GitHub, así que se excluyen con `--filter "Tipo!=Integracion"`. Se corren en el equipo del desarrollador.
 
-**Verificación:** cada paso se ejecutó en local con resultado correcto (70 pruebas sin las de integración, 0 paquetes vulnerables; lint 0, 8 de 8, build y audit 0). **En GitHub todavía no se ejecutó:** corre por primera vez con el próximo push.
+**Verificación:** cada paso se ejecutó en local con resultado correcto (70 pruebas sin las de integración, 0 paquetes vulnerables; lint 0, 8 de 8, build y audit 0). **En GitHub:** la primera ejecución fue el 06/11/2026, sobre el commit `4243429`, y salió en verde (backend y frontend).
 
 **Falta (lo hace el dueño del repositorio en GitHub):** marcarlo como verificación obligatoria, en Settings → Branches → regla para `main` → «Require status checks to pass».
 

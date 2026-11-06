@@ -2,8 +2,8 @@
 
 Entrega al analista SQA según el apartado 12 del plan de pruebas («Protocolo de entrega de versiones»). Mientras no se firme el acta del plan, este documento es la propuesta del desarrollador.
 
-- **Etiqueta de Git:** `v1.0.0-rc1`. Se crea en local y sube a GitHub con el próximo push.
-- **Código de la versión:** commit `cf6c07e`. Los commits posteriores solo cambian documentos.
+- **Etiqueta de Git:** `v1.0.0-rc1`, sobre el último commit de esta entrega.
+- **Código de la versión:** commit `cf6c07e`. Los commits posteriores solo cambian documentos y scripts de despliegue.
 - **Entorno publicado:** https://asilo-cabeza-algodon-2796.azurewebsites.net. **Esta versión está publicada desde el 06/11/2026** (commit `cf6c07e`). La verificación está en `pruebas/resultado-despliegue-azure.md`.
 
 ## 1. Lista de verificación antes de entregar (tabla 20 del plan)
@@ -11,10 +11,10 @@ Entrega al analista SQA según el apartado 12 del plan de pruebas («Protocolo d
 | N.º | Condición | Estado |
 |---|---|---|
 | 1 | Etiqueta en Git y commit desplegado identificado | ✅ Etiqueta `v1.0.0-rc1`. Commit desplegado en Azure el 06/11: `cf6c07e` (frontend `index-5cSokZa6.js`) |
-| 2 | Backend y frontend compilan en Linux y en Windows | ✅ Windows. ⏳ Linux: lo comprueba GitHub Actions en el primer push (`.github/workflows/calidad.yml`) |
+| 2 | Backend y frontend compilan en Linux y en Windows | ✅ Windows. ✅ Linux: GitHub Actions («calidad», `.github/workflows/calidad.yml`) en verde el 06/11/2026 sobre el commit `4243429` (compilación, pruebas, lint y auditorías) |
 | 3 | Las pruebas automatizadas pasan | ✅ xUnit 215 de 215 · Vitest 8 de 8 · Playwright 4 de 4 |
 | 4 | Se ejecutaron los casos del catálogo afectados y se registraron | ✅ Semanas 1 a 5 (`pruebas/resultado-semana-*.md` y `pruebas/resultados-*.md`) |
-| 5 | Regresión mínima del apartado 7.9 | ✅ Permisos 142 de 142 · conciliación (REP-08) · flujo EXP-08 → LAB-02 → FAR-02 → FIN-02 en el navegador (E1 y E2). En Azure: 11 comprobaciones básicas, 142 permisos y los 8 informes responden. ⚠️ Los valores de los informes solo se verifican de forma automática en los informes 1 y 2 y la conciliación; los ocho «con los datos de referencia» los ejecuta SQA. ⏳ CMP-01 en Linux: con el primer push |
+| 5 | Regresión mínima del apartado 7.9 | ✅ Permisos 142 de 142 · conciliación (REP-08) · flujo EXP-08 → LAB-02 → FAR-02 → FIN-02 en el navegador (E1 y E2). En Azure: 11 comprobaciones básicas, 142 permisos y los 8 informes responden. ⚠️ Los valores de los informes solo se verifican de forma automática en los informes 1 y 2 y la conciliación; los ocho «con los datos de referencia» los ejecuta SQA. ✅ CMP-01: compila en Linux (GitHub Actions) |
 | 6 | Sin defectos críticos abiertos; los altos con tratamiento acordado | ✅ No hay defectos críticos ni altos abiertos conocidos (ver limitaciones) |
 | 7 | Auditorías de NuGet y npm sin avisos altos nuevos | ✅ NuGet: 0 paquetes vulnerables. npm de lo publicado: 0. npm completo: 4 moderados, solo de ESLint (desarrollo) |
 | 8 | Registro de cambios con lo corregido, lo pendiente y los riesgos | ✅ `docs/registro-de-cambios-sqa.md` |
@@ -44,6 +44,6 @@ Entrega al analista SQA según el apartado 12 del plan de pruebas («Protocolo d
 
 ## 4. Pendiente para completar la entrega
 
-1. **Push** de los commits y la etiqueta (GitHub Desktop), y revisar que GitHub Actions salga en verde (condiciones 1, 2 y CMP-01).
+1. **Subir la etiqueta** `v1.0.0-rc1` (los commits ya están en GitHub y GitHub Actions salió en verde).
 2. **Aplicar el usuario `app_asilo`** con `despliegue/aplicar-usuario-minimo.ps1` (necesita aprobación expresa porque toca producción) y repetir los 142 permisos contra Azure.
 3. **Enviar las cuentas** de Azure al analista por un canal privado (condición 9).

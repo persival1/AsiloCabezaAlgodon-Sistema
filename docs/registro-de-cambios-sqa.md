@@ -164,7 +164,7 @@ Detalle: `pruebas/resultado-semana-5-plan-sqa.md` y `pruebas/resultado-despliegu
 - **Transacción (ROB-03):** registrar visita, despachar y registrar resultado guardan todo o nada (`IUnidadDeTrabajo` / `UnidadDeTrabajo`). Prueba de integración con SQL Server real: antes quedaba una visita guardada tras la falla; ahora no queda nada a medias.
 - **Límite de intentos de login:** 10 por minuto por IP; el intento 11 recibe 429 con mensaje en español.
 - **Datos inesperados (ROB-05):** JSON mal escrito o texto en campos numéricos responden 400 con `{ mensaje }` en español, sin nombres de clases internas (antes los mostraba).
-- **Pipeline (Anexo C):** `.github/workflows/calidad.yml`, sin las pruebas que necesitan SQL Server. Corre en GitHub con el próximo push.
+- **Pipeline (Anexo C):** `.github/workflows/calidad.yml`, sin las pruebas que necesitan SQL Server. Primera ejecución en GitHub el 06/11/2026: en verde.
 - **Usuario de base con permisos mínimos:** script preparado (`base-de-datos/usuario-permisos-minimos.sql`); se aplica en Azure con la publicación.
 - **Pruebas:** xUnit 72 de 72; `probar-semana-4.ps1` 19 de 19; regresión 11/11, 142/142 y 20/20.
 

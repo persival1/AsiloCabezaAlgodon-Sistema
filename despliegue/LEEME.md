@@ -44,6 +44,10 @@ El script [`actualizar-azure.ps1`](./actualizar-azure.ps1) hace todo en orden y 
 
 Antes: pasar las pruebas, hacer commit y push. Después: verificar el sitio y correr `pruebas/probar-permisos.ps1` contra Azure.
 
+## Usuario de base con permisos mínimos
+
+[`aplicar-usuario-minimo.ps1`](./aplicar-usuario-minimo.ps1) crea el usuario `app_asilo` (solo leer y escribir datos, sin poder crear ni borrar tablas), comprueba esos permisos y, después de pedir confirmación, cambia la cadena de conexión de la aplicación para que lo use. La clave se genera al azar y se guarda solo en la carpeta de secretos, junto con la cadena anterior para poder regresar. Abre el firewall de SQL solo para la IP del equipo y lo vuelve a cerrar al terminar.
+
 ## Correo electrónico
 
 Para que el correo al familiar se envíe de verdad, la aplicación necesita estos valores en **Configuración → Variables de entorno** del App Service:

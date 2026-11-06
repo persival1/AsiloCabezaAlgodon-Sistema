@@ -7,6 +7,9 @@
 -- La aplicación no necesita más: nunca cambia la estructura de la base mientras corre
 -- (no llama a Migrate, EnsureCreated ni ejecuta SQL propio).
 --
+-- El script despliegue/aplicar-usuario-minimo.ps1 hace todos estos pasos solo (con firewall
+-- temporal, clave al azar guardada en la carpeta de secretos y confirmación antes de cambiar
+-- la conexión). Pasos a mano, si se prefiere:
 -- Cómo usarlo (Azure SQL):
 --   1. Conectarse a la base asilo_cabeza_algodon (NO a master) con el administrador.
 --   2. Reemplazar <CLAVE_GENERADA> por una contraseña larga generada al azar.

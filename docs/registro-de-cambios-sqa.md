@@ -155,7 +155,9 @@ Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 - **Limpieza:** se borraron archivos de plantilla sin uso y se corrigieron nombres de carpetas y archivos (`Autenticacion`, `Entidad/Familiar.cs`, `Comun/Interfaces`, `RutaProtegida.jsx`).
 - **Regresión completa:** xUnit 215 de 215, navegador 4 de 4, scripts 11/11, 142/142, 20/20 y 19/19.
 
-Detalle: `pruebas/resultado-semana-5-plan-sqa.md`. Entrega: `docs/version-candidata.md`.
+- **Publicada en Azure el 06/11/2026** (commit `cf6c07e`, etiqueta `v1.0.0-rc1`) con `despliegue/actualizar-azure.ps1` y respaldo previo: 11 comprobaciones básicas, 142 permisos, 8 informes y 19 de 19 en datos mal formados y límite de intentos. Se confirmó en Azure que el reintento de la base (30/10) evita el 500 al despertar. Falta aplicar el usuario `app_asilo` (`despliegue/aplicar-usuario-minimo.ps1`).
+
+Detalle: `pruebas/resultado-semana-5-plan-sqa.md` y `pruebas/resultado-despliegue-azure.md`. Entrega: `docs/version-candidata.md`.
 
 ## Plan de pruebas de SQA: semana 4 (03/11/2026, solo local)
 

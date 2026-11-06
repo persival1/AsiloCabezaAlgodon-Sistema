@@ -108,3 +108,24 @@ Se publicó el código del commit `8a7bbb2` (revisión descrita en [`resultado-r
 | Validaciones nuevas en Azure | **No se ejecutaron**: son peticiones de escritura a producción. En local pasaron (antes 500, ahora 400) |
 
 **Reintento de la base:** esta vez la primera llamada no dio 500, pero no se puede asegurar que la base estuviera pausada en ese momento. La prueba real será la próxima vez que la base despierte después de estar una hora sin uso.
+
+---
+
+# Actualización del 06/11/2026: versión candidata v1.0.0-rc1 (semanas 4 y 5)
+
+Se publicó el código del commit `cf6c07e` (etiqueta `v1.0.0-rc1`) con `despliegue/actualizar-azure.ps1`, que así quedó probado: respaldo previo (`respaldo-azure-20261106-1504.zip`, fuera del repositorio), compilación, paquete de 28 MB y `az webapp deploy`. No se cambió ninguna configuración al mismo tiempo. El sitio arrancó al primer intento («Site started successfully»).
+
+| Comprobación | Resultado |
+|---|---|
+| Azure sirve la versión nueva | `index-5cSokZa6.js`, el mismo archivo compilado en local |
+| Comprobaciones básicas | 11 de 11 |
+| Permisos por rol (script, 6 roles reales) | 142 de 142 (archivo de resultados sin contraseñas) |
+| Los 8 informes (solo lectura) | 8 de 8 responden 200 |
+| Datos mal formados (ROB-05) y límite de intentos de login (`probar-semana-4.ps1`) | 19 de 19 ([`resultados-semana-4-azure.md`](./resultados-semana-4-azure.md)). Las peticiones mal formadas se rechazan antes de llegar a la base: no se guardó nada |
+
+**Reintento de la base (`EnableRetryOnFailure`, 30/10): confirmado.** La métrica de CPU facturada de la base estuvo vacía de 19:30 a 21:00 UTC (la base estaba pausada) y volvió a tener consumo con la primera comprobación después de publicar. Esa primera petición respondió lo correcto (401 para la clave de prueba), sin el 500 que aparecía antes al despertar la base.
+
+**Pendiente:**
+
+- **Usuario de base con permisos mínimos:** el paso que crea `app_asilo` y cambia la cadena de conexión quedó bloqueado por el sistema de permisos del asistente, porque modifica un recurso compartido de producción. No se ejecutó nada: se comprobó después que el firewall seguía igual (32 reglas). Se aplica con `despliegue/aplicar-usuario-minimo.ps1`.
+- **IP real en el límite de intentos:** se comprobó el límite desde un solo equipo. Falta confirmar con una segunda conexión (por ejemplo, un celular con datos móviles) que el bloqueo de una IP no bloquea a las demás.

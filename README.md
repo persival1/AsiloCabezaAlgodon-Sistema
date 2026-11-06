@@ -42,7 +42,7 @@ npm install
 npm run dev
 ```
 
-Para revisar el frontend: `npm test` (pruebas automáticas con Vitest), `npm run lint` (ESLint) y `npm audit` (dependencias con vulnerabilidades).
+Para revisar el frontend: `npm test` (pruebas automáticas con Vitest), `npm run lint` (ESLint) y `npm audit` (dependencias con vulnerabilidades). `npm run e2e` recorre el sistema en el navegador con Playwright (usa Edge; levanta solo la API y el frontend; **crea datos**, así que es solo para el entorno local).
 
 Para el backend, desde la carpeta `AsiloCabezaAlgodon`: `dotnet test AsiloCabezaAlgodon.slnx` (pruebas con xUnit). Las de integración (`Tipo=Integracion`) usan SQL Express local con una base aparte, `asilo_pruebas_integracion`; para otra instancia, definir la variable `ASILO_BD_PRUEBAS`. Sin SQL Server: `dotnet test AsiloCabezaAlgodon.slnx --filter "Tipo!=Integracion"`.
 
@@ -62,6 +62,8 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 - [`pruebas/resultado-semana-3-plan-sqa.md`](./pruebas/resultado-semana-3-plan-sqa.md): semana 3 (solo el especialista asignado registra la visita, estados de la solicitud, validación de la asignación y mensaje honesto del correo).
 - [`pruebas/resultado-revision-30-10.md`](./pruebas/resultado-revision-30-10.md): revisión de los errores registrados en Azure y de las operaciones que aún no validaban datos.
 - [`pruebas/resultado-semana-4-plan-sqa.md`](./pruebas/resultado-semana-4-plan-sqa.md): semana 4 (transacción en las operaciones compuestas, límite de intentos de login, datos inesperados, pipeline de GitHub Actions y usuario de base con permisos mínimos).
+- [`pruebas/resultado-semana-5-plan-sqa.md`](./pruebas/resultado-semana-5-plan-sqa.md): semana 5 (recorridos completos en el navegador con Playwright, matriz de permisos automatizada, pantallas para celular, limpieza del código y regresión completa).
+- [`docs/version-candidata.md`](./docs/version-candidata.md): entrega de la versión candidata a SQA (lista de verificación, resultados y limitaciones conocidas).
 - [`pruebas/probar-semana-4.ps1`](./pruebas/probar-semana-4.ps1): datos mal formados y límite de intentos de login. No crea datos; tarda unos dos minutos. Resultados en [`pruebas/resultados-semana-4.md`](./pruebas/resultados-semana-4.md).
 - [`pruebas/probar-validaciones.ps1`](./pruebas/probar-validaciones.ps1): script que envía datos inválidos a la API y comprueba que se rechacen sin cambiar nada. Resultados en [`pruebas/resultados-validaciones.md`](./pruebas/resultados-validaciones.md).
 - [`pruebas/probar-semana-3.ps1`](./pruebas/probar-semana-3.ps1): recorre el ciclo de una solicitud y prueba lo que no se debe poder hacer en cada paso. **Crea datos**: solo en local. Resultados en [`pruebas/resultados-semana-3.md`](./pruebas/resultados-semana-3.md).
@@ -75,7 +77,7 @@ Se incluye el script [`base-de-datos/crear-base.sql`](./base-de-datos/crear-base
 
 **El sistema está publicado en Azure: https://asilo-cabeza-algodon-2796.azurewebsites.net**
 
-Usa planes gratuitos (App Service F1 y la oferta gratis de Azure SQL). La API y el frontend están en la misma aplicación. Las contraseñas de los usuarios en Azure **no son las de prueba** de este README: se entregan en privado. Detalle del despliegue, medidas de seguridad y limitaciones en [`despliegue/LEEME.md`](./despliegue/LEEME.md); las pruebas del sistema publicado, en [`pruebas/resultado-despliegue-azure.md`](./pruebas/resultado-despliegue-azure.md).
+Usa planes gratuitos (App Service F1 y la oferta gratis de Azure SQL); durante la revisión de SQA el App Service está temporalmente en B1. La API y el frontend están en la misma aplicación. Las contraseñas de los usuarios en Azure **no son las de prueba** de este README: se entregan en privado. Detalle del despliegue, medidas de seguridad y limitaciones en [`despliegue/LEEME.md`](./despliegue/LEEME.md); las pruebas del sistema publicado, en [`pruebas/resultado-despliegue-azure.md`](./pruebas/resultado-despliegue-azure.md).
 
 Para publicarlo en otro servidor:
 

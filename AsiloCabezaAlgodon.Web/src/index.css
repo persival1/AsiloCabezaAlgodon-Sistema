@@ -613,3 +613,57 @@ h1, h2, h3 {
   color: var(--color-texto-suave);
   font-size: 13.5px;
 }
+
+/* ------------------------------------------------------------------
+   Celular y tablet (pantallas de hasta 768 px de ancho)
+   El menú lateral fijo de 240 px dejaba casi sin espacio al contenido:
+   en pantallas chicas pasa a ser una barra arriba, las filas de campos
+   se apilan y las tablas se pueden deslizar de lado con el dedo.
+   ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .layout-contenedor { flex-direction: column; }
+
+  .layout-barra-lateral {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 14px 0 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--barra-borde);
+  }
+
+  .layout-marca { padding: 0 16px 12px; margin-bottom: 10px; }
+
+  .layout-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .layout-enlace { padding: 8px 10px; }
+
+  .layout-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px 0;
+  }
+
+  .layout-usuario { margin-bottom: 0; flex: 1 1 100%; }
+  .layout-boton-salir { width: auto; padding: 8px 14px; }
+
+  .layout-contenido { margin-left: 0; }
+  .layout-encabezado { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .layout-principal { padding: 16px; }
+
+  .encabezado-seccion { flex-wrap: wrap; gap: 12px; }
+  .fila-campos { flex-direction: column; align-items: stretch; gap: 0; }
+
+  .tabla {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

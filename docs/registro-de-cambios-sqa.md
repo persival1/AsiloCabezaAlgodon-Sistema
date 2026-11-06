@@ -147,6 +147,16 @@ Detalle y evidencia: `pruebas/resultado-semana-2-plan-sqa.md`.
 
 Detalle y evidencia: `pruebas/resultado-semana-3-plan-sqa.md`.
 
+## Plan de pruebas de SQA: semana 5 (05/11/2026)
+
+- **Recorridos en el navegador (fase 5, Playwright):** E1 atención médica completa, E2 pago parcial y total con conciliación, E3 sesión vencida y una prueba en tamaño de celular. 4 de 4.
+- **Matriz de permisos automatizada (fase 3):** los 142 casos del script como prueba de xUnit con `WebApplicationFactory`. Se comprobó que detecta fallas: abriendo a propósito un controller fallaron 10 casos.
+- **Celular:** el menú lateral pasa a barra superior, los campos se apilan y las tablas se deslizan (antes la página medía 530 px en un teléfono de 375 px).
+- **Limpieza:** se borraron archivos de plantilla sin uso y se corrigieron nombres de carpetas y archivos (`Autenticacion`, `Entidad/Familiar.cs`, `Comun/Interfaces`, `RutaProtegida.jsx`).
+- **Regresión completa:** xUnit 215 de 215, navegador 4 de 4, scripts 11/11, 142/142, 20/20 y 19/19.
+
+Detalle: `pruebas/resultado-semana-5-plan-sqa.md`. Entrega: `docs/version-candidata.md`.
+
 ## Plan de pruebas de SQA: semana 4 (03/11/2026, solo local)
 
 - **Transacción (ROB-03):** registrar visita, despachar y registrar resultado guardan todo o nada (`IUnidadDeTrabajo` / `UnidadDeTrabajo`). Prueba de integración con SQL Server real: antes quedaba una visita guardada tras la falla; ahora no queda nada a medias.

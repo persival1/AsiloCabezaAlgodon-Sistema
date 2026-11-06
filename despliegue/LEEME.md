@@ -7,7 +7,7 @@ El sistema está publicado en: **https://asilo-cabeza-algodon-2796.azurewebsites
 | Pieza | Servicio de Azure | Plan |
 |---|---|---|
 | Base de datos | Azure SQL Database (`asilo_cabeza_algodon`) | Oferta gratis, serverless, con **AutoPause**: si se agota el uso gratis del mes, la base se pausa en lugar de cobrar |
-| API y frontend | Azure App Service (Linux, .NET 10) | **F1, gratis** |
+| API y frontend | Azure App Service (Linux, .NET 10) | **F1, gratis**. Durante la revisión de SQA está temporalmente en **B1** con Always On (no se duerme); al terminar la revisión vuelve a F1 (primero se apaga Always On) |
 
 La API y el frontend están en **una sola aplicación**: la API entrega también los archivos de React (carpeta `wwwroot`). Se hizo así porque la suscripción de estudiante solo permite cinco regiones (Brasil Sur, Oeste de EE. UU., Canadá Central, Francia Central y Bélgica Central) y Static Web Apps no está disponible en ninguna de ellas. Como ventaja, el navegador habla con una sola dirección y no hacen falta llamadas entre sitios distintos.
 

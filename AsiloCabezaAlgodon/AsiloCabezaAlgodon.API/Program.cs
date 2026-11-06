@@ -172,3 +172,6 @@ app.MapFallback("/api/{**ruta}", () => Results.NotFound());
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+// Permite que las pruebas de integración (WebApplicationFactory<Program>) levanten esta API.
+public partial class Program { }

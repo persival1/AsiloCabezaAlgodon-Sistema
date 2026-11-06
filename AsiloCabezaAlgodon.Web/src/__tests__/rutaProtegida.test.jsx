@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { AutenticacionProveedor } from "../contexto/AutenticacionContexto.jsx";
-import RutaProtegida from "../componentes/Rutaprotegida.jsx";
+import RutaProtegida from "../componentes/RutaProtegida.jsx";
 
 function montar() {
   return render(

@@ -1,14 +1,14 @@
 # Resultados de las pruebas de validación en el servidor
 
-Fecha: 03/11/2026 21:00 · API: https://localhost:7022/api
+Fecha: 05/11/2026 23:22 · API: https://localhost:7022/api
 
 **20 de 20 correctas.** Datos sin cambios después de las pruebas: **sí**.
 
 | Caso del plan | Prueba | Petición | Esperado | Obtenido | Mensaje del servidor | Resultado |
 |---|---|---|---|---|---|---|
-| FAR-05 | Despachar de nuevo una prescripción ya despachada | PUT /Prescripciones/7/despachar | 409 | 409 | Esta prescripción ya fue despachada. | Correcto |
+| FAR-05 | Despachar de nuevo una prescripción ya despachada | PUT /Prescripciones/1007/despachar | 409 | 409 | Esta prescripción ya fue despachada. | Correcto |
 | FAR-05 | Despachar una prescripción que no existe | PUT /Prescripciones/99999/despachar | 404 | 404 |  | Correcto |
-| LAB-06 | Registrar de nuevo el resultado de un examen | PUT /Examenes/6/resultado | 409 | 409 | Este examen ya tiene un resultado registrado. | Correcto |
+| LAB-06 | Registrar de nuevo el resultado de un examen | PUT /Examenes/1006/resultado | 409 | 409 | Este examen ya tiene un resultado registrado. | Correcto |
 | LAB-05 | Registrar el resultado de un examen que no existe | PUT /Examenes/99999/resultado | 404 | 404 |  | Correcto |
 | FIN-05 | Cobro con monto -1.00 | POST /Cobros | 400 | 400 | El monto no puede ser menor que cero. | Correcto |
 | FIN-05 | Cobro con monto 0.00 | POST /Cobros | 400 | 400 | El monto debe ser mayor que cero. | Correcto |
@@ -31,9 +31,9 @@ Fecha: 03/11/2026 21:00 · API: https://localhost:7022/api
 
 | Dato | Antes | Después |
 |---|---|---|
-| Internos | 1 | 1 |
-| Cobros | 2 | 2 |
+| Internos | 2 | 2 |
+| Cobros | 4 | 4 |
 | Donaciones | 1 | 1 |
 | Gastos | 1 | 1 |
-| Saldos | 1=293 | 1=293 |
+| Saldos | 2=150, 1=293 | 2=150, 1=293 |
 | Cuadra | True | True |

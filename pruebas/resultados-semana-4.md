@@ -1,6 +1,6 @@
 # Resultados: semana 4, datos inesperados (ROB-05) y límite de intentos de inicio de sesión
 
-Fecha: 03/11/2026 20:58 · API: https://localhost:7022/api
+Fecha: 05/11/2026 23:24 · API: https://localhost:7022/api
 
 | Caso | Esperado | Obtenido | Resultado | Detalle |
 |---|---|---|---|---|

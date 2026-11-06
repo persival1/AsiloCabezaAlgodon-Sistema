@@ -229,7 +229,6 @@ Generadas por `/api/Seed/*` (ver 5.4):
 
 - **Correo**: si `Smtp:*` no está configurado, no se envía nada (ver 5.7). No es un error del sistema, es el comportamiento esperado sin credenciales reales.
 - **Descuentos**: el sistema no calcula descuentos automáticamente. Quien captura el costo (especialista, laboratorio, farmacia) lo ingresa **ya con el descuento de la fundación aplicado** — es una simplificación deliberada para no construir un motor de tarifas que el enunciado no detalla.
-- **`EquiposController`**: controlador vacío sin usar, remanente de una prueba temprana; no afecta el funcionamiento del sistema.
 - **Sin recuperación de contraseña ni edición de usuarios desde la interfaz**: la gestión de usuarios (incluida la `Especialidad` de un especialista) se hace por ahora vía `/api/Seed` o directo en la base de datos.
 - **HTTPS con certificado de desarrollo**: al abrir `https://localhost:7022/swagger` por primera vez el navegador puede advertir de certificado no confiable — es el certificado de desarrollo de .NET (`dotnet dev-certs https --trust` lo soluciona localmente).
 

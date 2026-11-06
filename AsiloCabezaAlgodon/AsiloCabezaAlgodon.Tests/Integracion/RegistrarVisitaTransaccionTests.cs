@@ -12,14 +12,12 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     //
     // A diferencia de las demás pruebas, estas usan los repositorios reales y SQL Server de
     // verdad, en una base aparte que se borra y se vuelve a crear en cada prueba (nunca la
-    // base del sistema). Por defecto usa SQL Express local; se puede cambiar con la variable
-    // de entorno ASILO_BD_PRUEBAS. En GitHub Actions se excluyen con el filtro Tipo!=Integracion.
+    // base del sistema; ver BasesDePrueba). En GitHub Actions se excluyen con el filtro
+    // Tipo!=Integracion.
     [Trait("Tipo", "Integracion")]
     public class RegistrarVisitaTransaccionTests
     {
-        private static readonly string Conexion =
-            Environment.GetEnvironmentVariable("ASILO_BD_PRUEBAS")
-            ?? @"Server=localhost\SQLEXPRESS;Database=asilo_pruebas_integracion;Trusted_Connection=True;TrustServerCertificate=True;";
+        private static readonly string Conexion = BasesDePrueba.Conexion("asilo_pruebas_integracion");
 
         private static BDConexion NuevoContexto() =>
             new(new DbContextOptionsBuilder<BDConexion>().UseSqlServer(Conexion).Options);

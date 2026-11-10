@@ -228,17 +228,41 @@ function ReporteCobrosPorPaciente({ datos }) {
   );
 }
 
+// AC-07: lo que se le debe a la fundación en el periodo, lo pagado y lo pendiente
 function ReportePagosFundacion({ datos }) {
   return (
-    <table className="tabla">
-      <thead><tr><th>Concepto</th><th>Monto</th></tr></thead>
-      <tbody>
-        <tr><td>Consultas médicas</td><td>Q{datos.totalConsultas.toFixed(2)}</td></tr>
-        <tr><td>Laboratorio</td><td>Q{datos.totalLaboratorio.toFixed(2)}</td></tr>
-        <tr><td>Farmacia</td><td>Q{datos.totalFarmacia.toFixed(2)}</td></tr>
-        <tr><td><strong>Total a la fundación</strong></td><td><strong>Q{datos.totalGeneral.toFixed(2)}</strong></td></tr>
-      </tbody>
-    </table>
+    <div>
+      <table className="tabla">
+        <thead><tr><th>Cargos médicos del periodo</th><th>Monto</th></tr></thead>
+        <tbody>
+          <tr><td>Consultas médicas</td><td>Q{datos.totalConsultas.toFixed(2)}</td></tr>
+          <tr><td>Laboratorio</td><td>Q{datos.totalLaboratorio.toFixed(2)}</td></tr>
+          <tr><td>Farmacia</td><td>Q{datos.totalFarmacia.toFixed(2)}</td></tr>
+          <tr><td><strong>Total adeudado en el periodo</strong></td><td><strong>Q{datos.totalGeneral.toFixed(2)}</strong></td></tr>
+          <tr><td><strong>Pagado en el periodo</strong></td><td><strong>Q{datos.totalPagado.toFixed(2)}</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h3 className="titulo-seccion">Pagos registrados en el periodo</h3>
+      <table className="tabla">
+        <thead><tr><th>Fecha</th><th>Comprobante</th><th>Descripción</th><th>Monto</th></tr></thead>
+        <tbody>
+          {datos.pagos.map((p) => (
+            <tr key={p.idPagoFundacion}><td>{new Date(p.fecha).toLocaleDateString()}</td><td>{p.numeroComprobante}</td><td>{p.descripcion || "—"}</td><td>Q{p.monto.toFixed(2)}</td></tr>
+          ))}
+          {datos.pagos.length === 0 && <tr><td colSpan="4">Sin pagos en el periodo.</td></tr>}
+        </tbody>
+      </table>
+
+      <h3 className="titulo-seccion">Saldo con la fundación hasta hoy</h3>
+      <table className="tabla">
+        <tbody>
+          <tr><td>Cargos médicos acumulados</td><td>Q{datos.adeudadoAcumulado.toFixed(2)}</td></tr>
+          <tr><td>Pagado acumulado</td><td>Q{datos.pagadoAcumulado.toFixed(2)}</td></tr>
+          <tr><td><strong>Pendiente de pagar</strong></td><td><strong className={datos.saldoPendiente > 0 ? "saldo-debe" : "saldo-al-dia"}>Q{datos.saldoPendiente.toFixed(2)}</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
 

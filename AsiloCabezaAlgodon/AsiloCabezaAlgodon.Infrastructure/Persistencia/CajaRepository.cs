@@ -83,6 +83,26 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
             return cargos - pagado;
         }
 
+        public async Task<List<PagoFundacion>> ObtenerPagosFundacionAsync()
+        {
+            return await _context.PagosFundacion.OrderByDescending(p => p.Fecha).ToListAsync();
+        }
+
+        public async Task<PagoFundacion> CrearPagoFundacionAsync(PagoFundacion pago)
+        {
+            _context.PagosFundacion.Add(pago);
+            await _context.SaveChangesAsync();
+            return pago;
+        }
+
+        public async Task<decimal> TotalCargosMedicosAsync()
+        {
+            var consultas = await _context.VisitasMedicas.Where(v => v.CostoConsulta > 0).SumAsync(v => (decimal?)v.CostoConsulta) ?? 0;
+            var examenes = await _context.ExamenesSolicitados.Where(e => e.Costo > 0).SumAsync(e => e.Costo) ?? 0;
+            var medicamentos = await _context.Prescripciones.Where(p => p.Costo > 0).SumAsync(p => p.Costo) ?? 0;
+            return consultas + examenes + medicamentos;
+        }
+
         public async Task<bool> VisitaEsDelFamiliarAsync(int idVisitaMedica, int idFamiliar)
         {
             return await _context.VisitasMedicas.AnyAsync(v =>

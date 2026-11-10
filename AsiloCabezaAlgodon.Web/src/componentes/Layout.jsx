@@ -33,12 +33,14 @@ const MENUS_POR_ROL = {
     { texto: "Inicio", ruta: "/dashboard", icono: IconoInicio },
     { texto: "Internos", ruta: "/dashboard/internos", icono: IconoInternos },
     { texto: "Solicitudes", ruta: "/dashboard/solicitudes", icono: IconoSolicitudes },
+    { texto: "Reportes", ruta: "/dashboard/reportes", icono: IconoReportes },
   ],
   Especialista: [
     { texto: "Inicio", ruta: "/dashboard", icono: IconoInicio },
     { texto: "Mis citas", ruta: "/dashboard/citas", icono: IconoCitas },
     { texto: "Visitas médicas", ruta: "/dashboard/visitas", icono: IconoVisitas },
     { texto: "Internos", ruta: "/dashboard/internos", icono: IconoInternos },
+    { texto: "Reportes", ruta: "/dashboard/reportes", icono: IconoReportes },
   ],
   Enfermero: [
     { texto: "Inicio", ruta: "/dashboard", icono: IconoInicio },

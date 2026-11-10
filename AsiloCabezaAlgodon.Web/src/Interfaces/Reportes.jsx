@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listarInternos } from "../Servicios/internosServicio";
+import { useAutenticacion } from "../contexto/AutenticacionContexto";
 import {
   reporteCostosPorCita,
   reporteFichaMedica,
@@ -10,20 +11,25 @@ import {
   reporteMedicamentosPorPaciente,
 } from "../Servicios/reportesServicio";
 
+// AC-10: los informes financieros son solo del Administrador; los clínicos también los usan
+// el médico general y el especialista (este último, solo de sus pacientes). La API lo valida.
+const MEDICOS = ["Administrador", "MedicoGeneral", "Especialista"];
 const REPORTES = [
-  { valor: "costos-por-cita", texto: "1. Costos por cita (consulta + laboratorio + medicamentos)" },
-  { valor: "ficha-medica", texto: "2. Análisis médico / ficha médica por paciente" },
-  { valor: "cobros-por-paciente", texto: "3. Cobros por paciente por rango de fecha" },
-  { valor: "pagos-fundacion", texto: "4. Pagos a la fundación" },
-  { valor: "entradas", texto: "5. Entradas: donaciones y cobros" },
-  { valor: "examenes-por-paciente", texto: "6. Exámenes médicos realizados por paciente" },
-  { valor: "medicamentos-por-paciente", texto: "7. Medicamentos aplicados por paciente" },
+  { valor: "costos-por-cita", texto: "1. Costos por cita (consulta + laboratorio + medicamentos)", roles: ["Administrador"] },
+  { valor: "ficha-medica", texto: "2. Análisis médico / ficha médica por paciente", roles: MEDICOS },
+  { valor: "cobros-por-paciente", texto: "3. Cobros por paciente por rango de fecha", roles: ["Administrador"] },
+  { valor: "pagos-fundacion", texto: "4. Pagos a la fundación", roles: ["Administrador"] },
+  { valor: "entradas", texto: "5. Entradas: donaciones y cobros", roles: ["Administrador"] },
+  { valor: "examenes-por-paciente", texto: "6. Exámenes médicos realizados por paciente", roles: MEDICOS },
+  { valor: "medicamentos-por-paciente", texto: "7. Medicamentos aplicados por paciente", roles: MEDICOS },
 ];
 
 const HOY = new Date().toISOString().slice(0, 10);
 
 function Reportes() {
-  const [reporteSeleccionado, setReporteSeleccionado] = useState(REPORTES[0].valor);
+  const { rol } = useAutenticacion();
+  const disponibles = REPORTES.filter((r) => r.roles.includes(rol));
+  const [reporteSeleccionado, setReporteSeleccionado] = useState(disponibles[0]?.valor ?? "");
   const [internos, setInternos] = useState([]);
   const [idInterno, setIdInterno] = useState("");
   const [fechaInicio, setFechaInicio] = useState(HOY);
@@ -89,7 +95,7 @@ function Reportes() {
       <div className="encabezado-seccion">
         <div>
           <h1>Reportes</h1>
-          <p className="subtitulo">Los 7 informes que exige el enunciado, listos para exportar</p>
+          <p className="subtitulo">{rol === "Administrador" ? "Los 7 informes que exige el enunciado, listos para exportar" : "Informes clínicos de tus pacientes"}</p>
         </div>
       </div>
 
@@ -98,7 +104,7 @@ function Reportes() {
           <div className="campo">
             <label>Reporte</label>
             <select value={reporteSeleccionado} onChange={(e) => { setReporteSeleccionado(e.target.value); setResultado(null); }}>
-              {REPORTES.map((r) => (
+              {disponibles.map((r) => (
                 <option key={r.valor} value={r.valor}>{r.texto}</option>
               ))}
             </select>

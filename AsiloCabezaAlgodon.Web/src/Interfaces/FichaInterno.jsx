@@ -108,7 +108,9 @@ function FichaInterno() {
             <h2>Familiar responsable</h2>
             <p><strong>{interno.familiar.nombres} {interno.familiar.apellidos}</strong> — {interno.familiar.parentesco}</p>
             <p>{interno.familiar.telefono} · {interno.familiar.correo}</p>
-            <p>Cuota mensual: Q{interno.familiar.cuotaMensual.toFixed(2)} · Saldo de cargos médicos: <Saldo valor={interno.familiar.saldoPendiente} /></p>
+            {interno.familiar.cuotaMensual != null && (
+              <p>Cuota mensual: Q{interno.familiar.cuotaMensual.toFixed(2)} · Saldo de cargos médicos: <Saldo valor={interno.familiar.saldoPendiente} /></p>
+            )}
           </>
         )}
       </div>

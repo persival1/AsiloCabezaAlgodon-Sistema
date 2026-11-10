@@ -26,8 +26,8 @@ namespace AsiloCabezaAlgodon.Application.Internos.Consultas
                 interno.Familiar.Parentesco,
                 interno.Familiar.Telefono,
                 interno.Familiar.Correo,
-                interno.Familiar.CuotaMensual,
-                interno.Familiar.SaldoPendiente
+                request.IncluirFinanzas ? interno.Familiar.CuotaMensual : null,
+                request.IncluirFinanzas ? interno.Familiar.SaldoPendiente : null
             );
 
             return new InternoDetalleDto(

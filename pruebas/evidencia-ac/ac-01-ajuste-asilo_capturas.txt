@@ -1,0 +1,16 @@
+-- Base local: asilo_capturas  (10/11/2026 17:32)
+--- ANTES de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Diferencia
+---------- ------------- ------------- ----------
+1 -385.00 115.00 -500.00
+2 -600.00 .00 -600.00
+3 -300.00 150.00 -450.00
+4 .00 .00 .00
+Familiares corregidos: 3
+--- DESPUÉS de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Resultado
+---------- ------------- ------------- ---------
+1 115.00 115.00 CUADRA
+2 .00 .00 CUADRA
+3 150.00 150.00 CUADRA
+4 .00 .00 CUADRA

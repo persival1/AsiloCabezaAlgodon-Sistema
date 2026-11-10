@@ -129,6 +129,14 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             Assert.Equal(155, Casos().Count());
         }
 
+        [Fact] // AC-15: la versión se consulta sin sesión y no expone datos
+        public async Task La_version_es_publica()
+        {
+            var respuesta = await _api.CreateClient().GetAsync("/api/Version");
+            Assert.Equal(200, (int)respuesta.StatusCode);
+            Assert.Contains("1.0.0-rc2", await respuesta.Content.ReadAsStringAsync());
+        }
+
         [Theory]
         [MemberData(nameof(Casos))]
         public async Task Cada_rol_recibe_el_codigo_esperado(string metodo, string ruta, string actor, int esperado)

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { iniciarSesion } from "../Servicios/autenticacionServicio";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
+import VersionApp from "../componentes/VersionApp";
 
 function Login() {
   const [nombreUsuario, setNombreUsuario] = useState("");
@@ -79,6 +80,7 @@ function Login() {
           {cargando ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
+      <VersionApp />
     </div>
   );
 }

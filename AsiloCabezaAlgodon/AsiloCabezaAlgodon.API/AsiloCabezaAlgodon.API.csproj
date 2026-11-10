@@ -5,6 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>125d912e-6a01-433f-9c94-c3472f2adf63</UserSecretsId>
+		<!-- AC-15: versión de la entrega; el commit lo agrega el despliegue (SourceRevisionId) -->
+		<Version>1.0.0-rc2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -679,3 +679,6 @@ h1, h2, h3 {
 .exito { color: var(--color-exito); background: var(--color-exito-suave); padding: 0.6rem 0.9rem; border-radius: 8px; }
 .obligatorio { color: var(--color-peligro); }
 .ayuda-campo { display: block; color: var(--color-texto-suave); font-size: 0.82rem; margin-top: 0.25rem; }
+
+/* AC-15: versión y commit visibles */
+.version-app { color: var(--color-texto-suave); font-size: 0.75rem; text-align: center; margin: 0.6rem 0 0; }

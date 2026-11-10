@@ -6,6 +6,7 @@ import {
   IconoAcompanamientos, IconoExamenes, IconoPrescripciones, IconoDonaciones,
   IconoCobros, IconoGastos, IconoReportes,
 } from "./Iconos";
+import VersionApp from "./VersionApp";
 
 const NOMBRES_ROL = {
   Administrador: "Administrador",
@@ -112,6 +113,7 @@ function Layout() {
           <button onClick={manejarCerrarSesion} className="layout-boton-salir">
             Cerrar sesión
           </button>
+          <VersionApp />
         </div>
       </aside>
 

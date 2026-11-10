@@ -5,10 +5,22 @@ import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
 import { mensajeDeError } from "../Servicios/api";
 import { reporteSaldosFamiliares } from "../Servicios/reportesServicio";
 import { Saldo } from "../componentes/Saldo";
+import { FiltrosTabla, PaginacionTabla } from "../componentes/ControlesTabla";
+import { useTabla } from "../utilidades/useTabla";
+
+// Búsqueda por familiar, interno o concepto; filtro por tipo de cobro y fecha (AC-13).
+// Los cobros no tienen estado: el "estado" es si pagan una visita o la cuota mensual.
+const OPCIONES_TABLA = {
+  campos: ["nombreFamiliar", "nombreInterno", "concepto"],
+  estado: (c) => (c.idVisitaMedica ? "Visita" : "Cuota"),
+  fecha: (c) => c.fecha,
+};
+const TIPOS = [{ valor: "Visita", texto: "Pago de visita médica" }, { valor: "Cuota", texto: "Cuota mensual u otro" }];
 
 function Cobros() {
   const [cobros, setCobros] = useState([]);
   const [saldos, setSaldos] = useState([]);
+  const tabla = useTabla(cobros, OPCIONES_TABLA);
   const [internos, setInternos] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [idInterno, setIdInterno] = useState("");
@@ -161,6 +173,7 @@ function Cobros() {
       </table>
 
       <h2 className="titulo-seccion">Cobros registrados</h2>
+      <FiltrosTabla tabla={tabla} placeholder="Familiar, interno o concepto" estados={TIPOS} />
       <table className="tabla">
         <thead>
           <tr>
@@ -172,7 +185,7 @@ function Cobros() {
           </tr>
         </thead>
         <tbody>
-          {cobros.map((c) => (
+          {tabla.filas.map((c) => (
             <tr key={c.idCobro}>
               <td>{new Date(c.fecha).toLocaleDateString()}</td>
               <td>{c.nombreFamiliar}</td>
@@ -181,13 +194,14 @@ function Cobros() {
               <td>Q{c.monto.toFixed(2)}</td>
             </tr>
           ))}
-          {cobros.length === 0 && (
+          {tabla.filas.length === 0 && (
             <tr>
-              <td colSpan="5">No hay cobros registrados todavía.</td>
+              <td colSpan="5">{tabla.total === 0 ? "No hay cobros registrados todavía." : "Ningún cobro coincide con la búsqueda."}</td>
             </tr>
           )}
         </tbody>
       </table>
+      <PaginacionTabla tabla={tabla} nombre="cobros" />
     </div>
   );
 }

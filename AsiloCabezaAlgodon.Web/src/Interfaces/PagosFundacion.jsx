@@ -83,12 +83,12 @@ function PagosFundacion() {
           <h2>Registrar pago</h2>
           <div className="fila-campos">
             <div className="campo">
-              <label>Monto (Q) <span className="obligatorio">*</span></label>
+              <label>Monto (Q)</label>
               <input type="number" step="0.01" min="0.01" max={resumen ? resumen.saldoPendiente : undefined} value={monto} onChange={(e) => setMonto(e.target.value)} required />
               {resumen && <small className="ayuda-campo">Máximo Q{resumen.saldoPendiente.toFixed(2)}, lo que falta pagar.</small>}
             </div>
             <div className="campo">
-              <label>Número de comprobante <span className="obligatorio">*</span></label>
+              <label>Número de comprobante</label>
               <input value={numeroComprobante} onChange={(e) => setNumeroComprobante(e.target.value)} placeholder="Recibo o boleta de la fundación" required />
             </div>
           </div>

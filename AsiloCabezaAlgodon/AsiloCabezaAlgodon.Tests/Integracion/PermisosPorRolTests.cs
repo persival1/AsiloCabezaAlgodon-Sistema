@@ -56,12 +56,15 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
                 Familiar = new Familiar { Nombres = "Otro", Apellidos = "Familiar", Parentesco = "Hija", Telefono = "2", Correo = "otro@prueba.test" }
             };
             ctx.Internos.AddRange(propio, ajeno);
-            ctx.Solicitudes.Add(new Solicitud
+            var solicitud = new Solicitud
             {
-                Motivo = "Control", Estado = "Asignada", Interno = propio,
+                Motivo = "Control", Estado = "Atendida", Interno = propio,
                 MedicoGeneral = usuarios.First(u => u.Rol.Nombre == "MedicoGeneral"),
                 Especialista = usuarios.First(u => u.Rol.Nombre == "Especialista")
-            });
+            };
+            ctx.Solicitudes.Add(solicitud);
+            // Una visita con cargo de Q150, para probar que el estado de pago solo lo ve el Administrador.
+            ctx.VisitasMedicas.Add(new VisitaMedica { Solicitud = solicitud, Diagnostico = "Control", CostoConsulta = 150 });
             await ctx.SaveChangesAsync();
 
             using var alcance = Services.CreateScope();
@@ -74,7 +77,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     }
 
     // Fase 3 del plan de automatización de SQA: la matriz de permisos del script
-    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (204 casos desde AC-10).
+    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (218 casos desde AC-13).
     //   200 = permitido   401 = sin sesión   403 = hay sesión pero el rol no tiene permiso
     // Igual que el script, las escrituras solo se prueban con los roles que NO pueden usarlas,
     // para no crear datos. Necesita SQL Server: en GitHub Actions se excluye (Tipo!=Integracion).
@@ -90,6 +93,8 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("/Internos/2", new[] { "Administrador", "MedicoGeneral" }), // AC-04: no es paciente del especialista
             ("/Solicitudes", new[] { "Administrador", "MedicoGeneral", "Especialista", "Enfermero" }),
             ("/VisitasMedicas", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/VisitasMedicas?idInterno=1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/VisitasMedicas?idInterno=2", new[] { "Administrador", "MedicoGeneral" }), // AC-04: historial de un interno ajeno
             ("/Examenes", new[] { "Administrador", "Laboratorio" }),
             ("/Prescripciones", new[] { "Administrador", "Farmacia" }),
             ("/Donaciones", new[] { "Administrador" }),
@@ -147,9 +152,23 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         }
 
         [Fact]
-        public void La_matriz_tiene_los_mismos_204_casos_que_el_script()
+        public void La_matriz_tiene_los_mismos_218_casos_que_el_script()
         {
-            Assert.Equal(204, Casos().Count());
+            Assert.Equal(218, Casos().Count());
+        }
+
+        [Theory] // AC-04: lo pagado de cada visita solo lo ve el Administrador
+        [InlineData("Administrador", true)]
+        [InlineData("MedicoGeneral", false)]
+        [InlineData("Especialista", false)]
+        public async Task El_estado_de_pago_de_las_visitas_solo_lo_ve_el_administrador(string rol, bool vePago)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/VisitasMedicas?idInterno=1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens[rol]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Contains("\"totalCargos\":150", json);
+            Assert.Equal(vePago, json.Contains("\"estadoPago\":\"PendientePago\""));
+            Assert.Equal(!vePago, json.Contains("\"estadoPago\":null"));
         }
 
         [Theory] // AC-04: la cuota y el saldo del familiar solo los ve el Administrador

@@ -107,6 +107,7 @@ if ($propio) {
     "Interno propio del especialista: $propio"
     $lecturas += @(
         @{ Ruta = "/Internos/$propio"; Permitidos = $medicos },
+        @{ Ruta = "/VisitasMedicas?idInterno=$propio"; Permitidos = $medicos },
         @{ Ruta = "/Reportes/ficha-medica/$propio"; Permitidos = $medicos },
         @{ Ruta = "/Reportes/examenes-por-paciente/$propio"; Permitidos = $medicos },
         @{ Ruta = "/Reportes/medicamentos-por-paciente/$propio"; Permitidos = $medicos })
@@ -115,6 +116,7 @@ if ($ajeno) {
     "Interno ajeno al especialista: $ajeno"
     $lecturas += @(
         @{ Ruta = "/Internos/$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") },
+        @{ Ruta = "/VisitasMedicas?idInterno=$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") },
         @{ Ruta = "/Reportes/ficha-medica/$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") })
 } else { Write-Warning "Todos los internos son del especialista: no se prueba el acceso a un interno ajeno." }
 

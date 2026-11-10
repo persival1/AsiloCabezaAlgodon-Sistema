@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import process from 'node:process'
 
 // AC-15: la versión (package.json) y el commit quedan dentro del frontend compilado, para
 // comprobar que lo publicado es exactamente el código revisado. El script de despliegue

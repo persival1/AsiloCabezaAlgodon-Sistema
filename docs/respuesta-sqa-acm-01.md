@@ -27,7 +27,7 @@ Los estados siguen la sección 10 de la solicitud. Ninguna acción se marca como
 | AC-11 | Correo en Azure | Abierta | El sistema informa con honestidad si el correo no salió | `docs/errores-y-limitaciones.md` (LIM-01) | Configurar la cuenta de Gmail en Azure (lo hace el desarrollador con sus credenciales) |
 | AC-12 | Supuestos y exclusiones sin aprobar | Abierta | Documentos listos para firmar | `docs/supuestos-para-aprobacion.md`, `ac-05`, `ac-06`, `matriz-actores-y-roles.md` | Firma del docente o de SQA |
 | AC-13 | Interfaz | Pendiente de verificación | Los diez puntos de la sección 5, con capturas antes y después en tres resoluciones | `docs/ac-13-interfaz.md`, `e2e/navegacion.spec.js`, `pruebas/evidencia-ac/ac-13/` | Validación de SQA |
-| AC-14 | Documentación | Pendiente de verificación (parcial) | 11 de los 13 documentos actualizados en el repositorio (tabla de abajo) | Ver tabla | Documento 1 (Word de la Fase de Análisis) y documento 8 (instalación en un equipo limpio) |
+| AC-14 | Documentación | Pendiente de verificación (parcial) | 12 de los 13 documentos actualizados en el repositorio (tabla de abajo). Los documentos de las fases (Análisis, Diseño, Desarrollo y Capturas) se rehicieron en Word y PDF como versión 2 | Ver tabla | Documento 1 (Word de la Fase de Análisis) y documento 8 (instalación en un equipo limpio) |
 | AC-15 | Commits y versión | En corrección | Una rama por acción con commits descriptivos. Versión y commit visibles en la aplicación y en `/api/Version`. Publicada en Azure: `/api/Version` responde `1.0.0-rc2` / `675011f…`, y el frontend muestra el mismo commit | `docs/historial-de-versiones.md`, `docs/registro-de-cambios-sqa.md` | Pull requests revisados y etiqueta `v1.0.0-rc2` (los hace el desarrollador desde GitHub Desktop) |
 | AC-16 | Fechas | Pendiente de verificación | La fecha por defecto del frontend era UTC; ahora es la local. En Azure se revisaron todas las fechas guardadas (con una copia previa de los valores): ninguna cae entre el 21 y el 30/10. Todos los registros son de septiembre o de principios de octubre, copiados de la base local, que siempre guardó la hora de Guatemala. El script de corrección, en vista previa, encontró 0 filas, así que no hubo nada que cambiar | `base-de-datos/corregir-fechas-utc-ac-16.sql` | — |
 | AC-17 | Consola en sesión vencida | Pendiente de verificación | Sin errores sin manejar | `e2e/sesion-vencida.spec.js` | — |
@@ -37,14 +37,14 @@ Los estados siguen la sección 10 de la solicitud. Ninguna acción se marca como
 
 | N° | Documento | Dónde | Estado |
 |---|---|---|---|
-| 1 | Análisis de requerimientos | Word «Fase de Análisis» (06/11) | **Pendiente:** agregar los CU-22 a CU-30 y las exclusiones. La aclaración «Nueva Vida» / «Cabeza de Algodón» ya está en el catálogo |
+| 1 | Análisis de requerimientos | Word y PDF «Fase de Análisis», versión 2 (10/11), en la carpeta de entrega | Actualizado: CU-22 a CU-30, la tabla PagosFundacion, 6 requerimientos y 7 reglas nuevas, exclusiones y la aclaración «Nueva Vida» / «Cabeza de Algodón» |
 | 2 | Catálogo de casos de uso | `docs/catalogo-casos-de-uso.md` | Actualizado |
 | 3 | Matriz de trazabilidad | `docs/matriz-de-trazabilidad.md` (sección H nueva) | Actualizado |
 | 4 | Modelo entidad-relación | `AsiloCabezaAlgodon/modelo-er.html` (14 tablas) | Actualizado |
 | 5 | Diagrama de componentes | `AsiloCabezaAlgodon/diagrama-componentes.html` | Actualizado |
 | 6 | Manual técnico | `docs/manual-tecnico.md` | Nuevo |
 | 7 | Manual de usuario por rol | `docs/manual-de-usuario.md` | Nuevo |
-| 8 | Instalación y configuración | `README.md`, `despliegue/LEEME.md` | **Pendiente:** validarla en un equipo limpio |
+| 8 | Instalación y configuración | `README.md`, `despliegue/LEEME.md`, `pruebas/resultado-instalacion.md` | Probada desde una carpeta nueva el 10/11. Faltaban tres requisitos, que ya se agregaron al README. **Pendiente:** la prueba en otro equipo, que hace el desarrollador |
 | 9 | Errores y limitaciones | `docs/errores-y-limitaciones.md` | Nuevo |
 | 10 | Plan de pruebas | `docs/plan-de-pruebas.md` | Nuevo |
 | 11 | Resultados de pruebas | `pruebas/resultado-regresion-ac-18.md` | Nuevo, con el formato de la sección 8 |
@@ -67,5 +67,4 @@ Los estados siguen la sección 10 de la solicitud. Ninguna acción se marca como
 - Configurar Gmail en Azure (AC-11).
 - Conseguir las firmas (AC-12).
 - Pull requests y etiqueta (AC-15).
-- Agregar los casos de uso nuevos al Word de la Fase de Análisis.
 - Probar la instalación en un equipo limpio (AC-14).

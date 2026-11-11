@@ -11,11 +11,20 @@ Este repositorio contiene el sistema completo en dos carpetas:
 | [`AsiloCabezaAlgodon/`](./AsiloCabezaAlgodon) | Backend (API) | .NET 10, Clean Architecture, CQRS con MediatR, Entity Framework Core, SQL Server |
 | [`AsiloCabezaAlgodon.Web/`](./AsiloCabezaAlgodon.Web) | Frontend (interfaz de usuario) | React + Vite |
 
-El **manual de usuario e instalación completo** (arquitectura, modelo E-R, roles, credenciales de prueba, errores conocidos) está en [`AsiloCabezaAlgodon/README.md`](./AsiloCabezaAlgodon/README.md). Los diagramas están en la misma carpeta: `modelo-er.html` y `diagrama-componentes.html`.
+Manuales de la versión 1.0.0-rc2: [`docs/manual-de-usuario.md`](./docs/manual-de-usuario.md) (por rol) y [`docs/manual-tecnico.md`](./docs/manual-tecnico.md) (arquitectura, seguridad, configuración y despliegue). Los diagramas están en `AsiloCabezaAlgodon/`: `modelo-er.html` y `diagrama-componentes.html`. El README del backend ([`AsiloCabezaAlgodon/README.md`](./AsiloCabezaAlgodon/README.md)) conserva las credenciales de prueba locales y el detalle de la API.
 
 ## Puesta en marcha rápida
 
-Requisitos: .NET SDK 10, Node.js 20 o superior y SQL Server (Express).
+Requisitos: .NET SDK 10, Node.js 20.19 o superior (o 22.12 o superior; lo pide Vite 8) y SQL Server Express con la instancia `localhost\SQLEXPRESS`.
+
+**Una sola vez en la computadora** (sin esto, el paso 1 falla en `dotnet ef` y el navegador rechaza la API por el certificado):
+
+```bash
+dotnet tool install --global dotnet-ef
+dotnet dev-certs https --trust
+```
+
+Si `dotnet-ef` no se encuentra después de instalarlo, cerrá y abrí la terminal (la carpeta de herramientas de .NET se agrega al PATH).
 
 ```bash
 git clone https://github.com/persival1/AsiloCabezaAlgodon-Sistema.git
@@ -105,4 +114,4 @@ Administrador (fundación y administración del asilo), Médico General, Especia
 
 ## Nota
 
-La llave del JWT y los demás valores de `appsettings.json` son de **desarrollo**. Antes de un despliegue real deben cambiarse y el controlador `SeedController` debe eliminarse o protegerse.
+La llave del JWT de desarrollo está en `appsettings.Development.json` y solo sirve en local. En un servidor se define con la variable `Jwt__Key` (la aplicación no arranca sin ella) y `SeedController` responde 404 fuera del entorno de desarrollo. La instalación de este README se probó desde una carpeta nueva el 10/11/2026: ver [`pruebas/resultado-instalacion.md`](./pruebas/resultado-instalacion.md).

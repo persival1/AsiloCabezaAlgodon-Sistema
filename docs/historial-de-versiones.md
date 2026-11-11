@@ -25,6 +25,8 @@ Las ramas están encadenadas y se integran a `main` en este orden, cada una con 
 | 7 | `ac-08-operaciones` | `1d77ec0`, `2bed6d6` | AC-08, AC-05, AC-06, AC-16 (fecha local) |
 | 8 | `ac-14-documentacion` | (esta rama) | AC-14, AC-18, AC-02 (pruebas locales del token) |
 
+**Aviso sobre GitHub Actions:** en las ramas `ac-15-version-visible` y `ac-10-permisos-informes` el paso de lint va a fallar con «'process' is not defined» en `vite.config.js`. El error lo introdujo AC-15 y se corrigió en `ac-13-interfaz` (commit `509e457`). No se reescribió la historia para no cambiar el commit `675011f`, que es el publicado en Azure. Desde `ac-13-interfaz` en adelante, el flujo debe salir en verde.
+
 ## Cómo se publica una versión
 
 1. Integrar las ramas en orden y crear la etiqueta en el último commit de `main`.

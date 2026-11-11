@@ -3,7 +3,7 @@
 - **Rama:** `ac-13-interfaz`
 - **Commit del código:** `509e457`
 - **Entorno de las capturas:** local, base `asilo_capturas` (datos ficticios), 10/11/2026.
-- **Capturas:** `pruebas/evidencia-ac/ac-13/`. Los nombres siguen el formato `momento-resolución-pantalla-rol.png`. Las de «antes» son del commit `ec1c413` (AC-10, justo antes de AC-13). Esas capturas dicen «commit a915aa0» porque ese servidor de Vite se había iniciado antes y no se reinició.
+- **Capturas:** `pruebas/evidencia-ac/ac-13/`. Los nombres siguen el formato `momento-resolución-pantalla-rol.png`. Las de «antes» son del commit `ec1c413` (AC-10, justo antes de AC-13). Las de escritorio dicen «commit a915aa0» porque ese servidor de Vite se había iniciado antes y no se reinició. Las de tableta y celular se tomaron después, levantando `ec1c413` en una carpeta aparte, y dicen el commit correcto.
 
 ## Los diez puntos
 
@@ -18,7 +18,7 @@
 | 7 | Estados visuales | Leyenda de estados y la convención del saldo (Por pagar, Al día, A favor) | `docs/guia-de-estilo.md` sección 3; `ac-01-cobros-despues.png` |
 | 8 | Funciones por rol | El menú de cada rol coincide con la matriz de AC-09, y la API lo valida igual: 218 casos | `e2e/navegacion.spec.js`; `docs/matriz-actores-y-roles.md`; `PermisosPorRolTests` |
 | 9 | Navegación | Prueba automática por rol: abre cada opción del menú, revisa que quede marcada, usa el botón «atrás» del navegador y entra a un módulo desde un indicador, sin errores de JavaScript | `e2e/navegacion.spec.js`: 6 de 6 |
-| 10 | Adaptabilidad | Inicio de los seis roles en escritorio (1366 × 768), tableta (768 × 1024) y celular (390 × 844) | `despues-escritorio-*`, `despues-tableta-*`, `despues-celular-*`; `e2e/celular.spec.js` |
+| 10 | Adaptabilidad | Inicio de los seis roles en escritorio (1366 × 768), tableta (768 × 1024) y celular (390 × 844), antes y después | `antes-*` y `despues-*` en las tres resoluciones; `e2e/celular.spec.js` |
 
 ## Indicadores y su requisito
 

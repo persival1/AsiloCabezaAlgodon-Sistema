@@ -39,7 +39,8 @@ namespace AsiloCabezaAlgodon.Application.Reportes
                     visitasDelInterno.SelectMany(v => v.ExamenesSolicitados).Where(e => e.Costo > 0).Sum(e => e.Costo!.Value) +
                     visitasDelInterno.SelectMany(v => v.Prescripciones).Where(p => p.Costo > 0).Sum(p => p.Costo!.Value);
 
-                var totalCobros = cobros.Where(c => c.IdFamiliar == familiar.IdFamiliar).Sum(c => c.Monto);
+                // AC-01: solo cuentan los pagos ligados a una visita (la cuota mensual no paga cargos médicos)
+                var totalCobros = cobros.Where(c => c.IdFamiliar == familiar.IdFamiliar && c.IdVisitaMedica != null).Sum(c => c.Monto);
                 var recalculado = cargos - totalCobros;
                 var diferencia = familiar.SaldoPendiente - recalculado;
 

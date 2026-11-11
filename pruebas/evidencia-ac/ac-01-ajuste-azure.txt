@@ -1,0 +1,10 @@
+--- ANTES de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Diferencia
+---------- ------------- ------------- ----------
+1 -349.50 150.50 -500.00
+Familiares corregidos: 1
+--- DESPUÉS de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Resultado
+---------- ------------- ------------- ---------
+1 150.50 150.50 CUADRA
+

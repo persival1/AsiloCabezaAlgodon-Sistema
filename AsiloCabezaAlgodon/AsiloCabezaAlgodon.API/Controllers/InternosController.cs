@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -18,6 +19,12 @@ namespace AsiloCabezaAlgodon.API.Controllers
             _mediator = mediator;
         }
 
+        private int IdUsuarioActual => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private string RolActual => User.FindFirstValue(ClaimTypes.Role)!;
+
+        // AC-04: el especialista solo puede ver o modificar la ficha de sus pacientes
+        private Task<bool> PuedeVer(int idInterno) => _mediator.Send(new PuedeVerInternoQuery(idInterno, IdUsuarioActual, RolActual));
+
         // CORRECCIÓN (observación SQA #3 - permisos por rol):
         // Antes este endpoint solo tenía el [Authorize] general de la clase, o sea que
         // CUALQUIER usuario con sesión (Enfermero, Laboratorio, Farmacia) podía pedirlo
@@ -29,7 +36,8 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> Listar()
         {
-            var internos = await _mediator.Send(new ListarInternosQuery());
+            // AC-04: el especialista solo ve a los internos de sus citas
+            var internos = await _mediator.Send(new ListarInternosQuery(RolActual == "Especialista" ? IdUsuarioActual : null));
             return Ok(internos);
         }
 
@@ -40,10 +48,12 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> ObtenerPorId(int id)
         {
-            var interno = await _mediator.Send(new ObtenerInternoQuery(id));
+            var interno = await _mediator.Send(new ObtenerInternoQuery(id, IncluirFinanzas: RolActual == "Administrador"));
 
             if (interno == null)
                 return NotFound();
+            if (!await PuedeVer(id))
+                return Forbid();
 
             return Ok(interno);
         }
@@ -60,6 +70,7 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> AgregarPsicopatologia(int id, [FromBody] AgregarPsicopatologiaRequest request)
         {
+            if (!await PuedeVer(id)) return Forbid();
             var idPsicopatologia = await _mediator.Send(new AgregarPsicopatologiaCommand(id, request.Nombre, request.FechaDiagnostico));
             return Ok(new { idPsicopatologia });
         }
@@ -68,6 +79,7 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador,MedicoGeneral,Especialista")]
         public async Task<IActionResult> AgregarMedicamentoCajon(int id, [FromBody] AgregarMedicamentoCajonRequest request)
         {
+            if (!await PuedeVer(id)) return Forbid();
             var idMedicamento = await _mediator.Send(new AgregarMedicamentoCajonCommand(id, request.Nombre, request.Dosis, request.Frecuencia));
             return Ok(new { idMedicamento });
         }

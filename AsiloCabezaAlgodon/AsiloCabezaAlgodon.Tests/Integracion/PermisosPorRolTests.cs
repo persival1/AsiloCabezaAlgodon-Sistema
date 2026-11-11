@@ -41,11 +41,26 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
                 .Select(rol => new Usuario { NombreUsuario = rol.ToLower(), NombreCompleto = $"Usuario {rol}", Rol = new Rol { Nombre = rol } })
                 .ToList();
             ctx.Usuarios.AddRange(usuarios);
-            ctx.Internos.Add(new Interno
+            // Interno 1: tiene una solicitud asignada al especialista (es "su" paciente).
+            // Interno 2: no tiene ninguna; sirve para probar el acceso horizontal (AC-04).
+            var propio = new Interno
             {
                 Nombres = "Interno", Apellidos = "De Prueba", MotivoIngreso = "Prueba",
                 FechaNacimiento = new DateTime(1940, 1, 1), FechaIngreso = new DateTime(2020, 1, 1),
-                Familiar = new Familiar { Nombres = "Familiar", Apellidos = "De Prueba", Parentesco = "Hijo", Telefono = "1", Correo = "familiar@prueba.test" }
+                Familiar = new Familiar { Nombres = "Familiar", Apellidos = "De Prueba", Parentesco = "Hijo", Telefono = "1", Correo = "familiar@prueba.test", CuotaMensual = 500 }
+            };
+            var ajeno = new Interno
+            {
+                Nombres = "Otro", Apellidos = "Interno", MotivoIngreso = "Prueba",
+                FechaNacimiento = new DateTime(1942, 1, 1), FechaIngreso = new DateTime(2021, 1, 1),
+                Familiar = new Familiar { Nombres = "Otro", Apellidos = "Familiar", Parentesco = "Hija", Telefono = "2", Correo = "otro@prueba.test" }
+            };
+            ctx.Internos.AddRange(propio, ajeno);
+            ctx.Solicitudes.Add(new Solicitud
+            {
+                Motivo = "Control", Estado = "Asignada", Interno = propio,
+                MedicoGeneral = usuarios.First(u => u.Rol.Nombre == "MedicoGeneral"),
+                Especialista = usuarios.First(u => u.Rol.Nombre == "Especialista")
             });
             await ctx.SaveChangesAsync();
 
@@ -59,7 +74,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     }
 
     // Fase 3 del plan de automatización de SQA: la matriz de permisos del script
-    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (142 casos).
+    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (204 casos desde AC-10).
     //   200 = permitido   401 = sin sesión   403 = hay sesión pero el rol no tiene permiso
     // Igual que el script, las escrituras solo se prueban con los roles que NO pueden usarlas,
     // para no crear datos. Necesita SQL Server: en GitHub Actions se excluye (Tipo!=Integracion).
@@ -72,6 +87,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         {
             ("/Internos", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
             ("/Internos/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Internos/2", new[] { "Administrador", "MedicoGeneral" }), // AC-04: no es paciente del especialista
             ("/Solicitudes", new[] { "Administrador", "MedicoGeneral", "Especialista", "Enfermero" }),
             ("/VisitasMedicas", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
             ("/Examenes", new[] { "Administrador", "Laboratorio" }),
@@ -79,10 +95,18 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("/Donaciones", new[] { "Administrador" }),
             ("/Gastos", new[] { "Administrador" }),
             ("/Cobros", new[] { "Administrador" }),
+            ("/PagosFundacion", new[] { "Administrador" }),
             ("/Usuarios", new[] { "Administrador" }),
             ("/Reportes/costos-por-cita", new[] { "Administrador" }),
             ("/Reportes/entradas", new[] { "Administrador" }),
-            ("/Reportes/ficha-medica/1", new[] { "Administrador" }),
+            // AC-10: informes clínicos para los médicos; financieros solo para el Administrador
+            ("/Reportes/ficha-medica/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/ficha-medica/2", new[] { "Administrador", "MedicoGeneral" }),
+            ("/Reportes/examenes-por-paciente/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/medicamentos-por-paciente/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/pagos-fundacion", new[] { "Administrador" }),
+            ("/Reportes/conciliacion-saldos", new[] { "Administrador" }),
+            ("/Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31", new[] { "Administrador" }),
         };
 
         private static readonly (string Metodo, string Ruta, string[] Prohibidos)[] Escrituras =
@@ -96,6 +120,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("POST", "/Donaciones", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Gastos", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Cobros", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("POST", "/PagosFundacion", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
         };
 
         public static IEnumerable<object[]> Casos()
@@ -122,9 +147,40 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         }
 
         [Fact]
-        public void La_matriz_tiene_los_mismos_142_casos_que_el_script()
+        public void La_matriz_tiene_los_mismos_204_casos_que_el_script()
         {
-            Assert.Equal(142, Casos().Count());
+            Assert.Equal(204, Casos().Count());
+        }
+
+        [Theory] // AC-04: la cuota y el saldo del familiar solo los ve el Administrador
+        [InlineData("Administrador", true)]
+        [InlineData("MedicoGeneral", false)]
+        [InlineData("Especialista", false)]
+        public async Task La_ficha_solo_muestra_finanzas_al_administrador(string rol, bool veFinanzas)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Internos/1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens[rol]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Equal(veFinanzas, json.Contains("\"cuotaMensual\":500"));
+            Assert.Equal(!veFinanzas, json.Contains("\"cuotaMensual\":null"));
+        }
+
+        [Fact] // AC-04: el especialista solo ve en la lista a sus pacientes
+        public async Task El_especialista_solo_lista_a_sus_pacientes()
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Internos");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens["Especialista"]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Contains("\"idInterno\":1", json);
+            Assert.DoesNotContain("\"idInterno\":2", json);
+        }
+
+        [Fact] // AC-15: la versión se consulta sin sesión y no expone datos
+        public async Task La_version_es_publica()
+        {
+            var respuesta = await _api.CreateClient().GetAsync("/api/Version");
+            Assert.Equal(200, (int)respuesta.StatusCode);
+            Assert.Contains("1.0.0-rc2", await respuesta.Content.ReadAsStringAsync());
         }
 
         [Theory]

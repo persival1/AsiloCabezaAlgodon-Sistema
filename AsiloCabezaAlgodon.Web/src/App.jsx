@@ -13,6 +13,7 @@ import Donaciones from "./Interfaces/Donaciones";
 import Gastos from "./Interfaces/Gastos";
 import Cobros from "./Interfaces/Cobros";
 import Reportes from "./Interfaces/Reportes";
+import PagosFundacion from "./Interfaces/PagosFundacion";
 import Layout from "./componentes/Layout";
 import RutaProtegida from "./componentes/RutaProtegida";
 
@@ -41,6 +42,7 @@ function App() {
         <Route path="donaciones" element={<Donaciones />} />
         <Route path="gastos" element={<Gastos />} />
         <Route path="cobros" element={<Cobros />} />
+        <Route path="pagos-fundacion" element={<PagosFundacion />} />
         <Route path="reportes" element={<Reportes />} />
       </Route>
 

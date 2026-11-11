@@ -31,6 +31,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             public Task<List<Solicitud>> ObtenerTodasAsync() => _real.ObtenerTodasAsync();
             public Task<Solicitud?> ObtenerPorIdAsync(int id) => _real.ObtenerPorIdAsync(id);
             public Task<Solicitud> CrearAsync(Solicitud solicitud) => _real.CrearAsync(solicitud);
+            public Task<List<int>> InternosDeEspecialistaAsync(int idEspecialista) => _real.InternosDeEspecialistaAsync(idEspecialista);
             public Task<bool> ActualizarAsync(Solicitud solicitud) =>
                 throw new InvalidOperationException("Falla simulada al actualizar la solicitud.");
         }

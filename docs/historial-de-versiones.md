@@ -8,7 +8,7 @@ Cada versión con su etiqueta, fecha, commit y despliegue en Azure. Desde la 1.0
 | Semana 3 | — | 30/10/2026 | `b115dce` | Sí, 30/10 (con `TZ=America/Guatemala`) | Especialista asignado, estados de la solicitud, mensaje honesto del correo |
 | Revisión 30/10 | — | 30/10/2026 | `8a7bbb2` | Sí, 30/10 | Reintento al despertar la base, validaciones en solicitud y ficha |
 | 1.0.0-rc1 | `v1.0.0-rc1` (sobre `8b5dc27`) | 05 y 06/11/2026 | `cf6c07e` | Sí, 06/11 (frontend `index-5cSokZa6.js`) | Semanas 4 y 5: transacciones, límite de intentos, e2e, celular |
-| 1.0.0-rc2 | `v1.0.0-rc2` (se crea al integrar) | 10/11/2026 | Último commit de la rama `ac-14-documentacion` después de integrar las ramas por AC (ver abajo) | **Todavía no.** Necesita aprobación (AC-15) | Acciones correctivas de SQA-ACM-01 |
+| 1.0.0-rc2 | `v1.0.0-rc2` (se crea al integrar, sobre `675011f`) | 10/11/2026 | `675011f` (rama `ac-14-documentacion`, que contiene todas las ramas por AC) | Sí, 10/11/2026 a las 21:30 (hora de Guatemala). `/api/Version` = `1.0.0-rc2` / `675011f`; frontend `index-D_gHDQwW.js`. Respaldo previo: `respaldo-azure-20261110-2128.zip` (fuera del repositorio) | Acciones correctivas de SQA-ACM-01 |
 
 ## Contenido de la 1.0.0-rc2 por rama
 

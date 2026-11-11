@@ -2,7 +2,7 @@
 
 - **Fecha:** 10/11/2026
 - **Código:** rama `ac-14-documentacion`, que contiene todas las ramas `ac-*` encadenadas. El último commit de código es `2bed6d6` y en esta rama se suman las pruebas de tokens.
-- **Entorno:** local (Windows 11, SQL Server Express, Edge). En Azure no se ejecutó porque la rc2 todavía no está publicada; queda **Pendiente** hasta que se apruebe publicarla.
+- **Entorno:** local (Windows 11, SQL Server Express, Edge) y, después de publicar, Azure: versión 1.0.0-rc2, commit `675011f`, con la base conectada como `app_asilo`.
 - **Datos:** todos ficticios. Las pruebas que crean datos usan nombres con un sello de tiempo («Prueba E2E 123456», «lab.e2e123456»).
 - **Formato:** el de la sección 8 de SQA-ACM-01. El plan está en `docs/plan-de-pruebas.md`.
 
@@ -16,6 +16,8 @@
 | `npm run build` | Correcto |
 | Playwright (5 archivos, Edge) | **12 de 12** |
 | `pruebas/probar-permisos.ps1` contra la API local (base de desarrollo) | **277 de 277** (`pruebas/resultados-permisos.md`) |
+| `pruebas/probar-permisos.ps1` contra **Azure** | **256 de 256** (`pruebas/resultados-permisos-azure.md`). Son menos casos porque Azure tiene un solo interno, así que no hay uno «ajeno» al especialista; ese caso lo cubre la base de pruebas |
+| Tokens falsificados contra **Azure** | **7 de 7** rechazados con 401 (`pruebas/evidencia-ac/ac-02-tokens-falsos-azure.md`) |
 | Auditorías: NuGet vulnerable / `npm audit --omit=dev` | 0 / 0 |
 
 **Hallazgos durante la regresión, ya corregidos:**
@@ -34,10 +36,10 @@ La primera ejecución de E2 también chocó con el límite de 10 inicios de sesi
 | PR-SES-03 | — | 11 inicios de sesión en menos de un minuto | Repetir el login | El 11.º recibe «Demasiados intentos» (429) | Igual (se vio en E2) | Aprobado | Esta regresión |
 | PR-SES-04 | Sesión con token vencido | Token vencido | 1. Abrir una pantalla | Vuelve al login con aviso y sin errores en la consola | Igual | Aprobado | `sesion-vencida.spec.js` |
 | PR-SES-05 | — | Token firmado con otra llave, alterado (Farmacia → Administrador), vencido, de otro emisor y sin firma | `GET /api/Usuarios` con cada uno | 401 en los cinco; el token bien firmado da 200 | Igual | Aprobado | `PermisosPorRolTests.Token_*` |
-| PR-SES-06 | rc2 publicada en Azure | Token falsificado | Igual que PR-SES-05, contra Azure | 401 | — | **Pendiente:** necesita aprobación para tocar Azure (AC-02) | — |
+| PR-SES-06 | rc2 publicada en Azure | Tokens de Administrador firmados con las 2 llaves del historial de Git, con una inventada, sin firma, vencido, basura y sin token | GET /api/Usuarios con cada uno | 401 | 401 en los 7 | Aprobado | `ac-02-tokens-falsos-azure.md` |
 | PR-ROL-01 | Base de pruebas con un usuario por rol | 282 combinaciones de rol y endpoint | `dotnet test` | 200 / 401 / 403 según la matriz | 282 de 282 | Aprobado | `PermisosPorRolTests` |
 | PR-ROL-02 | API local, base de desarrollo | 277 combinaciones | `pwsh pruebas/probar-permisos.ps1` | 0 fallas | 277 de 277 | Aprobado | `pruebas/resultados-permisos.md` |
-| PR-ROL-03 | rc2 en Azure | Igual | `-Api https://…/api` | 0 fallas | — | **Pendiente:** publicación | — |
+| PR-ROL-03 | rc2 en Azure con `app_asilo` | Contraseñas de Azure (archivo fuera del repositorio) | `-Api https://…/api -ArchivoClaves …` | 0 fallas | 256 de 256 | Aprobado | `resultados-permisos-azure.md` |
 | PR-RES-01 | Sesión de Administrador | Interno «Prueba Operaciones …» | Registrar → editar el teléfono y la cuota | Se guarda; la cuota cambia | Igual | Aprobado | `operaciones.spec.js`, `ac-08/ficha-editada.png` |
 | PR-RES-02 | Existe el interno 2 | Mismos nombre y fecha que el 2 | `PUT /api/Internos/1` | 409 «Ya existe otro interno» | Igual | Aprobado | `Editar_un_interno_para_que_quede_igual_a_otro_da_409` |
 | PR-RES-03 | Médico general edita un interno | Cuota 800 | `EditarInternoCommand` sin permiso de cuota | La cuota no cambia | Igual | Aprobado | `OperacionesAc08Tests` |
@@ -73,4 +75,4 @@ La primera ejecución de E2 también chocó con el límite de 10 inicios de sesi
 | PR-VAL-01 | Formulario de interno | Vacío y con un correo mal escrito | Guardar | 11 mensajes junto a los campos; nada se guarda; desaparecen al corregir | Igual | Aprobado | `validacionCampos.test.js`, `ac-13/despues-formulario-invalido.png` |
 | PR-UI-01 | Seis roles | — | Menú, cada opción, botón atrás, indicador | El menú coincide con la matriz; todo abre; sin errores de JavaScript | 6 de 6 | Aprobado | `navegacion.spec.js` |
 | PR-UI-02 | — | 1366 × 768, 768 × 1024, 390 × 844 | Abrir el inicio de cada rol | Sin desbordes; menú arriba en el celular | Igual | Aprobado | `celular.spec.js`, `ac-13/despues-*` |
-| PR-REG-01 | Versión final en Azure | — | Repetir PR-SES-06, PR-ROL-03 y una prueba de humo | Sin fallas | — | **Pendiente:** publicación de la rc2 (AC-15) | — |
+| PR-REG-01 | Versión final en Azure | — | 1. `/api/Version`. 2. Commit del frontend. 3. PR-SES-06. 4. PR-ROL-03 | rc2 / `675011f` en la API y en el frontend; sin fallas | Igual | Aprobado | Esta regresión; `docs/historial-de-versiones.md` |

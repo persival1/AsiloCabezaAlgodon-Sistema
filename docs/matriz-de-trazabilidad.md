@@ -4,7 +4,7 @@ Respuesta a la solicitud de SQA de mantener una matriz de trazabilidad. Une cada
 
 **Cómo leerla:** de izquierda a derecha, «qué se pidió → dónde está en la interfaz → qué endpoint lo ejecuta → con qué prueba se comprobó».
 
-**Pruebas:** `PF-xx` son casos funcionales, `R1`–`R7` son los informes (ver el documento de la Fase de Desarrollo). Las pruebas de permisos están en `pruebas/probar-permisos.ps1` (142 combinaciones de rol y endpoint, todas correctas).
+**Pruebas:** `PF-xx` son casos funcionales, `R1`–`R7` son los informes (ver el documento de la Fase de Desarrollo). Las pruebas de permisos están en `PermisosPorRolTests` y `pruebas/probar-permisos.ps1` (282 combinaciones de rol y endpoint desde la versión 1.0.0-rc2; eran 142 en la rc1). Los casos de uso (CU) y su estado están en [`catalogo-casos-de-uso.md`](./catalogo-casos-de-uso.md); la sección H une cada acción correctiva (AC) con lo demás.
 
 **Estados:** **Cumplido** = construido y probado. **Con observación** = funciona, pero hay un punto abierto. **Parcial** = una parte del requisito no está construida o no se ha probado.
 
@@ -86,3 +86,21 @@ Respuesta a la solicitud de SQA de mantener una matriz de trazabilidad. Une cada
 | D-01 | Un examen sin costo se mostraba como «(Q)» | Corregido |
 | O-01 | Diferencia de Q25.50 en el saldo de un familiar | Corregido (conciliación de saldos) |
 | O-02 | El correo no se ha probado con envío real | Abierta |
+
+## H. Acciones correctivas de SQA-ACM-01 (versión 1.0.0-rc2)
+
+| AC | Requisito / hallazgo | CU | Pantalla | Endpoint | Prueba | Estado |
+|---|---|---|---|---|---|---|
+| AC-01 | Saldo del familiar (req. 14 y 15) | CU-17, CU-18 | Cobros, Ficha | `POST /Cobros`, `GET /Reportes/conciliacion-saldos` | `SaldoFamiliarTests`, `CajaCommandHandlerTests`, e2e E2 | Pendiente de verificación |
+| AC-02 | Firma del JWT | CU-01 | — | Todos | `Token_*` (6 pruebas) | Local probado; falta en Azure |
+| AC-04 | Acceso horizontal y datos financieros | CU-04, CU-05, CU-08 | Internos, Ficha, Visitas | `GET /Internos`, `GET /Internos/{id}`, `GET /VisitasMedicas?idInterno=` | `PermisosPorRolTests` | Pendiente de verificación |
+| AC-05 | Contraseñas | CU-30 | Cambiar contraseña, Usuarios | `PUT /Auth/cambiar-clave`, `PUT /Usuarios/{id}/clave` | `OperacionesAc08Tests`, e2e | Implementado; recuperación por correo: exclusión propuesta |
+| AC-06 | Portal de familiares | — | — | — | — | Exclusión propuesta |
+| AC-07 | Pagos a la fundación (req. 13, supuesto 7) | CU-22, CU-21 | Pagos a la fundación, Reportes | `POST /PagosFundacion`, `GET /Reportes/pagos-fundacion` | `PagosFundacionTests` | Pendiente de verificación |
+| AC-08 | Operaciones del cuadro 3.5 | CU-23 a CU-29 | Ficha, Solicitudes, Usuarios | ver `ac-08-operaciones.md` | `OperacionesAc08Tests`, e2e | Pendiente de verificación |
+| AC-09 | Actores y roles | — | Menú | — | `navegacion.spec.js` | Pendiente de aprobación |
+| AC-10 | Permisos de los informes | CU-21 | Reportes | `GET /Reportes/*` | `PermisosPorRolTests` | Pendiente de verificación |
+| AC-13 | Interfaz | Todos | Todas | — | `navegacion.spec.js`, Vitest, capturas | Pendiente de verificación |
+| AC-15 | Versión identificable | — | Pie del menú y del login | `GET /Version` | `La_version_es_publica` | Falta publicar en Azure |
+| AC-16 | Fechas | — | Ficha, Reportes | — | Script con vista previa | Frontend corregido; datos de Azure pendientes |
+| AC-17 | Consola en sesión vencida | CU-02 | — | — | `sesion-vencida.spec.js` | Pendiente de verificación |

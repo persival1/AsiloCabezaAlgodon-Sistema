@@ -52,6 +52,11 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 
 ## Pruebas y revisión de calidad
 
+- [`docs/respuesta-sqa-acm-01.md`](./docs/respuesta-sqa-acm-01.md): **estado de cada acción correctiva de SQA-ACM-01** y dónde está su evidencia.
+- [`docs/manual-de-usuario.md`](./docs/manual-de-usuario.md) y [`docs/manual-tecnico.md`](./docs/manual-tecnico.md): manuales de la versión 1.0.0-rc2.
+- [`docs/catalogo-casos-de-uso.md`](./docs/catalogo-casos-de-uso.md): casos de uso con su estado (implementado o excluido) y la aclaración «Nueva Vida» / «Cabeza de Algodón».
+- [`docs/plan-de-pruebas.md`](./docs/plan-de-pruebas.md) y [`pruebas/resultado-regresion-ac-18.md`](./pruebas/resultado-regresion-ac-18.md): plan único y regresión completa.
+- [`docs/errores-y-limitaciones.md`](./docs/errores-y-limitaciones.md) y [`docs/historial-de-versiones.md`](./docs/historial-de-versiones.md).
 - [`docs/registro-de-cambios-sqa.md`](./docs/registro-de-cambios-sqa.md): respuesta punto por punto a la revisión preliminar de SQA (qué se cambió, evidencia y qué sigue pendiente).
 - [`docs/matriz-de-trazabilidad.md`](./docs/matriz-de-trazabilidad.md): cada requerimiento unido a su pantalla, endpoint, prueba y estado.
 - [`docs/supuestos-para-aprobacion.md`](./docs/supuestos-para-aprobacion.md): los 7 supuestos del análisis, en una tabla para aprobar o rechazar.

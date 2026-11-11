@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Domain.Entidad;
@@ -6,7 +8,9 @@ using AsiloCabezaAlgodon.Infrastructure.Persistencia;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AsiloCabezaAlgodon.Tests.Integracion
 {
@@ -223,6 +227,78 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
 
             Assert.Equal(409, (int)respuesta.StatusCode);
             Assert.Contains("Ya existe otro interno", await respuesta.Content.ReadAsStringAsync());
+        }
+
+        // AC-02 (parte local): la API rechaza con 401 los tokens falsificados, alterados o vencidos.
+        // Se pide /api/Usuarios, que solo puede ver el Administrador.
+        private string TokenDeAdministrador(string? llave = null, string? emisor = null, DateTime? vence = null, string algoritmo = SecurityAlgorithms.HmacSha256)
+        {
+            var config = _api.Services.GetRequiredService<IConfiguration>();
+            var credenciales = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(llave ?? config["Jwt:Key"]!)), algoritmo);
+            var fin = vence ?? DateTime.UtcNow.AddHours(1);
+            var token = new JwtSecurityToken(
+                issuer: emisor ?? config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "1"),
+                    new Claim(ClaimTypes.Name, "administrador"),
+                    new Claim(ClaimTypes.Role, "Administrador"),
+                },
+                notBefore: fin.AddHours(-2),
+                expires: fin,
+                signingCredentials: credenciales);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<int> PedirUsuariosCon(string token)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Usuarios");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return (int)(await _api.CreateClient().SendAsync(peticion)).StatusCode;
+        }
+
+        [Fact] // Control: un token bien firmado sí funciona (si no, las pruebas de abajo no probarían nada)
+        public async Task Token_bien_firmado_es_aceptado()
+        {
+            Assert.Equal(200, await PedirUsuariosCon(TokenDeAdministrador()));
+        }
+
+        [Fact] // AC-02: firmado con otra llave (por ejemplo, una publicada en internet)
+        public async Task Token_firmado_con_otra_llave_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(llave: "una-llave-distinta-de-al-menos-32-caracteres-123")));
+        }
+
+        [Fact] // AC-02: token de Farmacia al que se le cambió el rol a Administrador sin volver a firmarlo
+        public async Task Token_alterado_es_rechazado()
+        {
+            var partes = _api.Tokens["Farmacia"].Split('.');
+            var json = Encoding.UTF8.GetString(Base64UrlEncoder.DecodeBytes(partes[1])).Replace("\"Farmacia\"", "\"Administrador\"");
+            var alterado = $"{partes[0]}.{Base64UrlEncoder.Encode(json)}.{partes[2]}";
+
+            Assert.Equal(401, await PedirUsuariosCon(alterado));
+        }
+
+        [Fact] // AC-02: token vencido, aunque esté bien firmado
+        public async Task Token_vencido_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(vence: DateTime.UtcNow.AddMinutes(-10))));
+        }
+
+        [Fact] // AC-02: token de otro emisor
+        public async Task Token_de_otro_emisor_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(emisor: "https://otro-sistema.example")));
+        }
+
+        [Fact] // AC-02: token sin firma (alg "none")
+        public async Task Token_sin_firma_es_rechazado()
+        {
+            var partes = TokenDeAdministrador().Split('.');
+            var cabecera = Base64UrlEncoder.Encode("{\"alg\":\"none\",\"typ\":\"JWT\"}");
+            Assert.Equal(401, await PedirUsuariosCon($"{cabecera}.{partes[1]}."));
         }
 
         [Fact] // AC-15: la versión se consulta sin sesión y no expone datos

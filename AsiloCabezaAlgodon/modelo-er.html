@@ -90,14 +90,14 @@
   <header>
     <p class="kicker">Manual de usuario — Anexo técnico</p>
     <h1>Modelo Entidad-Relación</h1>
-    <p>Sistema de Administración — Asilo de Ancianos Cabeza de Algodón. 13 entidades agrupadas en cuatro dominios: Seguridad, Ficha médica, Flujo médico/Fundación y Caja. Generado directamente del <code>DbContext</code> (Entity Framework Core / SQL Server) del proyecto.</p>
+    <p>Sistema de Administración — Asilo de Ancianos Cabeza de Algodón. 14 entidades agrupadas en cuatro dominios: Seguridad, Ficha médica, Flujo médico/Fundación y Caja. Generado directamente del <code>DbContext</code> (Entity Framework Core / SQL Server) del proyecto.</p>
   </header>
 
   <div class="legend" id="legend"></div>
 
   <figure>
     <div class="scroller">
-      <svg id="erd" role="img" aria-label="Diagrama entidad-relación con 13 tablas agrupadas en Seguridad, Ficha médica, Flujo médico y Caja, mostrando llaves primarias, llaves foráneas y cardinalidad de cada relación."></svg>
+      <svg id="erd" role="img" aria-label="Diagrama entidad-relación con 14 tablas agrupadas en Seguridad, Ficha médica, Flujo médico y Caja, mostrando llaves primarias, llaves foráneas y cardinalidad de cada relación."></svg>
     </div>
     <figcaption>Cada caja es una tabla: <strong>PK</strong> marca la llave primaria, <strong>FK</strong> una llave foránea. Las líneas muestran la cardinalidad de cada relación (ej. "N : 1" — muchos Cobros pertenecen a un Familiar). Solicitud referencia tres veces a Usuario porque un médico general, un especialista y un enfermero son todos usuarios del sistema con roles distintos.</figcaption>
   </figure>
@@ -105,11 +105,12 @@
   <div class="notas">
     <h2>Notas del modelo</h2>
     <ul>
-      <li><strong>Familiar ↔ Interno es 1:1</strong> — cada interno tiene un único familiar responsable registrado (nombre, cuota mensual y saldo pendiente).</li>
+      <li><strong>Familiar ↔ Interno es 1:1</strong> — cada interno tiene un único familiar responsable registrado (nombre, cuota mensual y saldo de cargos médicos).</li>
       <li><strong>Solicitud → Usuario ocurre tres veces</strong> con el mismo rol de tabla (IdMedicoGeneral, IdEspecialista, IdEnfermero) porque los tres son cuentas de Usuario con roles distintos, no tablas separadas.</li>
       <li><strong>VisitaMedica es 1:1 con Solicitud</strong> — una solicitud asignada se convierte en, como máximo, una visita médica cuando el especialista atiende al paciente.</li>
       <li><strong>Los costos con descuento ya aplicado</strong> (CostoConsulta, Costo en ExamenSolicitado y en Prescripcion) se cargan automáticamente al SaldoPendiente del Familiar correspondiente al capturarse.</li>
-      <li><strong>Donacion y Gasto no tienen llave foránea</strong> — son movimientos institucionales de la fundación, no ligados a un interno específico.</li>
+      <li><strong>Donacion, Gasto y PagoFundacion no tienen llave foránea</strong> — son movimientos institucionales, no ligados a un interno específico. PagoFundacion (AC-07) registra lo que el asilo le paga a la fundación por los cargos médicos.</li>
+      <li><strong>Cobro → VisitaMedica es opcional</strong> — si el cobro paga una visita, baja el saldo de cargos médicos del familiar; la cuota mensual no lleva visita y no cambia ese saldo (AC-01).</li>
     </ul>
   </div>
 </div>
@@ -174,7 +175,10 @@
       {n:"IdGasto", pk:true}, {n:"Concepto"}, {n:"Monto"}, {n:"Fecha"}
     ]},
     Cobro: { cluster:"caja", x:560, y:860, w:210, fields:[
-      {n:"IdCobro", pk:true}, {n:"Concepto"}, {n:"Monto"}, {n:"Fecha"}, {n:"IdFamiliar", fk:true}
+      {n:"IdCobro", pk:true}, {n:"Concepto"}, {n:"Monto"}, {n:"Fecha"}, {n:"IdFamiliar", fk:true}, {n:"IdVisitaMedica (opcional)", fk:true}
+    ]},
+    PagoFundacion: { cluster:"caja", x:830, y:860, w:230, fields:[
+      {n:"IdPagoFundacion", pk:true}, {n:"Fecha"}, {n:"Monto"}, {n:"NumeroComprobante"}, {n:"Descripcion"}
     ]}
   };
 
@@ -188,7 +192,8 @@
     { from:"VisitaMedica", to:"Solicitud", label:"1 : 1", fromSide:"left", toSide:"right" },
     { from:"ExamenSolicitado", to:"VisitaMedica", label:"N : 1", fromSide:"left", toSide:"right" },
     { from:"Prescripcion", to:"VisitaMedica", label:"N : 1", fromSide:"top", toSide:"bottom" },
-    { from:"Cobro", to:"Familiar", label:"N : 1", fromSide:"top", toSide:"bottom" }
+    { from:"Cobro", to:"Familiar", label:"N : 1", fromSide:"top", toSide:"bottom" },
+    { from:"Cobro", to:"VisitaMedica", label:"N : 0..1  (pago de una visita)", fromSide:"right", toSide:"bottom" }
   ];
 
   var HEADER_H = 30, ROW_H = 18, PAD = 12, FONT = 11.5;

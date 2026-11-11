@@ -96,7 +96,14 @@ test.describe.serial("Atención médica y pago de la cita", () => {
   });
 
   test("E2. Pago parcial y total de la cita, estado de pago y conciliación", async ({ page }) => {
-    const tarjetaVisita = page.locator(".tarjeta-formulario", { hasText: diagnostico });
+    // AC-13: las visitas son una tabla; lo pagado está en el detalle de la fila
+    async function revisarVisita(estado, pagado) {
+      await page.goto("/dashboard/visitas");
+      const fila = page.locator("tr", { hasText: diagnostico });
+      await expect(fila).toContainText(estado);
+      await fila.getByRole("button", { name: "Ver detalle" }).click();
+      await expect(page.locator(".fila-detalle")).toContainText(`Pagado: Q${pagado} de Q192.50`);
+    }
 
     async function cobrarCargoMedico(monto) {
       await page.goto("/dashboard/cobros");
@@ -112,25 +119,19 @@ test.describe.serial("Atención médica y pago de la cita", () => {
     await entrarComo(page, "admin", "admin123");
 
     // FIN-02: antes de pagar, la visita está pendiente de pago por Q192.50
-    await page.goto("/dashboard/visitas");
-    await expect(tarjetaVisita).toContainText("Pendiente de pago");
-    await expect(tarjetaVisita).toContainText("(Q0.00 de Q192.50)");
+    await revisarVisita("Pendiente de pago", "0.00");
 
     // Pago parcial: sigue pendiente
     await cobrarCargoMedico("100");
-    await page.goto("/dashboard/visitas");
-    await expect(tarjetaVisita).toContainText("Pendiente de pago");
-    await expect(tarjetaVisita).toContainText("(Q100.00 de Q192.50)");
+    await revisarVisita("Pendiente de pago", "100.00");
 
     // Pago del resto: queda pagada
     await cobrarCargoMedico("92.50");
-    await page.goto("/dashboard/visitas");
-    await expect(tarjetaVisita).toContainText("Pagada");
-    await expect(tarjetaVisita).toContainText("(Q192.50 de Q192.50)");
+    await revisarVisita("Pagada", "192.50");
 
-    // FIN-03: el saldo del familiar queda en Q0.00 en la lista de cobros
+    // FIN-03: el saldo del familiar queda «Al día» (Q0.00) en la tabla de saldos de Cobros (AC-01)
     await page.goto("/dashboard/cobros");
-    await expect(page.locator("tr", { hasText: nombreInterno }).first()).toContainText("Q0.00");
+    await expect(page.locator("tr", { hasText: nombreInterno }).first()).toContainText("Al día");
 
     // REP-08: la conciliación cuadra para este familiar (no tiene pantalla: se consulta la API
     // con la sesión del administrador)

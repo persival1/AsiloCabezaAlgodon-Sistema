@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using AsiloCabezaAlgodon.Application.VisitasMedicas.Comandos;
 using AsiloCabezaAlgodon.Application.VisitasMedicas.Consultas;
+using AsiloCabezaAlgodon.Application.Internos.Consultas;
 
 namespace AsiloCabezaAlgodon.API.Controllers
 {
@@ -23,8 +24,15 @@ namespace AsiloCabezaAlgodon.API.Controllers
         [Authorize(Roles = "Administrador,Especialista,MedicoGeneral")]
         public async Task<IActionResult> Listar(int? idInterno)
         {
+            var rol = User.FindFirstValue(ClaimTypes.Role)!;
+            var idUsuario = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
             // Si se pide el historial de un interno puntual (para ver su ficha médica),
             // se muestra completo sin importar qué especialista atendió cada visita.
+            // AC-04: pero el especialista solo puede pedirlo de sus pacientes.
+            if (idInterno.HasValue && !await _mediator.Send(new PuedeVerInternoQuery(idInterno.Value, idUsuario, rol)))
+                return Forbid();
+
             var query = idInterno.HasValue
                 ? new ListarVisitasQuery(IdInterno: idInterno)
                 : User.FindFirstValue(ClaimTypes.Role) == "Especialista"
@@ -32,6 +40,8 @@ namespace AsiloCabezaAlgodon.API.Controllers
                     : new ListarVisitasQuery();
 
             var visitas = await _mediator.Send(query);
+            if (rol != "Administrador")
+                visitas = visitas.Select(v => v with { TotalCobrado = null, EstadoPago = null }).ToList();
             return Ok(visitas);
         }
 

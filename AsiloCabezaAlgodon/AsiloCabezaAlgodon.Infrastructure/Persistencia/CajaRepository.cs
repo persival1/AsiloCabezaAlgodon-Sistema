@@ -49,9 +49,15 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
         {
             _context.Cobros.Add(cobro);
 
-            var familiar = await _context.Familiares.FindAsync(cobro.IdFamiliar);
-            if (familiar != null)
-                familiar.SaldoPendiente -= cobro.Monto;
+            // AC-01, regla del saldo: el saldo del familiar es lo que debe por cargos médicos.
+            // Solo un pago ligado a una visita lo baja. La cuota mensual es un ingreso del
+            // asilo por la estadía y no paga cargos médicos, así que no lo cambia.
+            if (cobro.IdVisitaMedica != null)
+            {
+                var familiar = await _context.Familiares.FindAsync(cobro.IdFamiliar);
+                if (familiar != null)
+                    familiar.SaldoPendiente -= cobro.Monto;
+            }
 
             await _context.SaveChangesAsync();
             return cobro;
@@ -60,6 +66,41 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
         public async Task<bool> ExisteFamiliarAsync(int idFamiliar)
         {
             return await _context.Familiares.AnyAsync(f => f.IdFamiliar == idFamiliar);
+        }
+
+        public async Task<decimal?> PendienteDeVisitaAsync(int idVisitaMedica)
+        {
+            var visita = await _context.VisitasMedicas
+                .Include(v => v.ExamenesSolicitados)
+                .Include(v => v.Prescripciones)
+                .FirstOrDefaultAsync(v => v.IdVisitaMedica == idVisitaMedica);
+            if (visita == null) return null;
+
+            var cargos = (visita.CostoConsulta > 0 ? visita.CostoConsulta : 0)
+                + visita.ExamenesSolicitados.Where(e => e.Costo > 0).Sum(e => e.Costo!.Value)
+                + visita.Prescripciones.Where(p => p.Costo > 0).Sum(p => p.Costo!.Value);
+            var pagado = await _context.Cobros.Where(c => c.IdVisitaMedica == idVisitaMedica).SumAsync(c => (decimal?)c.Monto) ?? 0;
+            return cargos - pagado;
+        }
+
+        public async Task<List<PagoFundacion>> ObtenerPagosFundacionAsync()
+        {
+            return await _context.PagosFundacion.OrderByDescending(p => p.Fecha).ToListAsync();
+        }
+
+        public async Task<PagoFundacion> CrearPagoFundacionAsync(PagoFundacion pago)
+        {
+            _context.PagosFundacion.Add(pago);
+            await _context.SaveChangesAsync();
+            return pago;
+        }
+
+        public async Task<decimal> TotalCargosMedicosAsync()
+        {
+            var consultas = await _context.VisitasMedicas.Where(v => v.CostoConsulta > 0).SumAsync(v => (decimal?)v.CostoConsulta) ?? 0;
+            var examenes = await _context.ExamenesSolicitados.Where(e => e.Costo > 0).SumAsync(e => e.Costo) ?? 0;
+            var medicamentos = await _context.Prescripciones.Where(p => p.Costo > 0).SumAsync(p => p.Costo) ?? 0;
+            return consultas + examenes + medicamentos;
         }
 
         public async Task<bool> VisitaEsDelFamiliarAsync(int idVisitaMedica, int idFamiliar)

@@ -41,6 +41,15 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
             return solicitud;
         }
 
+        public async Task<List<int>> InternosDeEspecialistaAsync(int idEspecialista)
+        {
+            return await _context.Solicitudes
+                .Where(s => s.IdEspecialista == idEspecialista)
+                .Select(s => s.IdInterno)
+                .Distinct()
+                .ToListAsync();
+        }
+
         public async Task<bool> ActualizarAsync(Solicitud solicitud)
         {
             _context.Solicitudes.Update(solicitud);

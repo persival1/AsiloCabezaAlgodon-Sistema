@@ -15,5 +15,6 @@ namespace AsiloCabezaAlgodon.Application.Internos.Consultas
         string? CorreoFamiliar
     );
 
-    public record ListarInternosQuery() : IRequest<List<InternoDto>>;
+    // AC-04: con IdEspecialista, solo los internos de las solicitudes asignadas a ese especialista
+    public record ListarInternosQuery(int? IdEspecialista = null) : IRequest<List<InternoDto>>;
 }

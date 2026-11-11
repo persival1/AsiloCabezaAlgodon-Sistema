@@ -11,11 +11,20 @@ Este repositorio contiene el sistema completo en dos carpetas:
 | [`AsiloCabezaAlgodon/`](./AsiloCabezaAlgodon) | Backend (API) | .NET 10, Clean Architecture, CQRS con MediatR, Entity Framework Core, SQL Server |
 | [`AsiloCabezaAlgodon.Web/`](./AsiloCabezaAlgodon.Web) | Frontend (interfaz de usuario) | React + Vite |
 
-El **manual de usuario e instalación completo** (arquitectura, modelo E-R, roles, credenciales de prueba, errores conocidos) está en [`AsiloCabezaAlgodon/README.md`](./AsiloCabezaAlgodon/README.md). Los diagramas están en la misma carpeta: `modelo-er.html` y `diagrama-componentes.html`.
+Manuales de la versión 1.0.0-rc2: [`docs/manual-de-usuario.md`](./docs/manual-de-usuario.md) (por rol) y [`docs/manual-tecnico.md`](./docs/manual-tecnico.md) (arquitectura, seguridad, configuración y despliegue). Los diagramas están en `AsiloCabezaAlgodon/`: `modelo-er.html` y `diagrama-componentes.html`. El README del backend ([`AsiloCabezaAlgodon/README.md`](./AsiloCabezaAlgodon/README.md)) conserva las credenciales de prueba locales y el detalle de la API.
 
 ## Puesta en marcha rápida
 
-Requisitos: .NET SDK 10, Node.js 20 o superior y SQL Server (Express).
+Requisitos: .NET SDK 10, Node.js 20.19 o superior (o 22.12 o superior; lo pide Vite 8) y SQL Server Express con la instancia `localhost\SQLEXPRESS`.
+
+**Una sola vez en la computadora** (sin esto, el paso 1 falla en `dotnet ef` y el navegador rechaza la API por el certificado):
+
+```bash
+dotnet tool install --global dotnet-ef
+dotnet dev-certs https --trust
+```
+
+Si `dotnet-ef` no se encuentra después de instalarlo, cerrá y abrí la terminal (la carpeta de herramientas de .NET se agrega al PATH).
 
 ```bash
 git clone https://github.com/persival1/AsiloCabezaAlgodon-Sistema.git
@@ -52,9 +61,22 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 
 ## Pruebas y revisión de calidad
 
+- [`docs/respuesta-sqa-acm-01.md`](./docs/respuesta-sqa-acm-01.md): **estado de cada acción correctiva de SQA-ACM-01** y dónde está su evidencia.
+- [`docs/manual-de-usuario.md`](./docs/manual-de-usuario.md) y [`docs/manual-tecnico.md`](./docs/manual-tecnico.md): manuales de la versión 1.0.0-rc2.
+- [`docs/catalogo-casos-de-uso.md`](./docs/catalogo-casos-de-uso.md): casos de uso con su estado (implementado o excluido) y la aclaración «Nueva Vida» / «Cabeza de Algodón».
+- [`docs/plan-de-pruebas.md`](./docs/plan-de-pruebas.md) y [`pruebas/resultado-regresion-ac-18.md`](./pruebas/resultado-regresion-ac-18.md): plan único y regresión completa.
+- [`docs/errores-y-limitaciones.md`](./docs/errores-y-limitaciones.md) y [`docs/historial-de-versiones.md`](./docs/historial-de-versiones.md).
 - [`docs/registro-de-cambios-sqa.md`](./docs/registro-de-cambios-sqa.md): respuesta punto por punto a la revisión preliminar de SQA (qué se cambió, evidencia y qué sigue pendiente).
 - [`docs/matriz-de-trazabilidad.md`](./docs/matriz-de-trazabilidad.md): cada requerimiento unido a su pantalla, endpoint, prueba y estado.
 - [`docs/supuestos-para-aprobacion.md`](./docs/supuestos-para-aprobacion.md): los 7 supuestos del análisis, en una tabla para aprobar o rechazar.
+- [`docs/matriz-actores-y-roles.md`](./docs/matriz-actores-y-roles.md): actores del análisis, roles del sistema y qué puede hacer cada rol (AC-09 y AC-10).
+- [`docs/regla-del-saldo.md`](./docs/regla-del-saldo.md): cómo se calcula el saldo del familiar (AC-01).
+- [`docs/pagos-a-la-fundacion.md`](./docs/pagos-a-la-fundacion.md): registro de los pagos del asilo a la fundación (AC-07).
+- [`docs/ac-13-interfaz.md`](./docs/ac-13-interfaz.md): mejoras de la interfaz por rol, con capturas antes y después y pruebas de navegación (AC-13).
+- [`docs/guia-de-estilo.md`](./docs/guia-de-estilo.md): tipografía, colores, leyenda de estados y componentes de la interfaz.
+- [`docs/ac-08-operaciones.md`](./docs/ac-08-operaciones.md): editar, dar de baja, corregir la ficha, cancelar o reprogramar citas y administrar usuarios (AC-08).
+- [`docs/ac-05-contrasenas.md`](./docs/ac-05-contrasenas.md): cambio de contraseña y contraseña temporal; exclusión propuesta de la recuperación por correo (AC-05).
+- [`docs/ac-06-portal-familiares.md`](./docs/ac-06-portal-familiares.md): exclusión propuesta del portal de familiares (AC-06).
 - [`pruebas/resultado-conciliacion-y-sesion.md`](./pruebas/resultado-conciliacion-y-sesion.md): conciliación del saldo de los familiares y cierre de sesión cuando el token ya no sirve.
 - [`pruebas/resultado-respaldo-restauracion.md`](./pruebas/resultado-respaldo-restauracion.md): prueba de respaldo y recuperación de la base de datos.
 - [`pruebas/resultado-semana-1-plan-sqa.md`](./pruebas/resultado-semana-1-plan-sqa.md): semana 1 del plan de pruebas de SQA (compilación en Linux, ESLint, dependencias y pruebas automáticas del frontend).
@@ -67,7 +89,7 @@ Si SQL Server no usa la instancia `localhost\SQLEXPRESS`, cambiar la cadena de c
 - [`pruebas/probar-semana-4.ps1`](./pruebas/probar-semana-4.ps1): datos mal formados y límite de intentos de login. No crea datos; tarda unos dos minutos. Resultados en [`pruebas/resultados-semana-4.md`](./pruebas/resultados-semana-4.md).
 - [`pruebas/probar-validaciones.ps1`](./pruebas/probar-validaciones.ps1): script que envía datos inválidos a la API y comprueba que se rechacen sin cambiar nada. Resultados en [`pruebas/resultados-validaciones.md`](./pruebas/resultados-validaciones.md).
 - [`pruebas/probar-semana-3.ps1`](./pruebas/probar-semana-3.ps1): recorre el ciclo de una solicitud y prueba lo que no se debe poder hacer en cada paso. **Crea datos**: solo en local. Resultados en [`pruebas/resultados-semana-3.md`](./pruebas/resultados-semana-3.md).
-- [`pruebas/probar-permisos.ps1`](./pruebas/probar-permisos.ps1): script que prueba los permisos de la API con los 6 roles (142 pruebas). Los resultados están en [`pruebas/resultados-permisos.md`](./pruebas/resultados-permisos.md).
+- [`pruebas/probar-permisos.ps1`](./pruebas/probar-permisos.ps1): script que prueba los permisos de la API con los 6 roles (282 pruebas en la base de pruebas; el script agrega el acceso horizontal según los datos). Los resultados están en [`pruebas/resultados-permisos.md`](./pruebas/resultados-permisos.md).
 
 ## Base de datos
 
@@ -92,4 +114,4 @@ Administrador (fundación y administración del asilo), Médico General, Especia
 
 ## Nota
 
-La llave del JWT y los demás valores de `appsettings.json` son de **desarrollo**. Antes de un despliegue real deben cambiarse y el controlador `SeedController` debe eliminarse o protegerse.
+La llave del JWT de desarrollo está en `appsettings.Development.json` y solo sirve en local. En un servidor se define con la variable `Jwt__Key` (la aplicación no arranca sin ella) y `SeedController` responde 404 fuera del entorno de desarrollo. La instalación de este README se probó desde una carpeta nueva el 10/11/2026: ver [`pruebas/resultado-instalacion.md`](./pruebas/resultado-instalacion.md).

@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using AsiloCabezaAlgodon.Application.Comun.Interfaces;
 using AsiloCabezaAlgodon.Domain.Entidad;
@@ -6,7 +8,9 @@ using AsiloCabezaAlgodon.Infrastructure.Persistencia;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AsiloCabezaAlgodon.Tests.Integracion
 {
@@ -41,12 +45,30 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
                 .Select(rol => new Usuario { NombreUsuario = rol.ToLower(), NombreCompleto = $"Usuario {rol}", Rol = new Rol { Nombre = rol } })
                 .ToList();
             ctx.Usuarios.AddRange(usuarios);
-            ctx.Internos.Add(new Interno
+            // Interno 1: tiene una solicitud asignada al especialista (es "su" paciente).
+            // Interno 2: no tiene ninguna; sirve para probar el acceso horizontal (AC-04).
+            var propio = new Interno
             {
                 Nombres = "Interno", Apellidos = "De Prueba", MotivoIngreso = "Prueba",
                 FechaNacimiento = new DateTime(1940, 1, 1), FechaIngreso = new DateTime(2020, 1, 1),
-                Familiar = new Familiar { Nombres = "Familiar", Apellidos = "De Prueba", Parentesco = "Hijo", Telefono = "1", Correo = "familiar@prueba.test" }
-            });
+                Familiar = new Familiar { Nombres = "Familiar", Apellidos = "De Prueba", Parentesco = "Hijo", Telefono = "1", Correo = "familiar@prueba.test", CuotaMensual = 500 }
+            };
+            var ajeno = new Interno
+            {
+                Nombres = "Otro", Apellidos = "Interno", MotivoIngreso = "Prueba",
+                FechaNacimiento = new DateTime(1942, 1, 1), FechaIngreso = new DateTime(2021, 1, 1),
+                Familiar = new Familiar { Nombres = "Otro", Apellidos = "Familiar", Parentesco = "Hija", Telefono = "2", Correo = "otro@prueba.test" }
+            };
+            ctx.Internos.AddRange(propio, ajeno);
+            var solicitud = new Solicitud
+            {
+                Motivo = "Control", Estado = "Atendida", Interno = propio,
+                MedicoGeneral = usuarios.First(u => u.Rol.Nombre == "MedicoGeneral"),
+                Especialista = usuarios.First(u => u.Rol.Nombre == "Especialista")
+            };
+            ctx.Solicitudes.Add(solicitud);
+            // Una visita con cargo de Q150, para probar que el estado de pago solo lo ve el Administrador.
+            ctx.VisitasMedicas.Add(new VisitaMedica { Solicitud = solicitud, Diagnostico = "Control", CostoConsulta = 150 });
             await ctx.SaveChangesAsync();
 
             using var alcance = Services.CreateScope();
@@ -59,7 +81,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     }
 
     // Fase 3 del plan de automatización de SQA: la matriz de permisos del script
-    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (142 casos).
+    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (282 casos desde AC-08).
     //   200 = permitido   401 = sin sesión   403 = hay sesión pero el rol no tiene permiso
     // Igual que el script, las escrituras solo se prueban con los roles que NO pueden usarlas,
     // para no crear datos. Necesita SQL Server: en GitHub Actions se excluye (Tipo!=Integracion).
@@ -72,17 +94,28 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         {
             ("/Internos", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
             ("/Internos/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Internos/2", new[] { "Administrador", "MedicoGeneral" }), // AC-04: no es paciente del especialista
             ("/Solicitudes", new[] { "Administrador", "MedicoGeneral", "Especialista", "Enfermero" }),
             ("/VisitasMedicas", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/VisitasMedicas?idInterno=1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/VisitasMedicas?idInterno=2", new[] { "Administrador", "MedicoGeneral" }), // AC-04: historial de un interno ajeno
             ("/Examenes", new[] { "Administrador", "Laboratorio" }),
             ("/Prescripciones", new[] { "Administrador", "Farmacia" }),
             ("/Donaciones", new[] { "Administrador" }),
             ("/Gastos", new[] { "Administrador" }),
             ("/Cobros", new[] { "Administrador" }),
+            ("/PagosFundacion", new[] { "Administrador" }),
             ("/Usuarios", new[] { "Administrador" }),
             ("/Reportes/costos-por-cita", new[] { "Administrador" }),
             ("/Reportes/entradas", new[] { "Administrador" }),
-            ("/Reportes/ficha-medica/1", new[] { "Administrador" }),
+            // AC-10: informes clínicos para los médicos; financieros solo para el Administrador
+            ("/Reportes/ficha-medica/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/ficha-medica/2", new[] { "Administrador", "MedicoGeneral" }),
+            ("/Reportes/examenes-por-paciente/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/medicamentos-por-paciente/1", new[] { "Administrador", "MedicoGeneral", "Especialista" }),
+            ("/Reportes/pagos-fundacion", new[] { "Administrador" }),
+            ("/Reportes/conciliacion-saldos", new[] { "Administrador" }),
+            ("/Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31", new[] { "Administrador" }),
         };
 
         private static readonly (string Metodo, string Ruta, string[] Prohibidos)[] Escrituras =
@@ -96,6 +129,21 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("POST", "/Donaciones", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Gastos", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Cobros", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("POST", "/PagosFundacion", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            // AC-08: operaciones nuevas (solo se prueban los roles que NO pueden usarlas)
+            ("PUT", "/Internos/1", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/estado", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/psicopatologias/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("DELETE", "/Internos/1/psicopatologias/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/medicamentos-cajon/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("DELETE", "/Internos/2/medicamentos-cajon/1", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }), // AC-04: ficha ajena
+            ("PUT", "/Solicitudes/1", new[] { "Administrador", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Solicitudes/1/cancelar", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("POST", "/Usuarios", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1/estado", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1/clave", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Auth/cambiar-clave", Array.Empty<string>()), // cualquier rol con sesión; sin sesión, 401
         };
 
         public static IEnumerable<object[]> Casos()
@@ -122,9 +170,143 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         }
 
         [Fact]
-        public void La_matriz_tiene_los_mismos_142_casos_que_el_script()
+        public void La_matriz_tiene_282_casos()
         {
-            Assert.Equal(142, Casos().Count());
+            Assert.Equal(282, Casos().Count());
+        }
+
+        [Theory] // AC-04: lo pagado de cada visita solo lo ve el Administrador
+        [InlineData("Administrador", true)]
+        [InlineData("MedicoGeneral", false)]
+        [InlineData("Especialista", false)]
+        public async Task El_estado_de_pago_de_las_visitas_solo_lo_ve_el_administrador(string rol, bool vePago)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/VisitasMedicas?idInterno=1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens[rol]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Contains("\"totalCargos\":150", json);
+            Assert.Equal(vePago, json.Contains("\"estadoPago\":\"PendientePago\""));
+            Assert.Equal(!vePago, json.Contains("\"estadoPago\":null"));
+        }
+
+        [Theory] // AC-04: la cuota y el saldo del familiar solo los ve el Administrador
+        [InlineData("Administrador", true)]
+        [InlineData("MedicoGeneral", false)]
+        [InlineData("Especialista", false)]
+        public async Task La_ficha_solo_muestra_finanzas_al_administrador(string rol, bool veFinanzas)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Internos/1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens[rol]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Equal(veFinanzas, json.Contains("\"cuotaMensual\":500"));
+            Assert.Equal(!veFinanzas, json.Contains("\"cuotaMensual\":null"));
+        }
+
+        [Fact] // AC-04: el especialista solo ve en la lista a sus pacientes
+        public async Task El_especialista_solo_lista_a_sus_pacientes()
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Internos");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens["Especialista"]);
+            var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
+            Assert.Contains("\"idInterno\":1", json);
+            Assert.DoesNotContain("\"idInterno\":2", json);
+        }
+
+        [Fact] // AC-08: editar el interno 1 para que quede igual al 2 se rechaza (consulta real a SQL Server)
+        public async Task Editar_un_interno_para_que_quede_igual_a_otro_da_409()
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Put, "/api/Internos/1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens["Administrador"]);
+            peticion.Content = new StringContent("""
+                { "nombres": "otro", "apellidos": "INTERNO", "fechaNacimiento": "1942-01-01", "fechaIngreso": "2021-01-01",
+                  "motivoIngreso": "Prueba", "nombreFamiliar": "F", "apellidoFamiliar": "F", "parentesco": "Hijo",
+                  "telefonoFamiliar": "1", "correoFamiliar": "f@prueba.test", "cuotaMensual": 500 }
+                """, Encoding.UTF8, "application/json");
+
+            var respuesta = await _api.CreateClient().SendAsync(peticion);
+
+            Assert.Equal(409, (int)respuesta.StatusCode);
+            Assert.Contains("Ya existe otro interno", await respuesta.Content.ReadAsStringAsync());
+        }
+
+        // AC-02 (parte local): la API rechaza con 401 los tokens falsificados, alterados o vencidos.
+        // Se pide /api/Usuarios, que solo puede ver el Administrador.
+        private string TokenDeAdministrador(string? llave = null, string? emisor = null, DateTime? vence = null, string algoritmo = SecurityAlgorithms.HmacSha256)
+        {
+            var config = _api.Services.GetRequiredService<IConfiguration>();
+            var credenciales = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(llave ?? config["Jwt:Key"]!)), algoritmo);
+            var fin = vence ?? DateTime.UtcNow.AddHours(1);
+            var token = new JwtSecurityToken(
+                issuer: emisor ?? config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "1"),
+                    new Claim(ClaimTypes.Name, "administrador"),
+                    new Claim(ClaimTypes.Role, "Administrador"),
+                },
+                notBefore: fin.AddHours(-2),
+                expires: fin,
+                signingCredentials: credenciales);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<int> PedirUsuariosCon(string token)
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Get, "/api/Usuarios");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return (int)(await _api.CreateClient().SendAsync(peticion)).StatusCode;
+        }
+
+        [Fact] // Control: un token bien firmado sí funciona (si no, las pruebas de abajo no probarían nada)
+        public async Task Token_bien_firmado_es_aceptado()
+        {
+            Assert.Equal(200, await PedirUsuariosCon(TokenDeAdministrador()));
+        }
+
+        [Fact] // AC-02: firmado con otra llave (por ejemplo, una publicada en internet)
+        public async Task Token_firmado_con_otra_llave_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(llave: "una-llave-distinta-de-al-menos-32-caracteres-123")));
+        }
+
+        [Fact] // AC-02: token de Farmacia al que se le cambió el rol a Administrador sin volver a firmarlo
+        public async Task Token_alterado_es_rechazado()
+        {
+            var partes = _api.Tokens["Farmacia"].Split('.');
+            var json = Encoding.UTF8.GetString(Base64UrlEncoder.DecodeBytes(partes[1])).Replace("\"Farmacia\"", "\"Administrador\"");
+            var alterado = $"{partes[0]}.{Base64UrlEncoder.Encode(json)}.{partes[2]}";
+
+            Assert.Equal(401, await PedirUsuariosCon(alterado));
+        }
+
+        [Fact] // AC-02: token vencido, aunque esté bien firmado
+        public async Task Token_vencido_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(vence: DateTime.UtcNow.AddMinutes(-10))));
+        }
+
+        [Fact] // AC-02: token de otro emisor
+        public async Task Token_de_otro_emisor_es_rechazado()
+        {
+            Assert.Equal(401, await PedirUsuariosCon(TokenDeAdministrador(emisor: "https://otro-sistema.example")));
+        }
+
+        [Fact] // AC-02: token sin firma (alg "none")
+        public async Task Token_sin_firma_es_rechazado()
+        {
+            var partes = TokenDeAdministrador().Split('.');
+            var cabecera = Base64UrlEncoder.Encode("{\"alg\":\"none\",\"typ\":\"JWT\"}");
+            Assert.Equal(401, await PedirUsuariosCon($"{cabecera}.{partes[1]}."));
+        }
+
+        [Fact] // AC-15: la versión se consulta sin sesión y no expone datos
+        public async Task La_version_es_publica()
+        {
+            var respuesta = await _api.CreateClient().GetAsync("/api/Version");
+            Assert.Equal(200, (int)respuesta.StatusCode);
+            Assert.Contains("1.0.0-rc2", await respuesta.Content.ReadAsStringAsync());
         }
 
         [Theory]

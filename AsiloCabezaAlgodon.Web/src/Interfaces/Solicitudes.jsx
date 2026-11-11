@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
-import { listarSolicitudes, crearSolicitud, asignarMedico } from "../Servicios/solicitudesServicio";
+import { listarSolicitudes, crearSolicitud, asignarMedico, editarSolicitud, cancelarSolicitud } from "../Servicios/solicitudesServicio";
 import { listarInternos } from "../Servicios/internosServicio";
 import { listarUsuarios } from "../Servicios/usuariosServicio";
 import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
+import { FiltrosTabla, PaginacionTabla } from "../componentes/ControlesTabla";
+import { useTabla } from "../utilidades/useTabla";
+
+// Búsqueda por interno, motivo o especialista; filtros por estado y fecha de creación (AC-13)
+const OPCIONES_TABLA = {
+  campos: ["nombreInterno", "motivo", "especialidadRequerida", "nombreEspecialista"],
+  estado: (s) => s.estado,
+  fecha: (s) => s.fechaCreacion,
+};
+const ESTADOS = ["Pendiente", "Asignada", "Atendida", "Cancelada"].map((e) => ({ valor: e, texto: e }));
 
 function Solicitudes() {
   const { rol } = useAutenticacion();
@@ -19,6 +29,8 @@ function Solicitudes() {
   const [motivo, setMotivo] = useState("");
   const [especialidadRequerida, setEspecialidadRequerida] = useState("");
   const [creando, setCreando] = useState(false);
+  // AC-08: solicitud que el médico general está corrigiendo (null = crea una nueva)
+  const [idEditando, setIdEditando] = useState(null);
 
   const [solicitudEnAsignacion, setSolicitudEnAsignacion] = useState(null);
   const [especialidadDeAsignacion, setEspecialidadDeAsignacion] = useState(null);
@@ -27,6 +39,7 @@ function Solicitudes() {
   const [fechaHoraCita, setFechaHoraCita] = useState("");
   const [asignando, setAsignando] = useState(false);
 
+  const tabla = useTabla(solicitudes, OPCIONES_TABLA);
   const esMedicoGeneral = rol === "MedicoGeneral";
   const esAdministrador = rol === "Administrador";
 
@@ -38,7 +51,8 @@ function Solicitudes() {
   useEffect(() => {
     listarSolicitudes().then(setSolicitudes);
     if (esMedicoGeneral) {
-      listarInternos().then(setInternos);
+      // AC-08: a un interno dado de baja no se le crean solicitudes
+      listarInternos().then((lista) => setInternos(lista.filter((i) => i.estado === "activo")));
     }
     if (esAdministrador) {
       listarUsuarios().then(setUsuarios);
@@ -50,7 +64,9 @@ function Solicitudes() {
     setError("");
     setCreando(true);
     try {
-      await crearSolicitud(Number(idInterno), motivo, especialidadRequerida);
+      if (idEditando) await editarSolicitud(idEditando, motivo, especialidadRequerida);
+      else await crearSolicitud(Number(idInterno), motivo, especialidadRequerida);
+      setIdEditando(null);
       setIdInterno("");
       setMotivo("");
       setEspecialidadRequerida("");
@@ -62,12 +78,49 @@ function Solicitudes() {
     }
   }
 
+  // Asignar una solicitud Pendiente, o reprogramar una cita Asignada (CU-018): mismo formulario,
+  // con los datos actuales de la cita ya puestos.
   function abrirAsignacion(solicitud) {
     setSolicitudEnAsignacion(solicitud.idSolicitud);
     setEspecialidadDeAsignacion(solicitud.especialidadRequerida);
-    setIdEspecialista("");
-    setIdEnfermero("");
-    setFechaHoraCita("");
+    setIdEspecialista(solicitud.idEspecialista ? String(solicitud.idEspecialista) : "");
+    setIdEnfermero(solicitud.idEnfermero ? String(solicitud.idEnfermero) : "");
+    setFechaHoraCita(solicitud.fechaHoraCita ? String(solicitud.fechaHoraCita).slice(0, 16) : "");
+  }
+
+  function abrirEdicion(solicitud) {
+    setIdEditando(solicitud.idSolicitud);
+    setIdInterno(String(solicitud.idInterno));
+    setMotivo(solicitud.motivo);
+    setEspecialidadRequerida(solicitud.especialidadRequerida || "");
+    setError("");
+    window.scrollTo(0, 0);
+  }
+
+  function cancelarEdicion() {
+    setIdEditando(null);
+    setIdInterno("");
+    setMotivo("");
+    setEspecialidadRequerida("");
+  }
+
+  async function manejarCancelar(solicitud) {
+    const conCita = solicitud.estado === "Asignada";
+    const pregunta = conCita
+      ? `¿Cancelar la cita de ${solicitud.nombreInterno}? Se le avisará al familiar por correo.`
+      : `¿Cancelar la solicitud de ${solicitud.nombreInterno}?`;
+    if (!window.confirm(pregunta)) return;
+    setError("");
+    setAviso(null);
+    try {
+      const respuesta = await cancelarSolicitud(solicitud.idSolicitud);
+      setAviso(conCita
+        ? { correoEnviado: respuesta.correoEnviado, mensaje: respuesta.correoEnviado ? "Cita cancelada y aviso enviado al familiar." : "Cita cancelada, pero el correo al familiar no se pudo enviar." }
+        : { correoEnviado: true, mensaje: "Solicitud cancelada." });
+      await cargarSolicitudes();
+    } catch (err) {
+      setError(mensajeDeError(err, "No se pudo cancelar la solicitud."));
+    }
   }
 
   async function manejarAsignar(evento) {
@@ -110,11 +163,11 @@ function Solicitudes() {
 
       {esMedicoGeneral && (
         <form onSubmit={manejarCrear} className="tarjeta-formulario">
-          <h2>Nueva solicitud</h2>
+          <h2>{idEditando ? "Corregir solicitud" : "Nueva solicitud"}</h2>
           <div className="fila-campos">
             <div className="campo">
               <label>Interno</label>
-              <select value={idInterno} onChange={(e) => setIdInterno(e.target.value)} required>
+              <select value={idInterno} onChange={(e) => setIdInterno(e.target.value)} required disabled={!!idEditando}>
                 <option value="">Seleccioná un interno</option>
                 {internos.map((i) => (
                   <option key={i.idInterno} value={i.idInterno}>
@@ -137,9 +190,12 @@ function Solicitudes() {
             />
           </div>
           {error && <p className="error">{error}</p>}
-          <button type="submit" className="boton-primario" disabled={creando}>
-            {creando ? "Creando..." : "Crear solicitud"}
-          </button>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button type="submit" className="boton-primario" disabled={creando}>
+              {creando ? "Guardando..." : idEditando ? "Guardar corrección" : "Crear solicitud"}
+            </button>
+            {idEditando && <button type="button" className="boton-secundario" onClick={cancelarEdicion}>No corregir</button>}
+          </div>
         </form>
       )}
 
@@ -147,6 +203,7 @@ function Solicitudes() {
         <p className={aviso.correoEnviado ? "aviso-exito" : "aviso-alerta"}>{aviso.mensaje}</p>
       )}
 
+      <FiltrosTabla tabla={tabla} placeholder="Interno, motivo o especialista" estados={ESTADOS} etiquetaFecha="Creada" />
       <table className="tabla">
         <thead>
           <tr>
@@ -157,11 +214,11 @@ function Solicitudes() {
             <th>Estado</th>
             <th>Especialista</th>
             <th>Cita</th>
-            {esAdministrador && <th></th>}
+            {(esAdministrador || esMedicoGeneral) && <th></th>}
           </tr>
         </thead>
         <tbody>
-          {solicitudes.map((s) => (
+          {tabla.filas.map((s) => (
             <tr key={s.idSolicitud}>
               <td>{s.nombreInterno}</td>
               <td>{s.motivo}</td>
@@ -171,27 +228,48 @@ function Solicitudes() {
               <td>{s.nombreEspecialista ? `${s.nombreEspecialista}${s.especialidadEspecialista ? ` (${s.especialidadEspecialista})` : ""}` : "—"}</td>
               <td>{s.fechaHoraCita ? new Date(s.fechaHoraCita).toLocaleString() : "—"}</td>
               {esAdministrador && (
-                <td>
+                <td className="acciones-fila">
                   {s.estado === "Pendiente" && (
                     <button className="boton-secundario" onClick={() => abrirAsignacion(s)}>
                       Asignar
                     </button>
                   )}
+                  {s.estado === "Asignada" && (
+                    <button className="boton-secundario" onClick={() => abrirAsignacion(s)}>
+                      Reprogramar
+                    </button>
+                  )}
+                  {(s.estado === "Pendiente" || s.estado === "Asignada") && (
+                    <button className="boton-secundario boton-peligro" onClick={() => manejarCancelar(s)}>
+                      Cancelar
+                    </button>
+                  )}
+                </td>
+              )}
+              {esMedicoGeneral && (
+                <td className="acciones-fila">
+                  {s.estado === "Pendiente" && (
+                    <>
+                      <button className="boton-secundario" onClick={() => abrirEdicion(s)}>Corregir</button>
+                      <button className="boton-secundario boton-peligro" onClick={() => manejarCancelar(s)}>Cancelar</button>
+                    </>
+                  )}
                 </td>
               )}
             </tr>
           ))}
-          {solicitudes.length === 0 && (
+          {tabla.filas.length === 0 && (
             <tr>
-              <td colSpan={esAdministrador ? 8 : 7}>No hay solicitudes todavía.</td>
+              <td colSpan={esAdministrador || esMedicoGeneral ? 8 : 7}>{tabla.total === 0 ? "No hay solicitudes todavía." : "Ninguna solicitud coincide con la búsqueda."}</td>
             </tr>
           )}
         </tbody>
       </table>
+      <PaginacionTabla tabla={tabla} nombre="solicitudes" />
 
       {solicitudEnAsignacion && (
         <form onSubmit={manejarAsignar} className="tarjeta-formulario">
-          <h2>Asignar médico y horario</h2>
+          <h2>{solicitudes.find((x) => x.idSolicitud === solicitudEnAsignacion)?.estado === "Asignada" ? "Reprogramar cita" : "Asignar médico y horario"}</h2>
           {especialidadDeAsignacion && (
             <p className="subtitulo" style={{ marginBottom: 14 }}>
               El médico general refirió a este paciente a <strong>{especialidadDeAsignacion}</strong>.

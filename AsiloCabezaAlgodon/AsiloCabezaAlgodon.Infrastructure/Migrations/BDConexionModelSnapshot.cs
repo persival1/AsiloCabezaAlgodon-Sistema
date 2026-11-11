@@ -260,6 +260,34 @@ namespace AsiloCabezaAlgodon.Infrastructure.Migrations
                     b.ToTable("MedicamentosCajon");
                 });
 
+            modelBuilder.Entity("AsiloCabezaAlgodon.Domain.Entidad.PagoFundacion", b =>
+                {
+                    b.Property<int>("IdPagoFundacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPagoFundacion"));
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Monto")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("NumeroComprobante")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdPagoFundacion");
+
+                    b.ToTable("PagosFundacion");
+                });
+
             modelBuilder.Entity("AsiloCabezaAlgodon.Domain.Entidad.Prescripcion", b =>
                 {
                     b.Property<int>("IdPrescripcion")

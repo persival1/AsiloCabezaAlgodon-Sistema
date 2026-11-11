@@ -193,3 +193,21 @@ Al cambiar la llave del JWT, las sesiones abiertas en el navegador quedaron con 
 ## Hallazgo adicional: paquete con vulnerabilidad
 
 Al compilar, .NET advertía que el paquete `System.Security.Cryptography.Pkcs 9.0.11` (dependencia indirecta de Entity Framework) tenía una vulnerabilidad de gravedad alta conocida (GHSA-846f-f764-76mx: consumo excesivo de CPU al verificar firmas). **Corregido:** se fijó de forma directa la versión **10.0.13**, que es la que trae la corrección. Después del cambio, la compilación no muestra advertencias y `dotnet list package --vulnerable --include-transitive` no reporta paquetes vulnerables.
+
+---
+
+# Segunda parte: solicitud de acciones correctivas SQA-ACM-01 (10/11/2026)
+
+Cada cambio está unido a su acción (AC), su rama y su commit. El estado de cada AC y lo que falta están en [`respuesta-sqa-acm-01.md`](./respuesta-sqa-acm-01.md).
+
+| AC | Qué se cambió | Rama | Commit(s) | Evidencia |
+|---|---|---|---|---|
+| AC-01 | Regla del saldo: cargos médicos − pagos de visitas. No se acepta pagar más de lo pendiente de una visita. Convención Por pagar / Al día / A favor. Ajuste de saldos en las bases locales | `ac-01-saldo-familiar` | `8eff41c` | `docs/regla-del-saldo.md`, `SaldoFamiliarTests`, `pruebas/evidencia-ac/ac-01-*` |
+| AC-07 | Pagos a la fundación: tabla, registro, historial e informe 4 con lo pagado y lo pendiente | `ac-07-pagos-fundacion` | `724c861` | `docs/pagos-a-la-fundacion.md`, `PagosFundacionTests`, `pruebas/evidencia-ac/ac-07-*` |
+| AC-17 | Sin «Unhandled rejection 401» en la consola al vencer la sesión | `ac-17-sesion-vencida` | `a915aa0` | `e2e/sesion-vencida.spec.js` |
+| AC-15 | Versión 1.0.0-rc2 y commit visibles en la pantalla y en `GET /api/Version`; el despliegue pasa el commit | `ac-15-version-visible` | `81e9476` | `La_version_es_publica`, `docs/historial-de-versiones.md` |
+| AC-10, AC-04, AC-09 | Informes clínicos para los médicos y financieros solo para el Administrador; el especialista solo ve a sus pacientes; la ficha sin finanzas para los roles clínicos; matriz de actores y roles | `ac-10-permisos-informes` | `ec1c413` | `docs/matriz-actores-y-roles.md`, `PermisosPorRolTests` |
+| AC-13, AC-04 | Inicio por rol, menú por áreas, filtros y paginación, visitas en tabla, validación junto al campo, guía de estilo. Historial de visitas ajeno con 403 y estado de pago solo para el Administrador | `ac-13-interfaz` | `509e457`, `85661ee` | `docs/ac-13-interfaz.md`, `e2e/navegacion.spec.js`, `pruebas/evidencia-ac/ac-13/` |
+| AC-08, AC-05, AC-06, AC-16 | Editar, dar de baja y corregir la ficha; cancelar y reprogramar citas; usuarios; contraseñas; exclusiones propuestas; fecha local en el frontend | `ac-08-operaciones` | `1d77ec0`, `2bed6d6` | `docs/ac-08-operaciones.md`, `OperacionesAc08Tests`, `e2e/operaciones.spec.js`, `pruebas/evidencia-ac/ac-08/` |
+| AC-11 | Correo configurado en Azure (Gmail con contraseña de aplicación) y probado con un envío real: llegaron los correos de cita asignada y cancelada | Configuración de Azure, sin cambios de código | — | `pruebas/evidencia-ac/ac-11-correo-azure.md` |
+| AC-14, AC-18, AC-02, AC-16 | Documentación actualizada, plan de pruebas y regresión, pruebas de tokens falsificados, script de fechas UTC | `ac-14-documentacion` | (ver `git log` de la rama) | `docs/plan-de-pruebas.md`, `pruebas/resultado-regresion-ac-18.md` |

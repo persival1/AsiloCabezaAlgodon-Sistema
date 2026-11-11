@@ -5,6 +5,7 @@ const ESTILOS_POR_ESTADO = {
   cancelada: "badge-peligro",
   activo: "badge-exito",
   inactivo: "badge-neutro",
+  baja: "badge-neutro",
   despachado: "badge-exito",
   resultadoregistrado: "badge-exito",
   pagada: "badge-exito",

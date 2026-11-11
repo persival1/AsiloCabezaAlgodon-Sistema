@@ -24,7 +24,7 @@ Las dos exclusiones necesitan la aprobación del docente o de SQA (acción AC-12
 
 ## 3. Permisos por rol (lo que valida la API)
 
-`✔` = permitido. Todo lo demás responde 403 (con sesión) o 401 (sin sesión). La misma tabla está automatizada en `PermisosPorRolTests` (204 casos) y en `pruebas/probar-permisos.ps1`.
+`✔` = permitido. Todo lo demás responde 403 (con sesión) o 401 (sin sesión). La misma tabla está automatizada en `PermisosPorRolTests` (282 casos desde AC-08) y en `pruebas/probar-permisos.ps1`.
 
 | Función | Adm. | Méd. general | Especialista | Enfermero | Laboratorio | Farmacia |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -32,10 +32,14 @@ Las dos exclusiones necesitan la aprobación del docente o de SQA (acción AC-12
 | Ver ficha médica | ✔ | ✔ | Solo sus pacientes | | | |
 | Ver cuota y saldo del familiar en la ficha | ✔ | | | | | |
 | Registrar interno | ✔ | ✔ | | | | |
-| Agregar psicopatología o medicina de cajón | ✔ | ✔ | Solo sus pacientes | | | |
+| Editar datos del interno (AC-08) | ✔ (con cuota) | ✔ (sin cuota) | | | | |
+| Dar de baja o reactivar un interno (AC-08) | ✔ | | | | | |
+| Agregar, corregir o quitar psicopatología o medicina de cajón | ✔ | ✔ | Solo sus pacientes | | | |
 | Ver solicitudes | Todas | Las que creó | Las asignadas a él | Las que acompaña | | |
 | Crear solicitud | | ✔ | | | | |
-| Asignar especialista, enfermero(a) y horario | ✔ | | | | | |
+| Corregir solicitud pendiente (AC-08) | | Las suyas | | | | |
+| Cancelar solicitud (AC-08) | Pendiente o con cita | Las suyas, pendientes | | | | |
+| Asignar o reprogramar especialista, enfermero(a) y horario | ✔ | | | | | |
 | Ver visitas médicas | Todas | ✔ | Las suyas | | | |
 | Registrar visita | | | Solo sus citas asignadas | | | |
 | Ver exámenes y registrar resultado | ✔ (ver) | | | | ✔ | |
@@ -44,7 +48,9 @@ Las dos exclusiones necesitan la aprobación del docente o de SQA (acción AC-12
 | Pagos a la fundación | ✔ | | | | | |
 | Informes financieros (1, 3, 4, 5 y conciliación) | ✔ | | | | | |
 | Informes clínicos (2, 6 y 7) | ✔ | ✔ | Solo sus pacientes | | | |
-| Usuarios (lista para asignar) | ✔ | | | | | |
+| Usuarios: ver, crear, editar, desactivar y asignar contraseña temporal (AC-08, AC-05) | ✔ | | | | | |
+| Cambiar la contraseña propia (AC-05) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Estado de pago de cada visita | ✔ | | | | | |
 
 **«Solo sus pacientes»:** internos que tienen al menos una solicitud asignada a ese especialista. Se aplica en la API (`PuedeVerInternoQuery`), no solo ocultando botones.
 
@@ -60,7 +66,7 @@ Las dos exclusiones necesitan la aprobación del docente o de SQA (acción AC-12
 
 ## 5. Pruebas
 
-- `PermisosPorRolTests`: 204 casos de rol por endpoint, incluidos el interno propio (1) y el ajeno (2) del especialista.
+- `PermisosPorRolTests`: 204 casos al cerrar AC-10 (282 después de AC-13 y AC-08), incluidos el interno propio (1) y el ajeno (2) del especialista.
 - `La_ficha_solo_muestra_finanzas_al_administrador`: el Administrador recibe la cuota; el médico general y el especialista reciben `null`.
 - `El_especialista_solo_lista_a_sus_pacientes`.
 - `dotnet test`: 293 de 293.

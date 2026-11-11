@@ -57,6 +57,22 @@ namespace AsiloCabezaAlgodon.Tests
             Assert.Equal(Especialista, solicitud.IdEspecialista);
         }
 
+        [Fact] // AC-08, CU-018: reprogramar una cita Asignada cambia la fecha y vuelve a avisar al familiar
+        public async Task Reprogramar_una_cita_asignada_cambia_la_fecha_y_avisa_de_nuevo()
+        {
+            var solicitud = SolicitudEnEstado("Asignada");
+            solicitud.FechaHoraCita = DateTime.Now.AddDays(2);
+            var nuevaFecha = DateTime.Now.AddDays(9);
+
+            var resultado = await Handler().Handle(Asignacion(fecha: nuevaFecha, idEnfermero: null), CancellationToken.None);
+
+            Assert.True(resultado!.CorreoEnviado);
+            Assert.Equal("Asignada", solicitud.Estado);
+            Assert.Equal(nuevaFecha, solicitud.FechaHoraCita);
+            Assert.Null(solicitud.IdEnfermero);
+            await _correo.Received(1).EnviarAsync("familiar@ejemplo.test", Arg.Any<string>(), Arg.Is<string>(c => c.Contains(nuevaFecha.ToString("dd/MM/yyyy HH:mm"))));
+        }
+
         [Fact] // EXP-07: no se reasigna una solicitud que ya fue atendida
         public async Task Reasignar_una_solicitud_atendida_se_rechaza()
         {

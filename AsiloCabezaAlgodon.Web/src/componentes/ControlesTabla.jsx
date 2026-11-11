@@ -1,7 +1,7 @@
 // AC-13 (punto 6): barra de búsqueda y filtros, y paginación, iguales en todas las listas.
 // "tabla" es lo que devuelve useTabla.
 
-export function FiltrosTabla({ tabla, placeholder, estados, conFechas = true, etiquetaFecha = "Fecha" }) {
+export function FiltrosTabla({ tabla, placeholder, estados, conFechas = true, etiquetaFecha = "Fecha", etiquetaEstado = "Estado" }) {
   const { filtros, cambiarFiltro, limpiar, hayFiltros } = tabla;
   return (
     <div className="filtros-tabla" role="search">
@@ -17,7 +17,7 @@ export function FiltrosTabla({ tabla, placeholder, estados, conFechas = true, et
       </div>
       {estados && (
         <div className="campo">
-          <label htmlFor="filtro-estado">Estado</label>
+          <label htmlFor="filtro-estado">{etiquetaEstado}</label>
           <select id="filtro-estado" value={filtros.estado} onChange={(e) => cambiarFiltro("estado", e.target.value)}>
             <option value="">Todos</option>
             {estados.map((e) => <option key={e.valor} value={e.valor}>{e.texto}</option>)}

@@ -71,7 +71,21 @@ $escrituras = @(
     @{ Metodo = "POST"; Ruta = "/Donaciones";                    Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
     @{ Metodo = "POST"; Ruta = "/Gastos";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
     @{ Metodo = "POST"; Ruta = "/Cobros";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
-    @{ Metodo = "POST"; Ruta = "/PagosFundacion";                Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") }
+    @{ Metodo = "POST"; Ruta = "/PagosFundacion";                Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    # AC-08: operaciones nuevas. El acceso del especialista a una ficha ajena solo se prueba en
+    # PermisosPorRolTests (base de pruebas), para no borrar datos reales si el interno sí es suyo.
+    @{ Metodo = "PUT";    Ruta = "/Internos/1";                      Prohibidos = @("Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Internos/1/estado";               Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Internos/1/psicopatologias/1";    Prohibidos = @("Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "DELETE"; Ruta = "/Internos/1/psicopatologias/1";    Prohibidos = @("Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Internos/1/medicamentos-cajon/1"; Prohibidos = @("Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Solicitudes/1";                   Prohibidos = @("Administrador", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Solicitudes/1/cancelar";          Prohibidos = @("Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "POST";   Ruta = "/Usuarios";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Usuarios/1";                      Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Usuarios/1/estado";               Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Usuarios/1/clave";                Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "PUT";    Ruta = "/Auth/cambiar-clave";              Prohibidos = @() }
 )
 
 function Obtener-Token($usuario, $clave) {

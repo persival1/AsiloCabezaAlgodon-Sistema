@@ -37,6 +37,9 @@ const MENUS_POR_ROL = {
       { texto: "Pagos a la fundación", ruta: "/dashboard/pagos-fundacion", icono: IconoCobros },
     ] },
     REPORTES,
+    { titulo: "Administración", opciones: [
+      { texto: "Usuarios", ruta: "/dashboard/usuarios", icono: IconoInternos },
+    ] },
   ],
   MedicoGeneral: [
     { opciones: [INICIO] },
@@ -134,6 +137,7 @@ function Layout() {
             Conectado como
             <strong>{NOMBRES_ROL[rol] || rol}</strong>
           </div>
+          <Link to="/dashboard/cambiar-clave" className="enlace-cambiar-clave">Cambiar contraseña</Link>
           <button onClick={cambiarTema} className="boton-tema">
             {tema === "claro" ? "🌙 Modo oscuro" : "☀️ Modo claro"}
           </button>

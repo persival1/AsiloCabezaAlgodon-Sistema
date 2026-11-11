@@ -33,5 +33,23 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
             return await _context.Usuarios
                 .AnyAsync(u => u.IdUsuario == idUsuario && u.Rol.Nombre == rol && u.Estado == "activo");
         }
+
+        public Task<Usuario?> ObtenerPorIdAsync(int idUsuario) =>
+            _context.Usuarios.Include(u => u.Rol).FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+
+        public Task<Rol?> ObtenerRolAsync(string nombre) =>
+            _context.Roles.FirstOrDefaultAsync(r => r.Nombre == nombre);
+
+        public Task<int> ContarActivosConRolAsync(string rol) =>
+            _context.Usuarios.CountAsync(u => u.Rol.Nombre == rol && u.Estado == "activo");
+
+        public async Task<Usuario> CrearAsync(Usuario usuario)
+        {
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
+            return usuario;
+        }
+
+        public Task ActualizarAsync(Usuario usuario) => _context.SaveChangesAsync();
     }
 }

@@ -33,6 +33,10 @@ namespace AsiloCabezaAlgodon.Application.Internos.Comandos
             if (request.FechaIngreso.Date < request.FechaNacimiento.Date)
                 throw new DatosInvalidosException("La fecha de ingreso no puede ser anterior a la fecha de nacimiento.");
 
+            // AC-08: no se registra dos veces a la misma persona
+            if (await _internoRepository.ExisteDuplicadoAsync(request.Nombres, request.Apellidos, request.FechaNacimiento))
+                throw new ConflictoException("Ya existe un interno con esos nombres, apellidos y fecha de nacimiento.");
+
             var interno = new Interno
             {
                 Nombres = request.Nombres,

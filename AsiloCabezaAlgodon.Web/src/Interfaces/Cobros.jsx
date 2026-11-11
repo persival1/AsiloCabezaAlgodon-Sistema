@@ -173,7 +173,7 @@ function Cobros() {
       </table>
 
       <h2 className="titulo-seccion">Cobros registrados</h2>
-      <FiltrosTabla tabla={tabla} placeholder="Familiar, interno o concepto" estados={TIPOS} />
+      <FiltrosTabla tabla={tabla} placeholder="Familiar, interno o concepto" estados={TIPOS} etiquetaEstado="Tipo" />
       <table className="tabla">
         <thead>
           <tr>

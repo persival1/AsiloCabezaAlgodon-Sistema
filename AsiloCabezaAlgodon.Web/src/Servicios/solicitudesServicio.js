@@ -18,3 +18,14 @@ export async function asignarMedico(idSolicitud, idEspecialista, idEnfermero, fe
   });
   return respuesta.data;
 }
+
+// AC-08: el médico general corrige su solicitud pendiente; cancelar (médico o fundación).
+// Reprogramar una cita usa asignarMedico sobre una solicitud Asignada.
+export async function editarSolicitud(idSolicitud, motivo, especialidadRequerida) {
+  await api.put(`/Solicitudes/${idSolicitud}`, { motivo, especialidadRequerida });
+}
+
+export async function cancelarSolicitud(idSolicitud) {
+  const respuesta = await api.put(`/Solicitudes/${idSolicitud}/cancelar`);
+  return respuesta.data;
+}

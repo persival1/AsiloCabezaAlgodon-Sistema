@@ -1,3 +1,4 @@
+import { fechaCorta } from "../utilidades/tabla";
 import { useEffect, useState } from "react";
 import { listarInternos } from "../Servicios/internosServicio";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
@@ -24,7 +25,8 @@ const REPORTES = [
   { valor: "medicamentos-por-paciente", texto: "7. Medicamentos aplicados por paciente", roles: MEDICOS },
 ];
 
-const HOY = new Date().toISOString().slice(0, 10);
+// AC-16: fecha local (toISOString da la fecha UTC: después de las 18:00 en Guatemala ya es "mañana")
+const HOY = fechaCorta(new Date());
 
 function Reportes() {
   const { rol } = useAutenticacion();

@@ -14,6 +14,8 @@ import Gastos from "./Interfaces/Gastos";
 import Cobros from "./Interfaces/Cobros";
 import Reportes from "./Interfaces/Reportes";
 import PagosFundacion from "./Interfaces/PagosFundacion";
+import Usuarios from "./Interfaces/Usuarios";
+import CambiarClave from "./Interfaces/CambiarClave";
 import Layout from "./componentes/Layout";
 import RutaProtegida from "./componentes/RutaProtegida";
 
@@ -44,6 +46,8 @@ function App() {
         <Route path="cobros" element={<Cobros />} />
         <Route path="pagos-fundacion" element={<PagosFundacion />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="usuarios" element={<Usuarios />} />
+        <Route path="cambiar-clave" element={<CambiarClave />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

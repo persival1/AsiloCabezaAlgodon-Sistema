@@ -6,7 +6,7 @@ import { entrarComo } from "./ayudantes";
 
 // Mismo contenido que docs/matriz-actores-y-roles.md (sección 3)
 const MENU_POR_ROL = {
-  admin: ["Inicio", "Internos", "Solicitudes", "Visitas médicas", "Cobros", "Donaciones", "Gastos", "Pagos a la fundación", "Reportes"],
+  admin: ["Inicio", "Internos", "Solicitudes", "Visitas médicas", "Cobros", "Donaciones", "Gastos", "Pagos a la fundación", "Reportes", "Usuarios"],
   medicogeneral: ["Inicio", "Internos", "Solicitudes", "Reportes"],
   especialista: ["Inicio", "Mis citas", "Visitas médicas", "Mis pacientes", "Reportes"],
   enfermero: ["Inicio", "Mis acompañamientos"],

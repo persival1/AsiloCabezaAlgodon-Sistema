@@ -57,5 +57,36 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
             await _context.SaveChangesAsync();
             return medicamento;
         }
+
+        // AC-08: mismo nombre, apellidos y fecha de nacimiento = la misma persona.
+        // SQL Server compara sin distinguir mayúsculas (intercalación por defecto).
+        public async Task<bool> ExisteDuplicadoAsync(string nombres, string apellidos, DateTime fechaNacimiento, int? excluirIdInterno = null)
+        {
+            var n = nombres.Trim();
+            var a = apellidos.Trim();
+            return await _context.Internos.AnyAsync(i =>
+                i.Nombres == n && i.Apellidos == a && i.FechaNacimiento.Date == fechaNacimiento.Date &&
+                (excluirIdInterno == null || i.IdInterno != excluirIdInterno));
+        }
+
+        public Task<Psicopatologia?> ObtenerPsicopatologiaAsync(int idPsicopatologia) =>
+            _context.Psicopatologias.FirstOrDefaultAsync(p => p.IdPsicopatologia == idPsicopatologia);
+
+        public Task<MedicamentoCajon?> ObtenerMedicamentoCajonAsync(int idMedicamentoCajon) =>
+            _context.MedicamentosCajon.FirstOrDefaultAsync(m => m.IdMedicamentoCajon == idMedicamentoCajon);
+
+        public async Task EliminarPsicopatologiaAsync(Psicopatologia psicopatologia)
+        {
+            _context.Psicopatologias.Remove(psicopatologia);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task EliminarMedicamentoCajonAsync(MedicamentoCajon medicamento)
+        {
+            _context.MedicamentosCajon.Remove(medicamento);
+            await _context.SaveChangesAsync();
+        }
+
+        public Task GuardarCambiosAsync() => _context.SaveChangesAsync();
     }
 }

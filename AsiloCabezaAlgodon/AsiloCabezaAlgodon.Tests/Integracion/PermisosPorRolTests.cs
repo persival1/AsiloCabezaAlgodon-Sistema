@@ -77,7 +77,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     }
 
     // Fase 3 del plan de automatización de SQA: la matriz de permisos del script
-    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (218 casos desde AC-13).
+    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (282 casos desde AC-08).
     //   200 = permitido   401 = sin sesión   403 = hay sesión pero el rol no tiene permiso
     // Igual que el script, las escrituras solo se prueban con los roles que NO pueden usarlas,
     // para no crear datos. Necesita SQL Server: en GitHub Actions se excluye (Tipo!=Integracion).
@@ -126,6 +126,20 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("POST", "/Gastos", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Cobros", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/PagosFundacion", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            // AC-08: operaciones nuevas (solo se prueban los roles que NO pueden usarlas)
+            ("PUT", "/Internos/1", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/estado", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/psicopatologias/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("DELETE", "/Internos/1/psicopatologias/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Internos/1/medicamentos-cajon/1", new[] { "Enfermero", "Laboratorio", "Farmacia" }),
+            ("DELETE", "/Internos/2/medicamentos-cajon/1", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }), // AC-04: ficha ajena
+            ("PUT", "/Solicitudes/1", new[] { "Administrador", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Solicitudes/1/cancelar", new[] { "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("POST", "/Usuarios", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1/estado", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Usuarios/1/clave", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("PUT", "/Auth/cambiar-clave", Array.Empty<string>()), // cualquier rol con sesión; sin sesión, 401
         };
 
         public static IEnumerable<object[]> Casos()
@@ -152,9 +166,9 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         }
 
         [Fact]
-        public void La_matriz_tiene_los_mismos_218_casos_que_el_script()
+        public void La_matriz_tiene_282_casos()
         {
-            Assert.Equal(218, Casos().Count());
+            Assert.Equal(282, Casos().Count());
         }
 
         [Theory] // AC-04: lo pagado de cada visita solo lo ve el Administrador
@@ -192,6 +206,23 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             var json = await (await _api.CreateClient().SendAsync(peticion)).Content.ReadAsStringAsync();
             Assert.Contains("\"idInterno\":1", json);
             Assert.DoesNotContain("\"idInterno\":2", json);
+        }
+
+        [Fact] // AC-08: editar el interno 1 para que quede igual al 2 se rechaza (consulta real a SQL Server)
+        public async Task Editar_un_interno_para_que_quede_igual_a_otro_da_409()
+        {
+            var peticion = new HttpRequestMessage(HttpMethod.Put, "/api/Internos/1");
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _api.Tokens["Administrador"]);
+            peticion.Content = new StringContent("""
+                { "nombres": "otro", "apellidos": "INTERNO", "fechaNacimiento": "1942-01-01", "fechaIngreso": "2021-01-01",
+                  "motivoIngreso": "Prueba", "nombreFamiliar": "F", "apellidoFamiliar": "F", "parentesco": "Hijo",
+                  "telefonoFamiliar": "1", "correoFamiliar": "f@prueba.test", "cuotaMensual": 500 }
+                """, Encoding.UTF8, "application/json");
+
+            var respuesta = await _api.CreateClient().SendAsync(peticion);
+
+            Assert.Equal(409, (int)respuesta.StatusCode);
+            Assert.Contains("Ya existe otro interno", await respuesta.Content.ReadAsStringAsync());
         }
 
         [Fact] // AC-15: la versión se consulta sin sesión y no expone datos

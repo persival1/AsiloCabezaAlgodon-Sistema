@@ -1,13 +1,19 @@
+import { fechaCorta } from "../utilidades/tabla";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
-import { obtenerInterno, agregarPsicopatologia, agregarMedicamentoCajon } from "../Servicios/internosServicio";
+import {
+  obtenerInterno, agregarPsicopatologia, agregarMedicamentoCajon, cambiarEstadoInterno,
+  editarPsicopatologia, eliminarPsicopatologia, editarMedicamentoCajon, eliminarMedicamentoCajon,
+} from "../Servicios/internosServicio";
 import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
 import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
 import { Saldo } from "../componentes/Saldo";
+import EditarInterno from "../componentes/EditarInterno";
 
-const HOY = new Date().toISOString().slice(0, 10);
+// AC-16: fecha local (toISOString da la fecha UTC: después de las 18:00 en Guatemala ya es "mañana")
+const HOY = fechaCorta(new Date());
 
 // Trae el interno y sus visitas al mismo tiempo
 function obtenerFicha(id) {
@@ -18,6 +24,15 @@ function FichaInterno() {
   const { id } = useParams();
   const { rol } = useAutenticacion();
   const puedeAgregarFicha = ["Administrador", "MedicoGeneral", "Especialista"].includes(rol);
+  // AC-08: editar datos (Administrador y médico general) y alta o baja (Administrador)
+  const puedeEditarDatos = ["Administrador", "MedicoGeneral"].includes(rol);
+  const puedeDarDeBaja = rol === "Administrador";
+  const [editandoDatos, setEditandoDatos] = useState(false);
+  const [avisoFicha, setAvisoFicha] = useState("");
+  const [errorFicha, setErrorFicha] = useState("");
+  // Registro de la ficha que se está corrigiendo (null = se agrega uno nuevo)
+  const [idPsicoEditada, setIdPsicoEditada] = useState(null);
+  const [idMedicamentoEditado, setIdMedicamentoEditado] = useState(null);
 
   const [interno, setInterno] = useState(null);
   const [visitas, setVisitas] = useState([]);
@@ -54,8 +69,10 @@ function FichaInterno() {
     setErrorPsico("");
     setGuardando(true);
     try {
-      await agregarPsicopatologia(id, nombrePsico, fechaPsico);
+      if (idPsicoEditada) await editarPsicopatologia(id, idPsicoEditada, nombrePsico, fechaPsico);
+      else await agregarPsicopatologia(id, nombrePsico, fechaPsico);
       setNombrePsico("");
+      setIdPsicoEditada(null);
       setMostrarPsico(false);
       await cargar();
     } catch (err) {
@@ -70,14 +87,56 @@ function FichaInterno() {
     setErrorMedicamento("");
     setGuardando(true);
     try {
-      await agregarMedicamentoCajon(id, medicamento.nombre, medicamento.dosis, medicamento.frecuencia);
+      if (idMedicamentoEditado) await editarMedicamentoCajon(id, idMedicamentoEditado, medicamento.nombre, medicamento.dosis, medicamento.frecuencia);
+      else await agregarMedicamentoCajon(id, medicamento.nombre, medicamento.dosis, medicamento.frecuencia);
       setMedicamento({ nombre: "", dosis: "", frecuencia: "" });
+      setIdMedicamentoEditado(null);
       setMostrarMedicamento(false);
       await cargar();
     } catch (err) {
       setErrorMedicamento(mensajeDeError(err, "No se pudo guardar el medicamento."));
     } finally {
       setGuardando(false);
+    }
+  }
+
+  function corregirPsico(p) {
+    setIdPsicoEditada(p.idPsicopatologia);
+    setNombrePsico(p.nombre);
+    setFechaPsico(String(p.fechaDiagnostico).slice(0, 10));
+    setErrorPsico("");
+    setMostrarPsico(true);
+  }
+
+  function corregirMedicamento(m) {
+    setIdMedicamentoEditado(m.idMedicamentoCajon);
+    setMedicamento({ nombre: m.nombre, dosis: m.dosis, frecuencia: m.frecuencia });
+    setErrorMedicamento("");
+    setMostrarMedicamento(true);
+  }
+
+  async function quitar(descripcion, accion) {
+    if (!window.confirm(`¿Quitar «${descripcion}» de la ficha? Usalo solo si se registró por error.`)) return;
+    setErrorFicha("");
+    try {
+      await accion();
+      await cargar();
+    } catch (err) {
+      setErrorFicha(mensajeDeError(err, "No se pudo quitar el registro."));
+    }
+  }
+
+  async function alternarBaja() {
+    const nuevo = interno.estado === "activo" ? "baja" : "activo";
+    if (nuevo === "baja" && !window.confirm(`¿Dar de baja a ${interno.nombres} ${interno.apellidos}? Su ficha y su historial se conservan, pero ya no se le podrán crear solicitudes.`)) return;
+    setErrorFicha("");
+    setAvisoFicha("");
+    try {
+      await cambiarEstadoInterno(id, nuevo);
+      setAvisoFicha(nuevo === "baja" ? "El interno quedó de baja." : "El interno quedó activo de nuevo.");
+      await cargar();
+    } catch (err) {
+      setErrorFicha(mensajeDeError(err, "No se pudo cambiar el estado del interno."));
     }
   }
 
@@ -95,7 +154,27 @@ function FichaInterno() {
           <h1>{interno.nombres} {interno.apellidos}</h1>
           <p className="subtitulo">Ficha médica completa — ingreso {new Date(interno.fechaIngreso).toLocaleDateString()}</p>
         </div>
+        <div className="acciones-fila">
+          {puedeEditarDatos && !editandoDatos && (
+            <button className="boton-secundario" onClick={() => { setAvisoFicha(""); setEditandoDatos(true); }}>Editar datos</button>
+          )}
+          {puedeDarDeBaja && (
+            <button className={interno.estado === "activo" ? "boton-secundario boton-peligro" : "boton-secundario"} onClick={alternarBaja}>
+              {interno.estado === "activo" ? "Dar de baja" : "Reactivar"}
+            </button>
+          )}
+        </div>
       </div>
+
+      {avisoFicha && <p className="exito">{avisoFicha}</p>}
+      {errorFicha && <p className="error">{errorFicha}</p>}
+      {editandoDatos && (
+        <EditarInterno
+          interno={interno}
+          onCancelar={() => setEditandoDatos(false)}
+          onGuardado={async () => { setEditandoDatos(false); setAvisoFicha("Se guardaron los datos del interno."); await cargar(); }}
+        />
+      )}
 
       <div className="tarjeta-formulario">
         <h2>Datos generales</h2>
@@ -119,7 +198,7 @@ function FichaInterno() {
         <div className="encabezado-seccion" style={{ marginBottom: 10 }}>
           <h2 style={{ margin: 0 }}>Psicopatologías</h2>
           {puedeAgregarFicha && (
-            <button className="boton-secundario" onClick={() => setMostrarPsico((v) => !v)}>
+            <button className="boton-secundario" onClick={() => { setIdPsicoEditada(null); setNombrePsico(""); setMostrarPsico((v) => !v); }}>
               {mostrarPsico ? "Cancelar" : "Agregar"}
             </button>
           )}
@@ -143,7 +222,15 @@ function FichaInterno() {
         <ul>
           {interno.psicopatologias.length === 0 && <li>Ninguna registrada</li>}
           {interno.psicopatologias.map((p) => (
-            <li key={p.idPsicopatologia}>{p.nombre} — diagnosticada el {new Date(p.fechaDiagnostico).toLocaleDateString()}</li>
+            <li key={p.idPsicopatologia}>
+              {p.nombre} — diagnosticada el {new Date(p.fechaDiagnostico).toLocaleDateString()}
+              {puedeAgregarFicha && (
+                <span className="acciones-item">
+                  <button type="button" className="boton-enlace" onClick={() => corregirPsico(p)}>Corregir</button>
+                  <button type="button" className="boton-enlace peligro" onClick={() => quitar(p.nombre, () => eliminarPsicopatologia(id, p.idPsicopatologia))}>Quitar</button>
+                </span>
+              )}
+            </li>
           ))}
         </ul>
       </div>
@@ -152,7 +239,7 @@ function FichaInterno() {
         <div className="encabezado-seccion" style={{ marginBottom: 10 }}>
           <h2 style={{ margin: 0 }}>Medicamentos de cajón</h2>
           {puedeAgregarFicha && (
-            <button className="boton-secundario" onClick={() => setMostrarMedicamento((v) => !v)}>
+            <button className="boton-secundario" onClick={() => { setIdMedicamentoEditado(null); setMedicamento({ nombre: "", dosis: "", frecuencia: "" }); setMostrarMedicamento((v) => !v); }}>
               {mostrarMedicamento ? "Cancelar" : "Agregar"}
             </button>
           )}
@@ -180,7 +267,15 @@ function FichaInterno() {
         <ul>
           {interno.medicamentosCajon.length === 0 && <li>Ninguno registrado</li>}
           {interno.medicamentosCajon.map((m) => (
-            <li key={m.idMedicamentoCajon}>{m.nombre} — {m.dosis}, {m.frecuencia}</li>
+            <li key={m.idMedicamentoCajon}>
+              {m.nombre} — {m.dosis}, {m.frecuencia}
+              {puedeAgregarFicha && (
+                <span className="acciones-item">
+                  <button type="button" className="boton-enlace" onClick={() => corregirMedicamento(m)}>Corregir</button>
+                  <button type="button" className="boton-enlace peligro" onClick={() => quitar(m.nombre, () => eliminarMedicamentoCajon(id, m.idMedicamentoCajon))}>Quitar</button>
+                </span>
+              )}
+            </li>
           ))}
         </ul>
       </div>

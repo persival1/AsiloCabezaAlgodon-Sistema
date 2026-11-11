@@ -5,6 +5,16 @@ import { listarInternos } from "../Servicios/internosServicio";
 import { listarUsuarios } from "../Servicios/usuariosServicio";
 import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
+import { FiltrosTabla, PaginacionTabla } from "../componentes/ControlesTabla";
+import { useTabla } from "../utilidades/useTabla";
+
+// Búsqueda por interno, motivo o especialista; filtros por estado y fecha de creación (AC-13)
+const OPCIONES_TABLA = {
+  campos: ["nombreInterno", "motivo", "especialidadRequerida", "nombreEspecialista"],
+  estado: (s) => s.estado,
+  fecha: (s) => s.fechaCreacion,
+};
+const ESTADOS = ["Pendiente", "Asignada", "Atendida", "Cancelada"].map((e) => ({ valor: e, texto: e }));
 
 function Solicitudes() {
   const { rol } = useAutenticacion();
@@ -27,6 +37,7 @@ function Solicitudes() {
   const [fechaHoraCita, setFechaHoraCita] = useState("");
   const [asignando, setAsignando] = useState(false);
 
+  const tabla = useTabla(solicitudes, OPCIONES_TABLA);
   const esMedicoGeneral = rol === "MedicoGeneral";
   const esAdministrador = rol === "Administrador";
 
@@ -147,6 +158,7 @@ function Solicitudes() {
         <p className={aviso.correoEnviado ? "aviso-exito" : "aviso-alerta"}>{aviso.mensaje}</p>
       )}
 
+      <FiltrosTabla tabla={tabla} placeholder="Interno, motivo o especialista" estados={ESTADOS} etiquetaFecha="Creada" />
       <table className="tabla">
         <thead>
           <tr>
@@ -161,7 +173,7 @@ function Solicitudes() {
           </tr>
         </thead>
         <tbody>
-          {solicitudes.map((s) => (
+          {tabla.filas.map((s) => (
             <tr key={s.idSolicitud}>
               <td>{s.nombreInterno}</td>
               <td>{s.motivo}</td>
@@ -181,13 +193,14 @@ function Solicitudes() {
               )}
             </tr>
           ))}
-          {solicitudes.length === 0 && (
+          {tabla.filas.length === 0 && (
             <tr>
-              <td colSpan={esAdministrador ? 8 : 7}>No hay solicitudes todavía.</td>
+              <td colSpan={esAdministrador ? 8 : 7}>{tabla.total === 0 ? "No hay solicitudes todavía." : "Ninguna solicitud coincide con la búsqueda."}</td>
             </tr>
           )}
         </tbody>
       </table>
+      <PaginacionTabla tabla={tabla} nombre="solicitudes" />
 
       {solicitudEnAsignacion && (
         <form onSubmit={manejarAsignar} className="tarjeta-formulario">

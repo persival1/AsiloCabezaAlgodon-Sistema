@@ -1,8 +1,10 @@
 # Resultados de las pruebas de autorización por rol
 
-Ejecutado el 05/11/2026 23:21 contra https://localhost:7022/api
+Ejecutado el 10/11/2026 17:49 contra https://localhost:7022/api
 
-**Total: 142 pruebas. Correctas: 142. Fallidas: 0.**
+**Total: 190 pruebas. Correctas: 190. Fallidas: 0.**
+
+Base de desarrollo. Ahí todos los internos tienen alguna solicitud del especialista, así que el script no encontró un interno ajeno y no probó esos 2 casos. El acceso a un interno ajeno (403) sí se prueba en `PermisosPorRolTests` (204 casos), que crea un interno sin solicitudes del especialista.
 
 | Método | Endpoint | Actor | Esperado | Obtenido | Resultado |
 |---|---|---|---|---|---|
@@ -13,13 +15,6 @@ Ejecutado el 05/11/2026 23:21 contra https://localhost:7022/api
 | GET | /Internos | Laboratorio | 403 | 403 | OK |
 | GET | /Internos | Farmacia | 403 | 403 | OK |
 | GET | /Internos | SinSesion | 401 | 401 | OK |
-| GET | /Internos/1 | Administrador | 200 | 200 | OK |
-| GET | /Internos/1 | MedicoGeneral | 200 | 200 | OK |
-| GET | /Internos/1 | Especialista | 200 | 200 | OK |
-| GET | /Internos/1 | Enfermero | 403 | 403 | OK |
-| GET | /Internos/1 | Laboratorio | 403 | 403 | OK |
-| GET | /Internos/1 | Farmacia | 403 | 403 | OK |
-| GET | /Internos/1 | SinSesion | 401 | 401 | OK |
 | GET | /Solicitudes | Administrador | 200 | 200 | OK |
 | GET | /Solicitudes | MedicoGeneral | 200 | 200 | OK |
 | GET | /Solicitudes | Especialista | 200 | 200 | OK |
@@ -69,6 +64,13 @@ Ejecutado el 05/11/2026 23:21 contra https://localhost:7022/api
 | GET | /Cobros | Laboratorio | 403 | 403 | OK |
 | GET | /Cobros | Farmacia | 403 | 403 | OK |
 | GET | /Cobros | SinSesion | 401 | 401 | OK |
+| GET | /PagosFundacion | Administrador | 200 | 200 | OK |
+| GET | /PagosFundacion | MedicoGeneral | 403 | 403 | OK |
+| GET | /PagosFundacion | Especialista | 403 | 403 | OK |
+| GET | /PagosFundacion | Enfermero | 403 | 403 | OK |
+| GET | /PagosFundacion | Laboratorio | 403 | 403 | OK |
+| GET | /PagosFundacion | Farmacia | 403 | 403 | OK |
+| GET | /PagosFundacion | SinSesion | 401 | 401 | OK |
 | GET | /Usuarios | Administrador | 200 | 200 | OK |
 | GET | /Usuarios | MedicoGeneral | 403 | 403 | OK |
 | GET | /Usuarios | Especialista | 403 | 403 | OK |
@@ -90,13 +92,55 @@ Ejecutado el 05/11/2026 23:21 contra https://localhost:7022/api
 | GET | /Reportes/entradas | Laboratorio | 403 | 403 | OK |
 | GET | /Reportes/entradas | Farmacia | 403 | 403 | OK |
 | GET | /Reportes/entradas | SinSesion | 401 | 401 | OK |
-| GET | /Reportes/ficha-medica/1 | Administrador | 200 | 200 | OK |
-| GET | /Reportes/ficha-medica/1 | MedicoGeneral | 403 | 403 | OK |
-| GET | /Reportes/ficha-medica/1 | Especialista | 403 | 403 | OK |
-| GET | /Reportes/ficha-medica/1 | Enfermero | 403 | 403 | OK |
-| GET | /Reportes/ficha-medica/1 | Laboratorio | 403 | 403 | OK |
-| GET | /Reportes/ficha-medica/1 | Farmacia | 403 | 403 | OK |
-| GET | /Reportes/ficha-medica/1 | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/pagos-fundacion | Administrador | 200 | 200 | OK |
+| GET | /Reportes/pagos-fundacion | MedicoGeneral | 403 | 403 | OK |
+| GET | /Reportes/pagos-fundacion | Especialista | 403 | 403 | OK |
+| GET | /Reportes/pagos-fundacion | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/pagos-fundacion | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/pagos-fundacion | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/pagos-fundacion | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/conciliacion-saldos | Administrador | 200 | 200 | OK |
+| GET | /Reportes/conciliacion-saldos | MedicoGeneral | 403 | 403 | OK |
+| GET | /Reportes/conciliacion-saldos | Especialista | 403 | 403 | OK |
+| GET | /Reportes/conciliacion-saldos | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/conciliacion-saldos | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/conciliacion-saldos | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/conciliacion-saldos | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | Administrador | 200 | 200 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | MedicoGeneral | 403 | 403 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | Especialista | 403 | 403 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31 | SinSesion | 401 | 401 | OK |
+| GET | /Internos/3 | Administrador | 200 | 200 | OK |
+| GET | /Internos/3 | MedicoGeneral | 200 | 200 | OK |
+| GET | /Internos/3 | Especialista | 200 | 200 | OK |
+| GET | /Internos/3 | Enfermero | 403 | 403 | OK |
+| GET | /Internos/3 | Laboratorio | 403 | 403 | OK |
+| GET | /Internos/3 | Farmacia | 403 | 403 | OK |
+| GET | /Internos/3 | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/ficha-medica/3 | Administrador | 200 | 200 | OK |
+| GET | /Reportes/ficha-medica/3 | MedicoGeneral | 200 | 200 | OK |
+| GET | /Reportes/ficha-medica/3 | Especialista | 200 | 200 | OK |
+| GET | /Reportes/ficha-medica/3 | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/ficha-medica/3 | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/ficha-medica/3 | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/ficha-medica/3 | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | Administrador | 200 | 200 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | MedicoGeneral | 200 | 200 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | Especialista | 200 | 200 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/examenes-por-paciente/3 | SinSesion | 401 | 401 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | Administrador | 200 | 200 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | MedicoGeneral | 200 | 200 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | Especialista | 200 | 200 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | Enfermero | 403 | 403 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | Laboratorio | 403 | 403 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | Farmacia | 403 | 403 | OK |
+| GET | /Reportes/medicamentos-por-paciente/3 | SinSesion | 401 | 401 | OK |
 | POST | /Internos | Especialista | 403 | 403 | OK |
 | POST | /Internos | Enfermero | 403 | 403 | OK |
 | POST | /Internos | Laboratorio | 403 | 403 | OK |
@@ -148,3 +192,9 @@ Ejecutado el 05/11/2026 23:21 contra https://localhost:7022/api
 | POST | /Cobros | Laboratorio | 403 | 403 | OK |
 | POST | /Cobros | Farmacia | 403 | 403 | OK |
 | POST | /Cobros | SinSesion | 401 | 401 | OK |
+| POST | /PagosFundacion | MedicoGeneral | 403 | 403 | OK |
+| POST | /PagosFundacion | Especialista | 403 | 403 | OK |
+| POST | /PagosFundacion | Enfermero | 403 | 403 | OK |
+| POST | /PagosFundacion | Laboratorio | 403 | 403 | OK |
+| POST | /PagosFundacion | Farmacia | 403 | 403 | OK |
+| POST | /PagosFundacion | SinSesion | 401 | 401 | OK |

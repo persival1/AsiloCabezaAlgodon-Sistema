@@ -1,0 +1,14 @@
+-- Base local: asilo_cabeza_algodon  (10/11/2026 17:32)
+--- ANTES de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Diferencia
+---------- ------------- ------------- ----------
+1 293.00 793.00 -500.00
+2 150.00 150.00 .00
+3 .00 .00 .00
+Familiares corregidos: 1
+--- DESPUÉS de la corrección ---
+IdFamiliar SaldoGuardado SaldoCorrecto Resultado
+---------- ------------- ------------- ---------
+1 793.00 793.00 CUADRA
+2 150.00 150.00 CUADRA
+3 .00 .00 CUADRA

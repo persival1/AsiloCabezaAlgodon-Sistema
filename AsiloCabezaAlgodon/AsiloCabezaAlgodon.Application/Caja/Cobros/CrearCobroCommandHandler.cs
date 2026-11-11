@@ -30,6 +30,15 @@ namespace AsiloCabezaAlgodon.Application.Caja.Cobros
                 !await _cajaRepository.VisitaEsDelFamiliarAsync(request.IdVisitaMedica.Value, request.IdFamiliar))
                 throw new DatosInvalidosException("La visita médica no corresponde al interno de ese familiar.");
 
+            // AC-01: no se puede pagar más de lo que falta de esa visita; si no, el saldo
+            // quedaría «a favor» por un error de digitación.
+            if (request.IdVisitaMedica != null)
+            {
+                var pendiente = await _cajaRepository.PendienteDeVisitaAsync(request.IdVisitaMedica.Value) ?? 0;
+                if (request.Monto > pendiente)
+                    throw new DatosInvalidosException($"El monto supera lo que falta pagar de esa visita (Q{pendiente:0.00}).");
+            }
+
             var cobro = new Cobro
             {
                 IdFamiliar = request.IdFamiliar,

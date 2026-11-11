@@ -566,7 +566,7 @@ h1, h2, h3 {
 
 .tarjetas-stat {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -666,4 +666,142 @@ h1, h2, h3 {
     overflow-x: auto;
     white-space: nowrap;
   }
+}
+
+/* AC-01: convención del saldo de cargos médicos */
+.saldo-debe { color: var(--color-peligro); font-weight: 600; }
+.saldo-favor { color: var(--color-info); font-weight: 600; }
+.saldo-al-dia { color: var(--color-texto-suave); font-weight: 600; }
+.titulo-seccion { font-size: 1.05rem; margin: 1.6rem 0 0.4rem; }
+.nota-tabla { color: var(--color-texto-suave); font-size: 0.9rem; margin: 0 0 0.8rem; }
+
+/* AC-07 y formularios */
+.exito { color: var(--color-exito); background: var(--color-exito-suave); padding: 0.6rem 0.9rem; border-radius: 8px; }
+.obligatorio { color: var(--color-peligro); }
+.ayuda-campo { display: block; color: var(--color-texto-suave); font-size: 0.82rem; margin-top: 0.25rem; }
+
+/* AC-15: versión y commit visibles */
+.version-app { color: var(--color-texto-suave); font-size: 0.75rem; text-align: center; margin: 0.6rem 0 0; }
+
+/* ------------------------------------------------------------------
+   AC-13: inicio por rol, menú por áreas, filtros, paginación y validación.
+   Guía de estilo: docs/guia-de-estilo.md
+   ------------------------------------------------------------------ */
+
+/* Menú agrupado por área */
+.layout-grupo { display: flex; flex-direction: column; gap: 2px; }
+.layout-grupo + .layout-grupo { margin-top: 10px; }
+.layout-grupo-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--barra-texto);
+  opacity: 0.8;
+  padding: 6px 12px 4px;
+}
+
+/* Indicadores del inicio: toda la tarjeta es un enlace al módulo */
+.tarjeta-enlace {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.tarjeta-enlace:hover, .tarjeta-enlace:focus-visible { border-color: var(--color-primario); transform: translateY(-1px); }
+.tarjeta-alerta { border-left: 4px solid var(--color-alerta); }
+.tarjeta-stat .stat-periodo {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-suave);
+  margin-bottom: 10px;
+}
+.tarjeta-stat .stat-ir { margin-top: auto; padding-top: 12px; font-size: 12.5px; font-weight: 600; color: var(--color-primario-texto); }
+
+.panel-pendientes-encabezado { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.panel-pendientes-encabezado h2 { margin: 0; }
+.panel-pendientes-encabezado a { font-size: 13px; font-weight: 600; color: var(--color-primario-texto); }
+.panel-pendientes .lista-pendientes { list-style: none; margin: 0; padding: 0; }
+.lista-pendientes li + li { border-top: 1px solid var(--color-borde); }
+.lista-pendientes a {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 10px 4px;
+  color: var(--color-texto);
+  text-decoration: none;
+}
+.lista-pendientes a:hover { background: var(--color-superficie-alt); }
+.lista-pendientes span { color: var(--color-texto-suave); font-size: 13px; }
+
+/* Búsqueda, filtros y paginación de las listas */
+.filtros-tabla {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.filtros-tabla .campo { margin-bottom: 0; min-width: 150px; }
+.filtros-tabla .campo-busqueda { flex: 1 1 260px; }
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 8px;
+  font-size: 13px;
+  color: var(--color-texto-suave);
+}
+.paginacion-botones { display: flex; align-items: center; gap: 10px; }
+
+/* Visitas: fila con el detalle abierto */
+.fila-abierta td { background: var(--color-primario-suave); }
+.fila-detalle td { background: var(--color-superficie-alt); white-space: normal; }
+.detalle-visita p { margin: 0 0 6px; }
+.detalle-visita h3 { font-size: 13px; margin: 10px 0 4px; }
+.detalle-visita ul { margin: 0; padding-left: 18px; }
+.detalle-columnas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 24px; }
+
+/* Formularios: campos obligatorios y error junto al campo */
+.campo:has(> input[required], > select[required], > textarea[required]) > label::after {
+  content: " *";
+  color: var(--color-peligro);
+}
+form.tarjeta-formulario:has([required]) > h2:first-of-type::after {
+  content: "Los campos con * son obligatorios.";
+  display: block;
+  font-family: var(--fuente-texto);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-texto-suave);
+  margin-top: 4px;
+}
+.campo[data-error] input, .campo[data-error] select, .campo[data-error] textarea { border-color: var(--color-peligro); }
+.campo[data-error]::after {
+  content: attr(data-error);
+  display: block;
+  color: var(--color-peligro);
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+
+/* Tableta: el menú lateral se mantiene, pero más angosto */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .layout-barra-lateral { width: 200px; }
+  .layout-contenido { margin-left: 200px; }
+  .layout-principal { padding: 24px; }
+}
+
+@media (max-width: 768px) {
+  .layout-grupo { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .layout-grupo + .layout-grupo { margin-top: 0; }
+  .layout-grupo-titulo { display: none; }
+  .filtros-tabla .campo { flex: 1 1 140px; min-width: 0; }
+  .paginacion { flex-direction: column; align-items: stretch; }
 }

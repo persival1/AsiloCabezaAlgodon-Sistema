@@ -43,7 +43,6 @@ $roles = @($usuarios.Keys)
 # Endpoints de LECTURA: ruta y lista de roles que SÍ deben poder entrar (el resto, 403).
 $lecturas = @(
     @{ Ruta = "/Internos";                         Permitidos = @("Administrador", "MedicoGeneral", "Especialista") },
-    @{ Ruta = "/Internos/1";                       Permitidos = @("Administrador", "MedicoGeneral", "Especialista") },
     @{ Ruta = "/Solicitudes";                      Permitidos = @("Administrador", "MedicoGeneral", "Especialista", "Enfermero") },
     @{ Ruta = "/VisitasMedicas";                   Permitidos = @("Administrador", "MedicoGeneral", "Especialista") },
     @{ Ruta = "/Examenes";                         Permitidos = @("Administrador", "Laboratorio") },
@@ -51,10 +50,14 @@ $lecturas = @(
     @{ Ruta = "/Donaciones";                       Permitidos = @("Administrador") },
     @{ Ruta = "/Gastos";                           Permitidos = @("Administrador") },
     @{ Ruta = "/Cobros";                           Permitidos = @("Administrador") },
+    @{ Ruta = "/PagosFundacion";                   Permitidos = @("Administrador") },
     @{ Ruta = "/Usuarios";                         Permitidos = @("Administrador") },
     @{ Ruta = "/Reportes/costos-por-cita";         Permitidos = @("Administrador") },
     @{ Ruta = "/Reportes/entradas";                Permitidos = @("Administrador") },
-    @{ Ruta = "/Reportes/ficha-medica/1";          Permitidos = @("Administrador") }
+    # AC-10: informes financieros, solo Administrador (los clínicos se agregan abajo, por paciente)
+    @{ Ruta = "/Reportes/pagos-fundacion";         Permitidos = @("Administrador") },
+    @{ Ruta = "/Reportes/conciliacion-saldos";     Permitidos = @("Administrador") },
+    @{ Ruta = "/Reportes/cobros-por-paciente?idInterno=1&fechaInicio=2026-01-01&fechaFin=2026-12-31"; Permitidos = @("Administrador") }
 )
 
 # Endpoints de ESCRITURA: solo se prueban los roles que NO tienen permiso (deben dar 403).
@@ -67,7 +70,8 @@ $escrituras = @(
     @{ Metodo = "PUT";  Ruta = "/Prescripciones/1/despachar";    Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio") },
     @{ Metodo = "POST"; Ruta = "/Donaciones";                    Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
     @{ Metodo = "POST"; Ruta = "/Gastos";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
-    @{ Metodo = "POST"; Ruta = "/Cobros";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") }
+    @{ Metodo = "POST"; Ruta = "/Cobros";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "POST"; Ruta = "/PagosFundacion";                Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") }
 )
 
 function Obtener-Token($usuario, $clave) {
@@ -91,6 +95,31 @@ foreach ($rol in $roles) {
     if (-not $tokens[$rol]) { throw "No se pudo iniciar sesión como $rol. ¿La API está corriendo y existen los usuarios de prueba?" }
 }
 
+# AC-04 y AC-10: acceso horizontal. El especialista solo ve la ficha y los informes clínicos
+# de los internos de sus solicitudes. Se buscan en los datos un interno "propio" y uno "ajeno".
+$cab = { param($rol) @{ Authorization = "Bearer $($tokens[$rol])" } }
+$solEsp = @((Invoke-RestMethod -Uri "$Api/Solicitudes" -Headers (& $cab "Especialista") -SkipCertificateCheck) | ForEach-Object { $_ })
+$todos = @((Invoke-RestMethod -Uri "$Api/Internos" -Headers (& $cab "Administrador") -SkipCertificateCheck) | ForEach-Object { $_ })
+$propio = ($solEsp | Select-Object -First 1).idInterno
+$ajeno = ($todos | Where-Object { $solEsp.idInterno -notcontains $_.idInterno } | Select-Object -First 1).idInterno
+$medicos = @("Administrador", "MedicoGeneral", "Especialista")
+if ($propio) {
+    "Interno propio del especialista: $propio"
+    $lecturas += @(
+        @{ Ruta = "/Internos/$propio"; Permitidos = $medicos },
+        @{ Ruta = "/VisitasMedicas?idInterno=$propio"; Permitidos = $medicos },
+        @{ Ruta = "/Reportes/ficha-medica/$propio"; Permitidos = $medicos },
+        @{ Ruta = "/Reportes/examenes-por-paciente/$propio"; Permitidos = $medicos },
+        @{ Ruta = "/Reportes/medicamentos-por-paciente/$propio"; Permitidos = $medicos })
+} else { Write-Warning "El especialista no tiene solicitudes: no se prueban sus pacientes propios." }
+if ($ajeno) {
+    "Interno ajeno al especialista: $ajeno"
+    $lecturas += @(
+        @{ Ruta = "/Internos/$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") },
+        @{ Ruta = "/VisitasMedicas?idInterno=$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") },
+        @{ Ruta = "/Reportes/ficha-medica/$ajeno"; Permitidos = @("Administrador", "MedicoGeneral") })
+} else { Write-Warning "Todos los internos son del especialista: no se prueba el acceso a un interno ajeno." }
+
 $filas = New-Object System.Collections.Generic.List[object]
 
 function Registrar($metodo, $ruta, $actor, $esperado, $obtenido) {
@@ -105,7 +134,7 @@ function Registrar($metodo, $ruta, $actor, $esperado, $obtenido) {
 foreach ($l in $lecturas) {
     foreach ($rol in $roles) {
         $esperado = if ($l.Permitidos -contains $rol) { 200 } else { 403 }
-        # /Internos/1 puede dar 404 si no existe el interno 1; con permiso lo tomamos como OK de autorización
+        # Con permiso, un 404 (por ejemplo, el interno 1 no existe) cuenta como OK de autorización
         $obtenido = Llamar "GET" $l.Ruta $tokens[$rol]
         if ($esperado -eq 200 -and $obtenido -eq 404) { $obtenido = 200 }
         Registrar "GET" $l.Ruta $rol $esperado $obtenido

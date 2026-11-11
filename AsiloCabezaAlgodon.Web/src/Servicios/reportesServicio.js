@@ -40,3 +40,9 @@ export async function reporteMedicamentosPorPaciente(idInterno) {
   const respuesta = await api.get(`/Reportes/medicamentos-por-paciente/${idInterno}`);
   return respuesta.data;
 }
+
+// AC-01: saldo de cargos médicos de cada familiar (cargos, pagado y saldo)
+export async function reporteSaldosFamiliares() {
+  const respuesta = await api.get("/Reportes/conciliacion-saldos");
+  return respuesta.data;
+}

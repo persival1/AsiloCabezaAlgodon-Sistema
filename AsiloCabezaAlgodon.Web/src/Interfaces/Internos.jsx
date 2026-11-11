@@ -4,6 +4,16 @@ import { listarInternos, crearInterno } from "../Servicios/internosServicio";
 import { mensajeDeError } from "../Servicios/api";
 import { useAutenticacion } from "../contexto/AutenticacionContexto";
 import Badge from "../componentes/Badge";
+import { FiltrosTabla, PaginacionTabla } from "../componentes/ControlesTabla";
+import { useTabla } from "../utilidades/useTabla";
+
+// Búsqueda por interno o familiar; filtros por estado y fecha de ingreso (AC-13)
+const OPCIONES_TABLA = {
+  campos: ["nombres", "apellidos", "nombreFamiliar", "motivoIngreso"],
+  estado: (i) => i.estado,
+  fecha: (i) => i.fechaIngreso,
+};
+const ESTADOS = [{ valor: "Activo", texto: "Activo" }, { valor: "Inactivo", texto: "Inactivo" }];
 
 const VACIO = {
   nombres: "",
@@ -27,6 +37,7 @@ function Internos() {
   const [form, setForm] = useState(VACIO);
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
+  const tabla = useTabla(internos, OPCIONES_TABLA);
 
   useEffect(() => {
     cargarInternos();
@@ -143,6 +154,7 @@ function Internos() {
         </form>
       )}
 
+      <FiltrosTabla tabla={tabla} placeholder="Nombre del interno, familiar o motivo" estados={ESTADOS} etiquetaFecha="Ingreso" />
       <table className="tabla">
         <thead>
           <tr>
@@ -155,7 +167,7 @@ function Internos() {
           </tr>
         </thead>
         <tbody>
-          {internos.map((i) => (
+          {tabla.filas.map((i) => (
             <tr key={i.idInterno}>
               <td>{i.nombres} {i.apellidos}</td>
               <td>{new Date(i.fechaIngreso).toLocaleDateString()}</td>
@@ -165,13 +177,14 @@ function Internos() {
               <td><Link to={`/dashboard/internos/${i.idInterno}`} className="boton-secundario" style={{ textDecoration: "none", display: "inline-block" }}>Ver ficha</Link></td>
             </tr>
           ))}
-          {internos.length === 0 && (
+          {tabla.filas.length === 0 && (
             <tr>
-              <td colSpan="6">No hay internos registrados todavía.</td>
+              <td colSpan="6">{tabla.total === 0 ? "No hay internos registrados todavía." : "Ningún interno coincide con la búsqueda."}</td>
             </tr>
           )}
         </tbody>
       </table>
+      <PaginacionTabla tabla={tabla} nombre="internos" />
     </div>
   );
 }

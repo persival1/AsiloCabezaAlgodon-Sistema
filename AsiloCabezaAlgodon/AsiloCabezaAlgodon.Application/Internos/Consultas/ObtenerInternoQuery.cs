@@ -9,8 +9,8 @@ namespace AsiloCabezaAlgodon.Application.Internos.Consultas
         string Parentesco,
         string Telefono,
         string Correo,
-        decimal CuotaMensual,
-        decimal SaldoPendiente
+        decimal? CuotaMensual,   // AC-04: null para los roles clínicos (información financiera)
+        decimal? SaldoPendiente
     );
 
     public record PsicopatologiaDto(int IdPsicopatologia, string Nombre, DateTime FechaDiagnostico);
@@ -30,5 +30,5 @@ namespace AsiloCabezaAlgodon.Application.Internos.Consultas
         List<MedicamentoCajonDto> MedicamentosCajon
     );
 
-    public record ObtenerInternoQuery(int IdInterno) : IRequest<InternoDetalleDto?>;
+    public record ObtenerInternoQuery(int IdInterno, bool IncluirFinanzas = true) : IRequest<InternoDetalleDto?>;
 }

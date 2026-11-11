@@ -566,7 +566,7 @@ h1, h2, h3 {
 
 .tarjetas-stat {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -724,7 +724,7 @@ h1, h2, h3 {
 .panel-pendientes-encabezado { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
 .panel-pendientes-encabezado h2 { margin: 0; }
 .panel-pendientes-encabezado a { font-size: 13px; font-weight: 600; color: var(--color-primario-texto); }
-.lista-pendientes { list-style: none; margin: 0; padding: 0; }
+.panel-pendientes .lista-pendientes { list-style: none; margin: 0; padding: 0; }
 .lista-pendientes li + li { border-top: 1px solid var(--color-borde); }
 .lista-pendientes a {
   display: flex;

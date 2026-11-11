@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using AsiloCabezaAlgodon.Application.Autenticacion.Comandos;
+using AsiloCabezaAlgodon.Application.Usuarios.Comandos;
 
 namespace AsiloCabezaAlgodon.API.Controllers
 {
@@ -27,5 +30,19 @@ namespace AsiloCabezaAlgodon.API.Controllers
 
             return Ok(result);
         }
+
+        // AC-05: cada usuario cambia su propia contraseña (el usuario sale del token, no del cuerpo).
+        // Comparte el límite de intentos del login para que no sirva para adivinar contraseñas.
+        [HttpPut("cambiar-clave")]
+        [Authorize]
+        [EnableRateLimiting("login")]
+        public async Task<IActionResult> CambiarClave([FromBody] CambiarClaveRequest request)
+        {
+            var idUsuario = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var ok = await _mediator.Send(new CambiarClaveCommand(idUsuario, request.ClaveActual, request.ClaveNueva));
+            return ok ? NoContent() : Unauthorized();
+        }
     }
+
+    public record CambiarClaveRequest(string ClaveActual, string ClaveNueva);
 }

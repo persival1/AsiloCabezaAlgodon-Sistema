@@ -47,6 +47,15 @@ namespace AsiloCabezaAlgodon.Application.Comun
                 throw new DatosInvalidosException($"El campo «{campo}» no es un correo válido.");
         }
 
+        // AC-05 y AC-08: contraseña de al menos 8 caracteres, con letras y números.
+        public static void Clave(string? clave)
+        {
+            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8)
+                throw new DatosInvalidosException("La contraseña debe tener al menos 8 caracteres.");
+            if (!clave.Any(char.IsLetter) || !clave.Any(char.IsDigit))
+                throw new DatosInvalidosException("La contraseña debe tener letras y números.");
+        }
+
         public static void FechaNoFutura(DateTime fecha, string campo)
         {
             if (fecha.Date > DateTime.Today)

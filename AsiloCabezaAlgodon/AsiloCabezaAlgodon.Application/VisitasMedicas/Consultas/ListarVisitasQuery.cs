@@ -21,8 +21,9 @@ namespace AsiloCabezaAlgodon.Application.VisitasMedicas.Consultas
         List<ExamenDto> Examenes,
         List<PrescripcionDto> Prescripciones,
         decimal TotalCargos,
-        decimal TotalCobrado,
-        string EstadoPago
+        // AC-04: lo pagado y el estado de pago son datos financieros; para los roles clínicos llegan en null
+        decimal? TotalCobrado,
+        string? EstadoPago
     );
 
     // idEspecialista: si se envía, solo trae las visitas realizadas por ese especialista.

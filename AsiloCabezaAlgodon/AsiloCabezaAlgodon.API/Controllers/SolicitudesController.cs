@@ -56,6 +56,27 @@ namespace AsiloCabezaAlgodon.API.Controllers
             return Ok(new { idSolicitud });
         }
 
+        // AC-08, CU-013: el médico general corrige su solicitud mientras está Pendiente
+        [HttpPut("{id}")]
+        [Authorize(Roles = "MedicoGeneral")]
+        public async Task<IActionResult> Editar(int id, [FromBody] EditarSolicitudRequest request)
+        {
+            var ok = await _mediator.Send(new EditarSolicitudCommand(id, request.Motivo, request.EspecialidadRequerida, IdUsuarioActual));
+            return ok ? NoContent() : NotFound();
+        }
+
+        // AC-08, CU-014 y CU-019: cancelar una solicitud pendiente o una cita asignada
+        [HttpPut("{id}/cancelar")]
+        [Authorize(Roles = "Administrador,MedicoGeneral")]
+        public async Task<IActionResult> Cancelar(int id)
+        {
+            var resultado = await _mediator.Send(new CancelarSolicitudCommand(id, IdUsuarioActual, RolActual));
+            if (resultado == null)
+                return NotFound();
+            return Ok(new { mensaje = "Solicitud cancelada.", correoEnviado = resultado.CorreoEnviado });
+        }
+
+        // CU-018 (reprogramar una cita): es este mismo endpoint sobre una solicitud Asignada
         [HttpPut("{id}/asignar")]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Asignar(int id, [FromBody] AsignarMedicoRequest request)
@@ -75,6 +96,8 @@ namespace AsiloCabezaAlgodon.API.Controllers
     }
 
     public record CrearSolicitudRequest(int IdInterno, string Motivo, string? EspecialidadRequerida);
+
+    public record EditarSolicitudRequest(string Motivo, string? EspecialidadRequerida);
 
     public record AsignarMedicoRequest(int IdEspecialista, int? IdEnfermero, DateTime FechaHoraCita);
 }

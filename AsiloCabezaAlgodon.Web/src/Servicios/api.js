@@ -29,6 +29,9 @@ api.interceptors.response.use(
       localStorage.removeItem("rol");
       sessionStorage.setItem("sesionExpirada", "1");
       window.location.href = "/";
+      // AC-17: la página ya se va al login. Se devuelve una promesa que nunca termina para
+      // que ninguna pantalla reciba el error; antes la consola mostraba «Unhandled rejection 401».
+      return new Promise(() => {});
     }
     return Promise.reject(error);
   }

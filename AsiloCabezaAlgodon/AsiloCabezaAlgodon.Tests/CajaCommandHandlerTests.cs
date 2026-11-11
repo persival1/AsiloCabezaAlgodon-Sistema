@@ -59,12 +59,36 @@ namespace AsiloCabezaAlgodon.Tests
         public async Task Cobro_valido_se_guarda()
         {
             _repo.VisitaEsDelFamiliarAsync(10, 1).Returns(true);
+            _repo.PendienteDeVisitaAsync(10).Returns(265m);
             var handler = new CrearCobroCommandHandler(_repo);
 
             await handler.Handle(new CrearCobroCommand(1, "Cuota mensual", 500m), CancellationToken.None);
             await handler.Handle(new CrearCobroCommand(1, "Cargo médico", 150m, 10), CancellationToken.None);
 
             await _repo.Received(2).CrearCobroAsync(Arg.Any<Cobro>());
+        }
+
+        [Fact] // AC-01: no se puede pagar más de lo que falta de la visita
+        public async Task Cobro_mayor_a_lo_pendiente_de_la_visita_se_rechaza()
+        {
+            _repo.VisitaEsDelFamiliarAsync(10, 1).Returns(true);
+            _repo.PendienteDeVisitaAsync(10).Returns(115m);
+            var handler = new CrearCobroCommandHandler(_repo);
+
+            await Assert.ThrowsAsync<DatosInvalidosException>(() =>
+                handler.Handle(new CrearCobroCommand(1, "Cargo médico", 150m, 10), CancellationToken.None));
+            await _repo.DidNotReceive().CrearCobroAsync(Arg.Any<Cobro>());
+        }
+
+        [Fact] // AC-01: pagar exactamente lo pendiente sí se acepta
+        public async Task Cobro_igual_a_lo_pendiente_se_acepta()
+        {
+            _repo.VisitaEsDelFamiliarAsync(10, 1).Returns(true);
+            _repo.PendienteDeVisitaAsync(10).Returns(115m);
+            var handler = new CrearCobroCommandHandler(_repo);
+
+            await handler.Handle(new CrearCobroCommand(1, "Cargo médico", 115m, 10), CancellationToken.None);
+            await _repo.Received(1).CrearCobroAsync(Arg.Any<Cobro>());
         }
 
         [Fact] // FIN-05: donación con monto negativo

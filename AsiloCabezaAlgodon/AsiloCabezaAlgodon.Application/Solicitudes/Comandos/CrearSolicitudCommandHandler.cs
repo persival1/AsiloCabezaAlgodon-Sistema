@@ -21,8 +21,12 @@ namespace AsiloCabezaAlgodon.Application.Solicitudes.Comandos
             // Revisión del 30/10/2026: antes, con un interno inexistente la base rechazaba el
             // registro y la API respondía 500; y se aceptaban solicitudes sin motivo.
             Validar.Texto(request.Motivo, "motivo");
-            if (await _internoRepository.ObtenerPorIdAsync(request.IdInterno) == null)
+            var interno = await _internoRepository.ObtenerPorIdAsync(request.IdInterno);
+            if (interno == null)
                 throw new DatosInvalidosException("El interno indicado no existe.");
+            // AC-08: un interno dado de baja ya no recibe solicitudes nuevas
+            if (interno.Estado != "activo")
+                throw new ConflictoException("El interno está dado de baja; no se le pueden crear solicitudes.");
 
             var solicitud = new Solicitud
             {

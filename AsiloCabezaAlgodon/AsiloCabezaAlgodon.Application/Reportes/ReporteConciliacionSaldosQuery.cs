@@ -11,7 +11,9 @@ namespace AsiloCabezaAlgodon.Application.Reportes
     // Este reporte lo RECALCULA desde cero a partir de los movimientos reales y lo compara
     // con el valor guardado. Es de solo lectura (un Query): no cambia ningún dato.
     //
-    //   saldo recalculado = costos médicos (consultas + exámenes + medicamentos) - cobros
+    //   saldo recalculado = costos médicos (consultas + exámenes + medicamentos)
+    //                       - cobros ligados a una visita (AC-01: la cuota mensual no cuenta)
+    //   positivo = el familiar debe; 0 = al día; negativo = pagó de más (saldo a favor)
     public record SaldoConciliacionDto(
         int IdFamiliar,
         string NombreFamiliar,

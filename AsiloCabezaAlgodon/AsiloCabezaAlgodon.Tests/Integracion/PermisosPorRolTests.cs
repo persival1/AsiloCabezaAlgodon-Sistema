@@ -59,7 +59,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
     }
 
     // Fase 3 del plan de automatización de SQA: la matriz de permisos del script
-    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (142 casos).
+    // pruebas/probar-permisos.ps1 convertida en una prueba parametrizada (155 casos desde AC-07).
     //   200 = permitido   401 = sin sesión   403 = hay sesión pero el rol no tiene permiso
     // Igual que el script, las escrituras solo se prueban con los roles que NO pueden usarlas,
     // para no crear datos. Necesita SQL Server: en GitHub Actions se excluye (Tipo!=Integracion).
@@ -79,6 +79,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("/Donaciones", new[] { "Administrador" }),
             ("/Gastos", new[] { "Administrador" }),
             ("/Cobros", new[] { "Administrador" }),
+            ("/PagosFundacion", new[] { "Administrador" }),
             ("/Usuarios", new[] { "Administrador" }),
             ("/Reportes/costos-por-cita", new[] { "Administrador" }),
             ("/Reportes/entradas", new[] { "Administrador" }),
@@ -96,6 +97,7 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
             ("POST", "/Donaciones", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Gastos", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
             ("POST", "/Cobros", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
+            ("POST", "/PagosFundacion", new[] { "MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia" }),
         };
 
         public static IEnumerable<object[]> Casos()
@@ -122,9 +124,17 @@ namespace AsiloCabezaAlgodon.Tests.Integracion
         }
 
         [Fact]
-        public void La_matriz_tiene_los_mismos_142_casos_que_el_script()
+        public void La_matriz_tiene_los_mismos_155_casos_que_el_script()
         {
-            Assert.Equal(142, Casos().Count());
+            Assert.Equal(155, Casos().Count());
+        }
+
+        [Fact] // AC-15: la versión se consulta sin sesión y no expone datos
+        public async Task La_version_es_publica()
+        {
+            var respuesta = await _api.CreateClient().GetAsync("/api/Version");
+            Assert.Equal(200, (int)respuesta.StatusCode);
+            Assert.Contains("1.0.0-rc2", await respuesta.Content.ReadAsStringAsync());
         }
 
         [Theory]

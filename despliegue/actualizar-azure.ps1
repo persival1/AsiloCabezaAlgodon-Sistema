@@ -39,10 +39,23 @@ Invoke-WebRequest -Uri "https://$WebApp.scm.azurewebsites.net/api/zip/site/wwwro
     -Headers @{ Authorization = "Bearer $token" } -OutFile $respaldo
 "Respaldo: $respaldo"
 
+# --- AC-15: commit que se publica -------------------------------------------------
+# Se usa el git de GitHub Desktop si git no está en el PATH. Si hay cambios sin commit, se
+# avisa: lo publicado tiene que ser exactamente un commit identificado.
+$git = (Get-Command git -ErrorAction SilentlyContinue).Source
+if (-not $git) {
+    $desktop = Get-ChildItem "$env:LOCALAPPDATA\GitHubDesktop" -Directory -Filter "app-*" | Sort-Object Name -Descending | Select-Object -First 1
+    $git = Join-Path $desktop.FullName "resources\app\git\cmd\git.exe"
+}
+$commit = (& $git -C $repo rev-parse HEAD).Trim()
+if (& $git -C $repo status --porcelain) { Write-Warning "Hay cambios sin commit: lo publicado no coincidirá con el commit $($commit.Substring(0,7))." }
+"Commit que se publica: $commit"
+
 # --- 2) Frontend -----------------------------------------------------------------
 "=== 2) Frontend (npm run build) ==="
 Push-Location (Join-Path $repo "AsiloCabezaAlgodon.Web")
 $env:VITE_API_URL = "/api"
+$env:VITE_COMMIT = $commit.Substring(0, 7)
 npm run build
 if ($LASTEXITCODE -ne 0) { Pop-Location; throw "El frontend no compiló." }
 Pop-Location
@@ -50,7 +63,7 @@ Pop-Location
 # --- 3) Backend ------------------------------------------------------------------
 "=== 3) Backend (dotnet publish) ==="
 $pub = Join-Path $Carpeta "publicar-$fecha"
-dotnet publish (Join-Path $repo "AsiloCabezaAlgodon\AsiloCabezaAlgodon.API") -c Release -o $pub --nologo
+dotnet publish (Join-Path $repo "AsiloCabezaAlgodon\AsiloCabezaAlgodon.API") -c Release -o $pub --nologo -p:SourceRevisionId=$commit
 if ($LASTEXITCODE -ne 0) { throw "La API no compiló." }
 
 # --- 4) Juntar las dos partes ------------------------------------------------------

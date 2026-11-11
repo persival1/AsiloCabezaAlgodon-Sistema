@@ -3,9 +3,12 @@ import { listarCobros, crearCobro } from "../Servicios/cobrosServicio";
 import { listarInternos } from "../Servicios/internosServicio";
 import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
 import { mensajeDeError } from "../Servicios/api";
+import { reporteSaldosFamiliares } from "../Servicios/reportesServicio";
+import { Saldo } from "../componentes/Saldo";
 
 function Cobros() {
   const [cobros, setCobros] = useState([]);
+  const [saldos, setSaldos] = useState([]);
   const [internos, setInternos] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [idInterno, setIdInterno] = useState("");
@@ -17,12 +20,14 @@ function Cobros() {
   const [error, setError] = useState("");
 
   async function cargar() {
-    const datos = await listarCobros();
+    const [datos, s] = await Promise.all([listarCobros(), reporteSaldosFamiliares()]);
     setCobros(datos);
+    setSaldos(s);
   }
 
   useEffect(() => {
     listarCobros().then(setCobros);
+    reporteSaldosFamiliares().then(setSaldos);
     listarInternos().then(setInternos);
   }, []);
 
@@ -67,7 +72,7 @@ function Cobros() {
       <div className="encabezado-seccion">
         <div>
           <h1>Cobros a familiares</h1>
-          <p className="subtitulo">Cuotas mensuales y cargos médicos cobrados a cada familiar</p>
+          <p className="subtitulo">Cuotas mensuales y pagos de cargos médicos de cada familiar</p>
         </div>
         <button className="boton-primario" onClick={() => setMostrarFormulario((v) => !v)}>
           {mostrarFormulario ? "Cancelar" : "Nuevo cobro"}
@@ -121,6 +126,41 @@ function Cobros() {
         </form>
       )}
 
+      <h2 className="titulo-seccion">Saldo de cargos médicos por familiar</h2>
+      <p className="nota-tabla">
+        Saldo = consultas, exámenes y medicamentos cargados − pagos de esas visitas. La cuota mensual paga la estadía
+        y no cambia este saldo. <span className="saldo-debe">Por pagar</span> = el familiar debe ·{" "}
+        <span className="saldo-al-dia">Al día</span> = no debe nada · <span className="saldo-favor">A favor</span> = pagó de más.
+      </p>
+      <table className="tabla">
+        <thead>
+          <tr>
+            <th>Familiar</th>
+            <th>Interno</th>
+            <th>Cargos médicos</th>
+            <th>Pagado</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {saldos.map((s) => (
+            <tr key={s.idFamiliar}>
+              <td>{s.nombreFamiliar}</td>
+              <td>{s.nombreInterno}</td>
+              <td>Q{s.totalCargos.toFixed(2)}</td>
+              <td>Q{s.totalCobros.toFixed(2)}</td>
+              <td><Saldo valor={s.saldoGuardado} /></td>
+            </tr>
+          ))}
+          {saldos.length === 0 && (
+            <tr>
+              <td colSpan="5">No hay familiares registrados todavía.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      <h2 className="titulo-seccion">Cobros registrados</h2>
       <table className="tabla">
         <thead>
           <tr>
@@ -129,7 +169,6 @@ function Cobros() {
             <th>Interno</th>
             <th>Concepto</th>
             <th>Monto</th>
-            <th>Saldo pendiente actual</th>
           </tr>
         </thead>
         <tbody>
@@ -140,14 +179,11 @@ function Cobros() {
               <td>{c.nombreInterno}</td>
               <td>{c.concepto}</td>
               <td>Q{c.monto.toFixed(2)}</td>
-              <td style={{ color: c.saldoPendienteFamiliar > 0 ? "var(--color-peligro)" : "var(--color-exito)", fontWeight: 600 }}>
-                Q{c.saldoPendienteFamiliar.toFixed(2)}
-              </td>
             </tr>
           ))}
           {cobros.length === 0 && (
             <tr>
-              <td colSpan="6">No hay cobros registrados todavía.</td>
+              <td colSpan="5">No hay cobros registrados todavía.</td>
             </tr>
           )}
         </tbody>

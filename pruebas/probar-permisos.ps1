@@ -51,6 +51,7 @@ $lecturas = @(
     @{ Ruta = "/Donaciones";                       Permitidos = @("Administrador") },
     @{ Ruta = "/Gastos";                           Permitidos = @("Administrador") },
     @{ Ruta = "/Cobros";                           Permitidos = @("Administrador") },
+    @{ Ruta = "/PagosFundacion";                   Permitidos = @("Administrador") },
     @{ Ruta = "/Usuarios";                         Permitidos = @("Administrador") },
     @{ Ruta = "/Reportes/costos-por-cita";         Permitidos = @("Administrador") },
     @{ Ruta = "/Reportes/entradas";                Permitidos = @("Administrador") },
@@ -67,7 +68,8 @@ $escrituras = @(
     @{ Metodo = "PUT";  Ruta = "/Prescripciones/1/despachar";    Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio") },
     @{ Metodo = "POST"; Ruta = "/Donaciones";                    Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
     @{ Metodo = "POST"; Ruta = "/Gastos";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
-    @{ Metodo = "POST"; Ruta = "/Cobros";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") }
+    @{ Metodo = "POST"; Ruta = "/Cobros";                        Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") },
+    @{ Metodo = "POST"; Ruta = "/PagosFundacion";                Prohibidos = @("MedicoGeneral", "Especialista", "Enfermero", "Laboratorio", "Farmacia") }
 )
 
 function Obtener-Token($usuario, $clave) {

@@ -5,6 +5,7 @@ import { obtenerInterno, agregarPsicopatologia, agregarMedicamentoCajon } from "
 import { listarVisitasPorInterno } from "../Servicios/visitasServicio";
 import { mensajeDeError } from "../Servicios/api";
 import Badge from "../componentes/Badge";
+import { Saldo } from "../componentes/Saldo";
 
 const HOY = new Date().toISOString().slice(0, 10);
 
@@ -107,7 +108,7 @@ function FichaInterno() {
             <h2>Familiar responsable</h2>
             <p><strong>{interno.familiar.nombres} {interno.familiar.apellidos}</strong> — {interno.familiar.parentesco}</p>
             <p>{interno.familiar.telefono} · {interno.familiar.correo}</p>
-            <p>Cuota mensual: Q{interno.familiar.cuotaMensual.toFixed(2)} — Saldo pendiente: Q{interno.familiar.saldoPendiente.toFixed(2)}</p>
+            <p>Cuota mensual: Q{interno.familiar.cuotaMensual.toFixed(2)} · Saldo de cargos médicos: <Saldo valor={interno.familiar.saldoPendiente} /></p>
           </>
         )}
       </div>

@@ -2,7 +2,10 @@
 -- Conciliación de saldos de los familiares (observación SQA #4 / O-01)
 --
 -- Qué hace: recalcula el saldo de cada familiar a partir de sus movimientos
---   saldo correcto = costos médicos (consultas + exámenes + medicamentos) - cobros
+--   saldo correcto = costos médicos (consultas + exámenes + medicamentos)
+--                    - cobros ligados a una visita
+--   Regla del saldo (AC-01, 10/11/2026): la cuota mensual no paga cargos médicos, por eso
+--   no se resta. Positivo = el familiar debe; 0 = al día; negativo = pagó de más.
 -- y corrige el saldo guardado (Familiares.SaldoPendiente) SOLO donde no coincide.
 --
 -- Por qué hizo falta: el Ibuprofeno (Q25.50) se despachó antes de que existiera el
@@ -39,7 +42,7 @@ OUTER APPLY (SELECT SUM(p.Costo) AS Total
              JOIN VisitasMedicas v ON v.IdVisitaMedica = p.IdVisitaMedica
              JOIN Solicitudes s ON s.IdSolicitud = v.IdSolicitud
              WHERE s.IdInterno = f.IdInterno AND p.Costo > 0) medicamentos
-OUTER APPLY (SELECT SUM(c.Monto) AS Total FROM Cobros c WHERE c.IdFamiliar = f.IdFamiliar) cobros;
+OUTER APPLY (SELECT SUM(c.Monto) AS Total FROM Cobros c WHERE c.IdFamiliar = f.IdFamiliar AND c.IdVisitaMedica IS NOT NULL) cobros;
 
 PRINT '--- ANTES de la corrección ---';
 SELECT IdFamiliar, SaldoGuardado, Cargos - Cobros AS SaldoCorrecto, SaldoGuardado - (Cargos - Cobros) AS Diferencia

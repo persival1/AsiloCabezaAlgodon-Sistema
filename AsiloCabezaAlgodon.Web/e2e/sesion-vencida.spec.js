@@ -3,6 +3,11 @@
 import { test, expect } from "@playwright/test";
 
 test("E3. Sesión vencida: vuelve al login con aviso y borra el token", async ({ page }) => {
+  // AC-17: no debe quedar ningún error sin manejar en la consola (antes: «Unhandled rejection 401»)
+  const erroresSinManejar = [];
+  page.on("pageerror", (e) => erroresSinManejar.push(e.message));
+  page.on("console", (m) => { if (/unhandled|uncaught/i.test(m.text())) erroresSinManejar.push(m.text()); });
+
   await page.goto("/");
   await page.evaluate(() => {
     localStorage.setItem("token", "token-vencido-o-firmado-con-otra-llave");
@@ -14,4 +19,6 @@ test("E3. Sesión vencida: vuelve al login con aviso y borra el token", async ({
   await expect(page.getByText("Tu sesión expiró o ya no es válida. Iniciá sesión de nuevo.")).toBeVisible();
   await expect(page).toHaveURL(/:5173\/$/);
   expect(await page.evaluate(() => localStorage.getItem("token"))).toBeNull();
+  await page.waitForTimeout(1000);
+  expect(erroresSinManejar).toEqual([]);
 });

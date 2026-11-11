@@ -27,7 +27,12 @@ describe("Servicios/api.js", () => {
     localStorage.setItem("token", "vencido");
     localStorage.setItem("rol", "Administrador");
     const error = { config: { url: "/Cobros" }, response: { status: 401 } };
-    await expect(errorRespuesta(error)).rejects.toBe(error);
+    // AC-17: la promesa queda pendiente (no se rechaza) para que no haya errores sin manejar
+    const resultado = await Promise.race([
+      errorRespuesta(error).then(() => "resuelta", () => "rechazada"),
+      new Promise((r) => setTimeout(() => r("pendiente"), 50)),
+    ]);
+    expect(resultado).toBe("pendiente");
     expect(localStorage.getItem("token")).toBeNull();
     expect(localStorage.getItem("rol")).toBeNull();
     expect(sessionStorage.getItem("sesionExpirada")).toBe("1");

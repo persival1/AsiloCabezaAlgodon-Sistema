@@ -20,6 +20,7 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
         public DbSet<Donacion> Donaciones => Set<Donacion>();
         public DbSet<Gasto> Gastos => Set<Gasto>();
         public DbSet<Cobro> Cobros => Set<Cobro>();
+        public DbSet<PagoFundacion> PagosFundacion => Set<PagoFundacion>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -166,6 +167,14 @@ namespace AsiloCabezaAlgodon.Infrastructure.Persistencia
                 .WithMany()
                 .HasForeignKey(c => c.IdVisitaMedica)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // AC-07: pagos del asilo a la fundación
+            modelBuilder.Entity<PagoFundacion>()
+                .HasKey(p => p.IdPagoFundacion);
+
+            modelBuilder.Entity<PagoFundacion>()
+                .Property(p => p.Monto)
+                .HasPrecision(10, 2);
         }
     }
 }

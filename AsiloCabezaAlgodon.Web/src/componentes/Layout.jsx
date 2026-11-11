@@ -25,6 +25,7 @@ const MENUS_POR_ROL = {
     { texto: "Donaciones", ruta: "/dashboard/donaciones", icono: IconoDonaciones },
     { texto: "Cobros", ruta: "/dashboard/cobros", icono: IconoCobros },
     { texto: "Gastos", ruta: "/dashboard/gastos", icono: IconoGastos },
+    { texto: "Pagos a la fundación", ruta: "/dashboard/pagos-fundacion", icono: IconoCobros },
     { texto: "Reportes", ruta: "/dashboard/reportes", icono: IconoReportes },
   ],
   MedicoGeneral: [

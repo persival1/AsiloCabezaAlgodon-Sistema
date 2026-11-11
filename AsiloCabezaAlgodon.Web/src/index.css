@@ -667,3 +667,15 @@ h1, h2, h3 {
     white-space: nowrap;
   }
 }
+
+/* AC-01: convención del saldo de cargos médicos */
+.saldo-debe { color: var(--color-peligro); font-weight: 600; }
+.saldo-favor { color: var(--color-info); font-weight: 600; }
+.saldo-al-dia { color: var(--color-texto-suave); font-weight: 600; }
+.titulo-seccion { font-size: 1.05rem; margin: 1.6rem 0 0.4rem; }
+.nota-tabla { color: var(--color-texto-suave); font-size: 0.9rem; margin: 0 0 0.8rem; }
+
+/* AC-07 y formularios */
+.exito { color: var(--color-exito); background: var(--color-exito-suave); padding: 0.6rem 0.9rem; border-radius: 8px; }
+.obligatorio { color: var(--color-peligro); }
+.ayuda-campo { display: block; color: var(--color-texto-suave); font-size: 0.82rem; margin-top: 0.25rem; }

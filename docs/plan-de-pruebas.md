@@ -7,7 +7,6 @@ Plan único para la versión 1.0.0-rc2. Reúne lo que antes estaba repartido en 
 - **Entra:** todos los casos de uso de `docs/catalogo-casos-de-uso.md` marcados como implementados, los permisos por rol (vertical y horizontal), las validaciones, los siete informes, la interfaz por rol y la regresión completa.
 - **No entra:**
   - Las funciones excluidas (AC-05, recuperación por correo; AC-06, portal de familiares).
-  - El envío real de correo en Azure (AC-11).
 
 ## 2. Entornos y datos
 
@@ -50,7 +49,7 @@ Todos los datos de prueba son ficticios: nombres inventados y correos `@prueba.t
 | PR-DON | Donaciones y gastos | Montos válidos, campos obligatorios | `CajaCommandHandlerTests`, `ValidarTests` |
 | PR-INF | Informes | Permisos de los siete; valores de los informes 1, 2, 4 y conciliación | `PermisosPorRolTests`, `PagosFundacionTests`, `atencion-y-pago.spec.js` |
 | PR-REC | Contraseñas | Cambio con la contraseña actual; contraseña temporal; reglas de fuerza. La recuperación por correo está excluida | `OperacionesAc08Tests`, `operaciones.spec.js` |
-| PR-COR | Correo | Que la pantalla diga la verdad si el correo no sale; avisos de asignación, reprogramación y cancelación | `AsignarMedicoCommandHandlerTests`, `OperacionesAc08Tests`. El envío real en Azure queda pendiente (AC-11) |
+| PR-COR | Correo | Que la pantalla diga la verdad si el correo no sale; avisos de asignación, reprogramación y cancelación | `AsignarMedicoCommandHandlerTests`, `OperacionesAc08Tests` y la prueba real en Azure (PR-COR-02) |
 | PR-VAL | Validaciones | Campos obligatorios marcados; error junto al campo; validaciones repetidas en el servidor | `validacionCampos.test.js`, `ValidarTests`, `probar-validaciones.ps1` |
 | PR-UI | Navegación y adaptabilidad | Menú por rol, cada opción abre, botón atrás, indicadores; escritorio, tableta y celular | `navegacion.spec.js`, `celular.spec.js`, capturas de AC-13 |
 | PR-REG | Regresión | Todo lo anterior sobre la versión final | Este plan completo |

@@ -24,14 +24,14 @@ Los estados siguen la sección 10 de la solicitud. Ninguna acción se marca como
 | AC-08 | Operaciones del cuadro 3.5 | Pendiente de verificación | Las seis operaciones implementadas: editar, alta y baja, corregir la ficha, editar y cancelar solicitudes, reprogramar y cancelar citas, usuarios | `docs/ac-08-operaciones.md`, `OperacionesAc08Tests`, `e2e/operaciones.spec.js` | — |
 | AC-09 | Actores y roles | Pendiente de verificación | Matriz de correspondencia con justificación y permisos por rol | `docs/matriz-actores-y-roles.md` | Aprobación (AC-12) |
 | AC-10 | Permisos de los informes | Pendiente de verificación | Informes clínicos (2, 6 y 7) para los médicos, por paciente; financieros solo para el Administrador | `PermisosPorRolTests` | — |
-| AC-11 | Correo en Azure | Abierta | El sistema informa con honestidad si el correo no salió | `docs/errores-y-limitaciones.md` (LIM-01) | Configurar la cuenta de Gmail en Azure (lo hace el desarrollador con sus credenciales) |
+| AC-11 | Correo en Azure | Pendiente de verificación | El desarrollador configuró en Azure la cuenta de correo, con una contraseña de aplicación de Google. Prueba real el 10/11: al asignar y al cancelar una cita de prueba llegaron los dos correos a las 22:43 | `pruebas/evidencia-ac/ac-11-correo-azure.md` | — |
 | AC-12 | Supuestos y exclusiones sin aprobar | Abierta | Documentos listos para firmar | `docs/supuestos-para-aprobacion.md`, `ac-05`, `ac-06`, `matriz-actores-y-roles.md` | Firma del docente o de SQA |
 | AC-13 | Interfaz | Pendiente de verificación | Los diez puntos de la sección 5, con capturas antes y después en tres resoluciones | `docs/ac-13-interfaz.md`, `e2e/navegacion.spec.js`, `pruebas/evidencia-ac/ac-13/` | Validación de SQA |
 | AC-14 | Documentación | Pendiente de verificación (parcial) | 12 de los 13 documentos actualizados en el repositorio (tabla de abajo). Los documentos de las fases (Análisis, Diseño, Desarrollo y Capturas) se rehicieron en Word y PDF como versión 2 | Ver tabla | Documento 1 (Word de la Fase de Análisis) y documento 8 (instalación en un equipo limpio) |
 | AC-15 | Commits y versión | En corrección | Una rama por acción con commits descriptivos. Versión y commit visibles en la aplicación y en `/api/Version`. Publicada en Azure: `/api/Version` responde `1.0.0-rc2` / `675011f…`, y el frontend muestra el mismo commit | `docs/historial-de-versiones.md`, `docs/registro-de-cambios-sqa.md` | Pull requests revisados y etiqueta `v1.0.0-rc2` (los hace el desarrollador desde GitHub Desktop) |
 | AC-16 | Fechas | Pendiente de verificación | La fecha por defecto del frontend era UTC; ahora es la local. En Azure se revisaron todas las fechas guardadas (con una copia previa de los valores): ninguna cae entre el 21 y el 30/10. Todos los registros son de septiembre o de principios de octubre, copiados de la base local, que siempre guardó la hora de Guatemala. El script de corrección, en vista previa, encontró 0 filas, así que no hubo nada que cambiar | `base-de-datos/corregir-fechas-utc-ac-16.sql` | — |
 | AC-17 | Consola en sesión vencida | Pendiente de verificación | Sin errores sin manejar | `e2e/sesion-vencida.spec.js` | — |
-| AC-18 | Regresión completa | Pendiente de verificación | Plan único y regresión con el formato de la sección 8: completa en local y, en Azure, los permisos (256 de 256), los tokens falsos y la versión publicada | `docs/plan-de-pruebas.md`, `pruebas/resultado-regresion-ac-18.md` | Valores de los informes 3 a 7 con los datos de referencia de SQA; correo real (AC-11) |
+| AC-18 | Regresión completa | Pendiente de verificación | Plan único y regresión con el formato de la sección 8: completa en local y, en Azure, los permisos (256 de 256), los tokens falsos y la versión publicada | `docs/plan-de-pruebas.md`, `pruebas/resultado-regresion-ac-18.md` | Valores de los informes 3 a 7 con los datos de referencia de SQA |
 
 ## Documentos de la sección 7
 
@@ -62,9 +62,9 @@ Los estados siguen la sección 10 de la solicitud. Ninguna acción se marca como
 7. Prueba de tokens falsificados (AC-02).
 8. Usuario `app_asilo` y cierre de la regla vieja del firewall (AC-03).
 9. Permisos: 256 de 256 (AC-18).
+10. Correo real (AC-11). El desarrollador configuró Gmail. Se probó con el interno «PRUEBA CORREO AC-11» (id 2), al que se le asignó y canceló una cita (solicitud id 4) y llegaron los dos correos. Al terminar quedó de baja y sin el correo real.
 
 **Pendiente del desarrollador:**
-- Configurar Gmail en Azure (AC-11).
 - Conseguir las firmas (AC-12).
 - Pull requests y etiqueta (AC-15).
 - Probar la instalación en un equipo limpio (AC-14).

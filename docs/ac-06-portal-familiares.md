@@ -12,7 +12,7 @@ No implementar un rol «Familiar» con inicio de sesión en esta versión.
    - Desde AC-08, también el aviso de cita reprogramada o cancelada.
 3. **Riesgo.** Un portal expondría información médica y financiera a usuarios externos. Pediría algo que hoy no existe:
    - Registro y verificación de identidad.
-   - Recuperación de contraseña por correo, que depende de AC-05 y AC-11.
+   - Recuperación de contraseña por correo (excluida en AC-05).
    - Aislamiento estricto por residente.
 
    Hacerlo sin requisito aprobado contradice el principio de mínimo privilegio que pide la misma revisión (sección 6).

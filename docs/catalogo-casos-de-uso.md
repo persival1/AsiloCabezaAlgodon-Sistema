@@ -28,7 +28,7 @@ Estados posibles:
 | CU-08 | Consultar visitas médicas | Administrador, Médico general, Especialista (las suyas) | Implementado | Visitas médicas | `GET /api/VisitasMedicas` |
 | CU-09 | Crear solicitud de atención | Médico general | Implementado | Solicitudes | `POST /api/Solicitudes` |
 | CU-10 | Asignar especialista, enfermero(a) y horario | Administrador (fundación) | Implementado | Solicitudes | `PUT /api/Solicitudes/{id}/asignar` |
-| CU-11 | Enviar correo al familiar | Sistema | Implementado en el código. En Azure falta configurar el correo (AC-11) | — | (dentro de CU-10, CU-27 y CU-28) |
+| CU-11 | Enviar correo al familiar | Sistema | Implementado y probado en Azure con un envío real (AC-11, 10/11) | — | (dentro de CU-10, CU-27 y CU-28) |
 | CU-12 | Consultar mis citas | Especialista | Implementado | Mis citas | `GET /api/Solicitudes` |
 | CU-13 | Registrar visita médica | Especialista (solo sus citas) | Implementado | Mis citas | `POST /api/VisitasMedicas` |
 | CU-14 | Consultar mis acompañamientos | Enfermero(a) | Implementado | Mis acompañamientos | `GET /api/Solicitudes` |

@@ -14,11 +14,11 @@
 La **recuperación por enlace en el correo** (el usuario escribe su correo y recibe un enlace de un solo uso) se propone excluir de esta versión, por dos motivos:
 
 1. El enunciado no la pide. Solo pide el correo al familiar cuando se asigna una cita.
-2. Depende de que el correo funcione en Azure (AC-11), y eso todavía no está configurado. Un flujo de recuperación que no puede enviar el enlace no se puede probar de punta a punta, que es lo que exige el criterio de aceptación: enlace vencido, enlace reutilizado y usuario inexistente.
+2. Abre un punto de entrada público nuevo (cualquiera puede pedir un enlace). El correo ya funciona en Azure desde el 10/11 (AC-11), así que se podría implementar si se aprueba. Pero hacerlo bien pide más que enviar un correo: un token de un solo uso que vence, la misma respuesta exista o no el usuario, y las pruebas de enlace vencido, enlace reutilizado y usuario inexistente que pide el criterio de aceptación.
 
 Con el restablecimiento por el Administrador nadie se queda sin acceso, y no se abre un punto de entrada público nuevo.
 
-Si se aprueba implementarla después de AC-11, el diseño sería este:
+Si se aprueba implementarla, el diseño sería este:
 
 - Un token aleatorio de un solo uso, guardado como hash, que vence en 30 minutos.
 - La misma respuesta exista o no el usuario.

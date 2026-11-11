@@ -18,6 +18,7 @@
 | `pruebas/probar-permisos.ps1` contra la API local (base de desarrollo) | **277 de 277** (`pruebas/resultados-permisos.md`) |
 | `pruebas/probar-permisos.ps1` contra **Azure** | **256 de 256** (`pruebas/resultados-permisos-azure.md`). Son menos casos porque Azure tiene un solo interno, así que no hay uno «ajeno» al especialista; ese caso lo cubre la base de pruebas |
 | Tokens falsificados contra **Azure** | **7 de 7** rechazados con 401 (`pruebas/evidencia-ac/ac-02-tokens-falsos-azure.md`) |
+| Correo real desde **Azure** | **2 de 2** correos recibidos: cita asignada y cancelada (`pruebas/evidencia-ac/ac-11-correo-azure.md`) |
 | Auditorías: NuGet vulnerable / `npm audit --omit=dev` | 0 / 0 |
 
 **Hallazgos durante la regresión, ya corregidos:**
@@ -71,7 +72,7 @@ La primera ejecución de E2 también chocó con el límite de 10 inicios de sesi
 | PR-REC-02 | — | «soloLetras», «corta1» | Crear usuario | Rechazadas por las reglas | Igual | Aprobado | `operaciones.spec.js`, `OperacionesAc08Tests` |
 | PR-REC-03 | — | — | Recuperación por enlace en el correo | — | — | **Pendiente:** exclusión propuesta (AC-05) | `docs/ac-05-contrasenas.md` |
 | PR-COR-01 | Correo que falla | — | Asignar | La asignación se conserva y la pantalla dice que el correo no salió | Igual | Aprobado | `AsignarMedicoCommandHandlerTests` |
-| PR-COR-02 | Gmail configurado en Azure | Correo de prueba | Asignar, reprogramar y cancelar | Llegan los tres correos | — | **Bloqueado:** falta configurar el correo en Azure (AC-11) | — |
+| PR-COR-02 | Gmail configurado en Azure (10/11) | Interno «PRUEBA CORREO AC-11» con el correo del desarrollador | 1. Asignar una cita. 2. Cancelarla (reprogramar usa el mismo envío que asignar) | Llegan los dos correos | Llegaron los dos a las 22:43 | Aprobado | `evidencia-ac/ac-11-correo-azure.md` |
 | PR-VAL-01 | Formulario de interno | Vacío y con un correo mal escrito | Guardar | 11 mensajes junto a los campos; nada se guarda; desaparecen al corregir | Igual | Aprobado | `validacionCampos.test.js`, `ac-13/despues-formulario-invalido.png` |
 | PR-UI-01 | Seis roles | — | Menú, cada opción, botón atrás, indicador | El menú coincide con la matriz; todo abre; sin errores de JavaScript | 6 de 6 | Aprobado | `navegacion.spec.js` |
 | PR-UI-02 | — | 1366 × 768, 768 × 1024, 390 × 844 | Abrir el inicio de cada rol | Sin desbordes; menú arriba en el celular | Igual | Aprobado | `celular.spec.js`, `ac-13/despues-*` |

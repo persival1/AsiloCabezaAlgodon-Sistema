@@ -56,7 +56,7 @@ Respuesta a la solicitud de SQA de mantener una matriz de trazabilidad. Une cada
 
 | # | Requerimiento | Pantalla | Endpoint | Prueba | Estado |
 |---|---|---|---|---|---|
-| 25 | Correo al familiar con el estado del paciente y el médico al que fue referido | Automático al asignar | `PUT /Solicitudes/{id}/asignar` | PF-06 | **Parcial** (supuesto 1; se comprobó que se registra el intento, **no** el envío real: observación O-02) |
+| 25 | Correo al familiar con el estado del paciente y el médico al que fue referido | Automático al asignar | `PUT /Solicitudes/{id}/asignar` | PF-06, PR-COR-02 | Cumplido (supuesto 1). El envío real se probó en Azure el 10/11 (AC-11) |
 | 26 | Base de datos SQL Server, MySQL u Oracle | — | — | Script `base-de-datos/crear-base.sql` y prueba de respaldo y recuperación | Cumplido (SQL Server) |
 
 ## Seguridad (agregado por la revisión de SQA)
@@ -85,7 +85,7 @@ Respuesta a la solicitud de SQA de mantener una matriz de trazabilidad. Une cada
 |---|---|---|
 | D-01 | Un examen sin costo se mostraba como «(Q)» | Corregido |
 | O-01 | Diferencia de Q25.50 en el saldo de un familiar | Corregido (conciliación de saldos) |
-| O-02 | El correo no se ha probado con envío real | Abierta |
+| O-02 | El correo no se ha probado con envío real | Corregida el 10/11 (AC-11) |
 
 ## H. Acciones correctivas de SQA-ACM-01 (versión 1.0.0-rc2)
 

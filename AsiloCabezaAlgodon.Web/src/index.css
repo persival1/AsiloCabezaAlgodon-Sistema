@@ -809,6 +809,8 @@ form.tarjeta-formulario:has([required]) > h2:first-of-type::after {
 /* AC-08 y AC-05 */
 .enlace-cambiar-clave { display: block; font-size: 12.5px; font-weight: 600; color: var(--barra-texto-fuerte); margin: 0 0 10px; }
 .acciones-fila { display: flex; flex-wrap: wrap; gap: 6px; }
+td.acciones-fila { display: table-cell; white-space: nowrap; }
+td.acciones-fila > * + * { margin-left: 6px; }
 .acciones-item { display: inline-flex; gap: 6px; margin-left: 8px; }
 .boton-enlace { background: none; border: none; padding: 0; color: var(--color-primario-texto); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
 .boton-enlace.peligro { color: var(--color-peligro); }
